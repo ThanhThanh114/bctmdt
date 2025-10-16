@@ -1,0 +1,512 @@
+@extends('app')
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/Index.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header-info {
+            background: linear-gradient(135deg, #FF7B39 0%, #FF5722 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .route-info {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .date-info {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        .seat-selection {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .seat-legend {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-sold {
+            background: #D5D9DD;
+        }
+
+        .legend-available {
+            background: #DEF3FF;
+        }
+
+        .legend-selected {
+            background: #FDEDE8;
+        }
+
+        .bus-layout {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+        }
+
+        .floor {
+            text-align: center;
+        }
+
+        .floor-title {
+            background: #f8f9fa;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #666;
+        }
+
+        .seats-grid {
+            display: grid;
+            gap: 8px;
+        }
+
+        .seat-row {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .seat {
+            width: 44px;
+            height: 44px;
+            border: 2px solid;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .seat-available {
+            background: #DEF3FF;
+            border-color: #96C5E7;
+            color: #339AF4;
+        }
+
+        .seat-available:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(51, 154, 244, 0.3);
+        }
+
+        .seat-selected {
+            background: #FDEDE8;
+            border-color: #F8BEAB;
+            color: #EF5222;
+        }
+
+        .seat-sold {
+            background: #D5D9DD;
+            border-color: #C0C6CC;
+            color: #A2ABB3;
+            cursor: not-allowed;
+        }
+
+        .seat-empty {
+            width: 44px;
+            height: 44px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .info-label {
+            color: #666;
+        }
+
+        .info-value {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .price-total {
+            background: linear-gradient(135deg, #FF7B39 0%, #FF5722 100%);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+
+        .price-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .price-amount {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .booking-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FF7B39 0%, #FF5722 100%);
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .booking-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
+        }
+
+        .booking-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #5a6268;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .bus-layout {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+@endpush
+@section('content')
+<div class="container">
+    <button class="back-btn" onclick="window.history.back()">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </button>
+
+    <div class="header-info">
+        <div class="route-info">
+            {{ $trip->tramDi->ten_tram }} →
+            {{ $trip->tramDen->ten_tram }}
+        </div>
+        <div class="date-info">
+            {{ \Carbon\Carbon::parse($trip->ngay_di)->format('l, d/m/Y', 'Asia/Ho_Chi_Minh') }} -
+            {{ \Carbon\Carbon::parse($trip->gio_di)->format('H:i') }}
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="seat-selection">
+            <h3 style="text-align: center; margin-bottom: 20px; color: #333;">
+                <i class="fas fa-chair"></i> Chọn ghế
+            </h3>
+
+            <div class="seat-legend">
+                <div class="legend-item">
+                    <div class="legend-color legend-sold"></div>
+                    <span>Đã bán</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-available"></div>
+                    <span>Còn trống</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color legend-selected"></div>
+                    <span>Đang chọn</span>
+                </div>
+            </div>
+
+            <div class="bus-layout">
+                <!-- Tầng dưới -->
+                <div class="floor">
+                    <div class="floor-title">Tầng dưới</div>
+                    <div class="seats-grid">
+                        @php
+                            $seats = ['A01','A02','A03','A04','A05','A06','A07','A08','A09','A10','A11','A12','A13','A14','A15','A16','A17'];
+                        @endphp
+                        @for ($i = 0; $i < count($seats); $i += 5)
+                            <div class="seat-row">
+                                @for ($j = 0; $j < 5; $j++)
+                                    @if (isset($seats[$i + $j]))
+                                        @php $seat = $seats[$i + $j]; @endphp
+                                        @if (in_array($seat, $bookedSeats))
+                                            <div class="seat seat-sold" data-seat="{{ $seat }}">{{ $seat }}</div>
+                                        @else
+                                            <div class="seat seat-available" data-seat="{{ $seat }}">{{ $seat }}</div>
+                                        @endif
+                                    @else
+                                        <div class="seat-empty"></div>
+                                    @endif
+                                @endfor
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+
+                <!-- Tầng trên -->
+                <div class="floor">
+                    <div class="floor-title">Tầng trên</div>
+                    <div class="seats-grid">
+                        @php
+                            $upperSeats = ['B01','B02','B03','B04','B05','B06','B07','B08','B09','B10','B11','B12','B13','B14','B15','B16','B17'];
+                        @endphp
+                        @for ($i = 0; $i < count($upperSeats); $i += 5)
+                            <div class="seat-row">
+                                @for ($j = 0; $j < 5; $j++)
+                                    @if (isset($upperSeats[$i + $j]))
+                                        @php $seat = $upperSeats[$i + $j]; @endphp
+                                        @if (in_array($seat, $bookedSeats))
+                                            <div class="seat seat-sold" data-seat="{{ $seat }}">{{ $seat }}</div>
+                                        @else
+                                            <div class="seat seat-available" data-seat="{{ $seat }}">{{ $seat }}</div>
+                                        @endif
+                                    @else
+                                        <div class="seat-empty"></div>
+                                    @endif
+                                @endfor
+                            </div>
+                        @endfor
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar">
+            <!-- Thông tin lượt đi -->
+            <div class="info-card">
+                <div class="card-title">
+                    <i class="fas fa-route"></i> Thông tin lượt đi
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tuyến xe:</span>
+                    <span class="info-value">{{ $bookingInfo['diem_di'] ?? $trip->tramDi->ten_tram }} - {{ $bookingInfo['diem_den'] ?? $trip->tramDen->ten_tram }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Thời gian xuất bến:</span>
+                    <span class="info-value">{{ \Carbon\Carbon::parse($trip->ngay_di . ' ' . $trip->gio_di)->format('H:i d/m/Y') }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Số lượng ghế:</span>
+                    <span class="info-value">{{ $bookingInfo['seat_count'] }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Điểm trả khách:</span>
+                    <span class="info-value">{{ $trip->tramDen->ten_tram }}</span>
+                </div>
+            </div>
+
+            <!-- Chi tiết giá -->
+            <div class="info-card">
+                <div class="card-title">
+                    <i class="fas fa-receipt"></i> Chi tiết giá
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Giá vé lượt đi:</span>
+                    <span class="info-value" id="unit-price">{{ number_format($trip->gia_ve, 0, ',', '.') }}đ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Phí thanh toán:</span>
+                    <span class="info-value">0đ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Tổng tiền:</span>
+                    <span class="info-value" id="total-price">{{ number_format($trip->gia_ve, 0, ',', '.') }}đ</span>
+                </div>
+
+                <div class="price-total">
+                    <div class="price-label">Tổng tiền</div>
+                    <div class="price-amount" id="final-total">
+                        {{ number_format($trip->gia_ve, 0, ',', '.') }}đ</div>
+                </div>
+            </div>
+
+            <!-- Thông tin đơn trả -->
+            <div class="info-card">
+                <div class="card-title">
+                    <i class="fas fa-info-circle"></i> Thông tin đơn trả
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ĐIỂM ĐÓN:</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bến xe/VP:</span>
+                    <span class="info-value">Trung chuyển</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ĐIỂM TRẢ:</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Bến xe/VP:</span>
+                    <span class="info-value">Trung chuyển</span>
+                </div>
+            </div>
+
+            <form method="POST" action="{{ route('booking.complete') }}" id="booking-form">
+                @csrf
+                <input type="hidden" name="selected_seats" id="selected-seats-input">
+                <button type="button" class="booking-btn" id="complete-booking-btn" disabled>
+                    <i class="fas fa-credit-card"></i> Thanh toán
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedSeats = [];
+    const maxSeats = {{ $bookingInfo['seat_count'] }};
+    const unitPrice = {{ $trip->gia_ve }};
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Xử lý click ghế
+        document.querySelectorAll('.seat-available').forEach(seat => {
+            seat.addEventListener('click', function () {
+                const seatId = this.dataset.seat;
+
+                if (this.classList.contains('seat-selected')) {
+                    // Bỏ chọn ghế
+                    this.classList.remove('seat-selected');
+                    this.classList.add('seat-available');
+                    selectedSeats = selectedSeats.filter(s => s !== seatId);
+                } else if (selectedSeats.length < maxSeats) {
+                    // Chọn ghế
+                    this.classList.remove('seat-available');
+                    this.classList.add('seat-selected');
+                    selectedSeats.push(seatId);
+                } else {
+                    alert(`Bạn chỉ có thể chọn tối đa ${maxSeats} ghế!`);
+                }
+
+                updateBookingInfo();
+            });
+        });
+
+        function updateBookingInfo() {
+            const totalPrice = selectedSeats.length * unitPrice;
+
+            document.getElementById('total-price').textContent = totalPrice.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('final-total').textContent = totalPrice.toLocaleString('vi-VN') + 'đ';
+            document.getElementById('selected-seats-input').value = JSON.stringify(selectedSeats);
+
+            const completeBtn = document.getElementById('complete-booking-btn');
+            if (selectedSeats.length > 0) {
+                completeBtn.disabled = false;
+                completeBtn.innerHTML = `<i class="fas fa-credit-card"></i> Thanh toán (${selectedSeats.join(', ')})`;
+            } else {
+                completeBtn.disabled = true;
+                completeBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh toán';
+            }
+        }
+
+        // Xử lý submit form
+        document.getElementById('complete-booking-btn').addEventListener('click', function () {
+            if (selectedSeats.length === 0) {
+                alert('Vui lòng chọn ghế!');
+                return;
+            }
+
+            if (confirm(`Xác nhận đặt vé cho ghế ${selectedSeats.join(', ')}?`)) {
+                document.getElementById('booking-form').submit();
+            }
+        });
+    });
+</script>
+
+@endsection

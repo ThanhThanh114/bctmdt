@@ -1,0 +1,112 @@
+<?php
+
+namespace App\Http\Controllers\User;
+
+use App\Http\Controllers\Controller;
+use App\Models\DatVe;
+use App\Models\ChuyenXe;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class DashboardController extends Controller
+{
+
+    public function index()
+    {
+        $user = Auth::user();
+
+        // User-specific statistics
+        $stats = [
+            'total_bookings' => DatVe::where('user_id', $user->id)->count(),
+            'confirmed_bookings' => DatVe::where('user_id', $user->id)
+                ->whereStatus('confirmed')
+                ->count(),
+            'pending_bookings' => DatVe::where('user_id', $user->id)
+                ->whereStatus('pending')
+                ->count(),
+            'cancelled_bookings' => DatVe::where('user_id', $user->id)
+                ->whereStatus('cancelled')
+                ->count(),
+            'total_spent' => DatVe::with('chuyenXe')
+                ->where('user_id', $user->id)
+                ->whereStatus('confirmed')
+                ->get()
+                ->sum(function ($booking) {
+                    return $booking->chuyenXe->gia_ve ?? 0;
+                }),
+            'upcoming_trips' => DatVe::where('user_id', $user->id)
+                ->whereStatus('confirmed')
+                ->whereHas('chuyenXe', function ($q) {
+                    $q->where(function ($query) {
+                        $query->where('ngay_di', '>', today())
+                            ->orWhere(function ($q2) {
+                                $q2->where('ngay_di', today())
+                                    ->where('gio_di', '>', now()->format('H:i:s'));
+                            });
+                    });
+                })
+                ->count(),
+        ];
+
+        // User's recent bookings
+        $recent_bookings = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->where('user_id', $user->id)
+            ->orderBy('ngay_dat', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Upcoming trips
+        $upcoming_trips = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->where('user_id', $user->id)
+            ->whereStatus('confirmed')
+            ->whereHas('chuyenXe', function ($q) {
+                $q->where(function ($query) {
+                    $query->where('ngay_di', '>', today())
+                        ->orWhere(function ($q2) {
+                            $q2->where('ngay_di', today())
+                                ->where('gio_di', '>', now()->format('H:i:s'));
+                        });
+                });
+            })
+            ->join('chuyen_xe', 'dat_ve.chuyen_xe_id', '=', 'chuyen_xe.id')
+            ->orderByRaw("CASE WHEN ngay_di > CURDATE() THEN ngay_di ELSE CONCAT(ngay_di, ' ', gio_di) END")
+            ->select('dat_ve.*')
+            ->limit(5)
+            ->get();
+
+        // Popular routes for quick booking - get from bookings
+        $popular_routes = DatVe::select('chuyen_xe_id')
+            ->selectRaw('COUNT(*) as trip_count')
+            ->groupBy('chuyen_xe_id')
+            ->orderBy('trip_count', 'desc')
+            ->with('chuyenXe.tramDi', 'chuyenXe.tramDen')
+            ->limit(6)
+            ->get();
+
+        // Monthly spending for the current year
+        $monthly_bookings = DatVe::with('chuyenXe')
+            ->where('user_id', $user->id)
+            ->whereStatus('confirmed')
+            ->whereYear('ngay_dat', date('Y'))
+            ->get()
+            ->groupBy(function ($booking) {
+                return $booking->ngay_dat->format('n'); // Month number
+            });
+
+        $monthly_spending = [];
+        foreach ($monthly_bookings as $month => $bookings) {
+            $monthly_spending[$month] = $bookings->sum(function ($booking) {
+                return $booking->chuyenXe->gia_ve ?? 0;
+            });
+        }
+
+        return view('AdminLTE.user.dashboard', compact(
+            'stats',
+            'recent_bookings',
+            'upcoming_trips',
+            'popular_routes',
+            'monthly_spending',
+            'user'
+        ));
+    }
+}

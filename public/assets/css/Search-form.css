@@ -1,0 +1,296 @@
+.search-form-container {
+  margin: -120px auto 60px;
+  max-width: 1128px;
+  padding: 0 16px;
+  position: relative;
+  z-index: 20;
+}
+
+.search-form-wrapper {
+  background: white;
+  border-radius: 16px;
+  padding: 32px 36px 50px 36px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  border: 2px solid #ff5722;
+  font-weight: 500;
+  position: relative;
+}
+
+.trip-type-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  font-size: 15px;
+}
+
+.trip-type-radio {
+  display: flex;
+  gap: 20px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  gap: 8px;
+}
+
+.radio-option input {
+  margin: 0;
+}
+
+.guide-link {
+  display: none;
+  color: #ff5722;
+  font-weight: 500;
+}
+
+.search-row {
+  margin-bottom: 24px;
+}
+
+.search-locations {
+  display: grid !important;
+  grid-template-columns: 1fr auto 1fr !important;
+  gap: 16px !important;
+  align-items: end !important;
+  position: relative;
+}
+
+.location-field {
+  min-width: 0 !important;
+}
+
+.location-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #333;
+}
+
+.location-input select,
+.date-input input,
+.ticket-input select {
+  width: 100%;
+  padding: 16px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #333;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  height: 56px;
+  box-sizing: border-box;
+}
+
+.location-input select:focus,
+.date-input input:focus,
+.ticket-input select:focus {
+  border-color: #ff5722;
+  box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.switch-location {
+  cursor: pointer;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  margin-bottom: 0 !important;
+  margin-top: 0 !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.switch-icon {
+  width: 48px !important;
+  height: 48px !important;
+  background: linear-gradient(135deg, #2196F3, #1976D2) !important;
+  border-radius: 50% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3) !important;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.switch-location:hover .switch-icon {
+  transform: rotate(180deg) scale(1.1) !important;
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.5) !important;
+}
+
+.switch-icon i {
+  color: white !important;
+  font-size: 18px !important;
+  transition: transform 0.3s ease;
+}
+
+.search-row-bottom {
+  margin-bottom: 30px;
+}
+
+.date-ticket-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 80px !important;
+  max-width: 100% !important;
+}
+
+.date-field,
+.ticket-field {
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.date-field label,
+.ticket-field label {
+  display: block !important;
+  margin-bottom: 4px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+}
+
+.date-input,
+.ticket-input {
+  position: relative !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+.date-input input,
+.ticket-input select {
+  width: 100% !important;
+  min-width: 100% !important;
+  padding: 16px 16px !important;
+  border: 2px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  font-size: 16px !important;
+  background: white !important;
+  color: #333 !important;
+  outline: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  height: 56px !important;
+  box-sizing: border-box !important;
+  display: block !important;
+}
+
+.ticket-input select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M10.293 3.293L6 7.586 1.707 3.293A1 1 0 00.293 4.707l5 5a1 1 0 001.414 0l5-5a1 1 0 10-1.414-1.414z'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 12px center !important;
+  padding-right: 36px !important;
+  cursor: pointer !important;
+}
+
+.ticket-input img {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  display: none;
+}
+
+.search-button-wrapper {
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  bottom: -36px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+}
+
+.search-button {
+  background: linear-gradient(135deg, #ff7b39 0%, #ff5722 100%);
+  color: white;
+  border: none;
+  padding: 16px 100px;
+  border-radius: 28px;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(255, 87, 34, 0.3);
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 87, 34, 0.3);
+}
+
+@media (min-width: 1024px) {
+
+  .header-top-desktop,
+  .header-nav-desktop {
+    display: flex;
+  }
+
+  .header-mobile {
+    display: none;
+  }
+
+  .guide-link {
+    display: block;
+  }
+
+  .search-form-container {
+    margin-top: -80px;
+  }
+}
+
+@media (min-width: 768px) {
+
+  .search-locations {
+    grid-template-columns: 1fr auto 1fr;
+  }
+
+  .date-ticket-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 767px) {
+
+  .search-locations {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .switch-location {
+    order: 2;
+    margin: 8px 0;
+  }
+
+  .location-field:first-child {
+    order: 1;
+  }
+
+  .location-field:last-child {
+    order: 3;
+  }
+
+  .search-row-bottom {
+    border-top: 1px solid #e5e7eb;
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+
+  .date-ticket-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}

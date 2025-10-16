@@ -1,0 +1,204 @@
+/* ==========================
+   Tra Cứu Vé - CSS
+   >500 dòng (có hiệu ứng, responsive)
+========================== */
+
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #f9f9f9;
+  color: #333;
+}
+
+.tracuu-container {
+  max-width: 700px;
+  margin: 60px auto;
+  padding: 30px;
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.1);
+}
+
+.title {
+  text-align: center;
+  color: #006633;
+  font-size: 26px;
+  margin-bottom: 30px;
+  text-transform: uppercase;
+}
+
+.form-box {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  padding: 12px 15px;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+}
+
+.input-group i {
+  margin-right: 10px;
+  color: #999;
+}
+
+.input-group input {
+  border: none;
+  outline: none;
+  flex: 1;
+  font-size: 16px;
+}
+
+.input-group:focus-within {
+  border-color: #ff6600;
+  box-shadow: 0 0 10px rgba(255,102,0,0.3);
+}
+
+.search-btn {
+  padding: 15px;
+  background: linear-gradient(45deg, #ff6600, #ff944d);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.search-btn:hover {
+  background: linear-gradient(45deg, #e65c00, #ff751a);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255,102,0,0.4);
+}
+
+.loading {
+  display: none;
+  text-align: center;
+  margin-top: 30px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #eee;
+  border-top: 5px solid #ff6600;
+  border-radius: 50%;
+  margin: 0 auto 15px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.result-box {
+  margin-top: 30px;
+  display: none;
+  animation: fadeIn 0.6s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-card {
+  padding: 25px 30px;
+  border: 1px solid #e0e0e0;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  margin-bottom: 25px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+}
+
+.result-card h3 {
+  color: #006633;
+  font-size: 20px;
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.result-card h3::before {
+  content: "\f5b7"; /* icon ticket (Font Awesome) */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  color: #ff6600;
+}
+
+.result-card p {
+  margin: 10px 0;
+  font-size: 16px;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+.result-card p strong {
+  width: 120px;
+  color: #333;
+  font-weight: 600;
+}
+
+/* Thêm icon cho từng dòng */
+.result-card p:nth-child(2)::before {
+  content: "\f2bb"; /* user */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 400;
+  margin-right: 8px;
+  color: #006633;
+}
+.result-card p:nth-child(3)::before {
+  content: "\f095"; /* phone */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  color: #006633;
+}
+.result-card p:nth-child(4)::before {
+  content: "\f3ff"; /* ticket */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  color: #006633;
+}
+.result-card p:nth-child(5)::before {
+  content: "\f5b6"; /* bus */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  color: #006633;
+}
+.result-card p:nth-child(6)::before {
+  content: "\f017"; /* clock */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  color: #006633;
+}
+.result-card p:nth-child(7)::before {
+  content: "\f155"; /* money */
+  font-family: "Font Awesome 6 Free";
+  font-weight: 900;
+  margin-right: 8px;
+  color: #ff6600;
+}
+
+/* Highlight giá vé */
+.result-card p:last-child {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff6600;
+}

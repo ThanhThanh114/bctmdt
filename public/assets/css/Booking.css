@@ -1,0 +1,46 @@
+.new-background-color {
+    background-color: #f8f9fa;
+}
+
+.layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.trip-card {
+    transition: all 0.3s ease;
+}
+
+.trip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.orange {
+    color: #FF7B39;
+}
+
+.bg-orange {
+    background-color: #FF7B39;
+}
+
+.hover\:bg-orange-600:hover {
+    background-color: #e55b28;
+}
+
+.border-orange {
+    border-color: #FF7B39;
+}
+
+.text-green-600 {
+    color: #059669;
+}
+
+.focus\:ring-orange:focus {
+    box-shadow: 0 0 0 3px rgba(255, 123, 57, 0.1);
+}
+
+.focus\:border-orange:focus {
+    border-color: #FF7B39;
+}
