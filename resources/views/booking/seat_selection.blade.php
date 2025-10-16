@@ -242,6 +242,97 @@
             transform: none !important;
         }
 
+        /* Mã giảm giá */
+        .discount-section {
+            background: #f8f9fa !important;
+            padding: 12px !important;
+            border-radius: 10px !important;
+            margin-bottom: 15px !important;
+        }
+
+        .discount-input-group {
+            display: flex !important;
+            gap: 8px !important;
+            margin-top: 8px !important;
+        }
+
+        .discount-input {
+            flex: 1 !important;
+            padding: 10px 12px !important;
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            font-size: 0.9rem !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .discount-input:focus {
+            outline: none !important;
+            border-color: #FF7B39 !important;
+            box-shadow: 0 0 0 3px rgba(255, 123, 57, 0.1) !important;
+        }
+
+        .apply-discount-btn {
+            padding: 10px 20px !important;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-size: 0.85rem !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            white-space: nowrap !important;
+        }
+
+        .apply-discount-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3) !important;
+        }
+
+        .apply-discount-btn:disabled {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+        }
+
+        .discount-message {
+            margin-top: 8px !important;
+            padding: 8px 10px !important;
+            border-radius: 6px !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            display: none !important;
+        }
+
+        .discount-message.success {
+            background: #d4edda !important;
+            color: #155724 !important;
+            border: 1px solid #c3e6cb !important;
+            display: block !important;
+        }
+
+        .discount-message.error {
+            background: #f8d7da !important;
+            color: #721c24 !important;
+            border: 1px solid #f5c6cb !important;
+            display: block !important;
+        }
+
+        .discount-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            padding: 8px 0 !important;
+            color: #28a745 !important;
+            font-weight: 600 !important;
+            border-top: 1px dashed #dee2e6 !important;
+            margin-top: 8px !important;
+            display: none !important;
+        }
+
+        .discount-row.active {
+            display: flex !important;
+        }
+
         .back-btn {
             background: #6c757d !important;
             color: white !important;
@@ -485,6 +576,10 @@
                         <span class="info-label">Phí thanh toán:</span>
                         <span class="info-value">0đ</span>
                     </div>
+                    <div class="info-row discount-row" id="discount-row">
+                        <span class="info-label"><i class="fas fa-tag"></i> Giảm giá:</span>
+                        <span class="info-value" id="discount-amount">-0đ</span>
+                    </div>
                     <div class="info-row">
                         <span class="info-label">Tổng tiền:</span>
                         <span class="info-value" id="total-price">{{ number_format($trip->gia_ve, 0, ',', '.') }}đ</span>
@@ -496,6 +591,30 @@
                             {{ number_format($trip->gia_ve, 0, ',', '.') }}đ
                         </div>
                     </div>
+                </div>
+
+                <!-- Mã giảm giá -->
+                <div class="info-card">
+                    <div class="card-title">
+                        <i class="fas fa-percent"></i> Mã giảm giá
+                    </div>
+                    <div class="discount-input-group">
+                        <input 
+                            type="text" 
+                            class="discount-input" 
+                            id="discount-code-input" 
+                            placeholder="Nhập mã giảm giá"
+                            maxlength="20"
+                        >
+                        <button 
+                            type="button" 
+                            class="apply-discount-btn" 
+                            id="apply-discount-btn"
+                        >
+                            <i class="fas fa-check"></i> Áp dụng
+                        </button>
+                    </div>
+                    <div class="discount-message" id="discount-message"></div>
                 </div>
 
                 <!-- Thông tin hành khách -->
@@ -522,6 +641,8 @@
                 <form method="POST" action="{{ route('booking.complete') }}" id="booking-form">
                     @csrf
                     <input type="hidden" name="selected_seats" id="selected-seats-input">
+                    <input type="hidden" name="discount_code" id="discount-code-hidden">
+                    <input type="hidden" name="discount_amount" id="discount-amount-hidden" value="0">
                     <button type="button" class="booking-btn" id="complete-booking-btn" disabled>
                         <i class="fas fa-credit-card"></i> Thanh toán
                     </button>
@@ -534,6 +655,8 @@
         let selectedSeats = [];
         const maxSeats = {{ $bookingInfo['seat_count'] }};
         const unitPrice = {{ $trip->gia_ve }};
+        let discountAmount = 0;
+        let discountCode = '';
 
         document.addEventListener('DOMContentLoaded', function () {
             // Xử lý click ghế
@@ -560,7 +683,8 @@
             });
 
             function updateBookingInfo() {
-                const totalPrice = selectedSeats.length * unitPrice;
+                const basePrice = selectedSeats.length * unitPrice;
+                const totalPrice = basePrice - discountAmount;
 
                 document.getElementById('total-price').textContent = totalPrice.toLocaleString('vi-VN') + 'đ';
                 document.getElementById('final-total').textContent = totalPrice.toLocaleString('vi-VN') + 'đ';
@@ -575,6 +699,93 @@
                     completeBtn.disabled = true;
                     completeBtn.innerHTML = '<i class="fas fa-credit-card"></i> Thanh toán';
                 }
+            }
+
+            // Xử lý áp dụng mã giảm giá
+            document.getElementById('apply-discount-btn').addEventListener('click', async function() {
+                const codeInput = document.getElementById('discount-code-input');
+                const code = codeInput.value.trim().toUpperCase();
+                const messageDiv = document.getElementById('discount-message');
+                const applyBtn = this;
+
+                if (!code) {
+                    showDiscountMessage('Vui lòng nhập mã giảm giá!', 'error');
+                    return;
+                }
+
+                if (selectedSeats.length === 0) {
+                    showDiscountMessage('Vui lòng chọn ghế trước khi áp dụng mã giảm giá!', 'error');
+                    return;
+                }
+
+                // Disable button
+                applyBtn.disabled = true;
+                applyBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang kiểm tra...';
+
+                try {
+                    const response = await fetch('/api/check-discount', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            code: code,
+                            total_amount: selectedSeats.length * unitPrice
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (data.valid) {
+                        // Áp dụng mã giảm giá thành công
+                        discountAmount = data.discount_amount;
+                        discountCode = code;
+
+                        // Hiển thị giảm giá
+                        document.getElementById('discount-row').classList.add('active');
+                        document.getElementById('discount-amount').textContent = 
+                            '-' + discountAmount.toLocaleString('vi-VN') + 'đ';
+
+                        // Lưu vào hidden input
+                        document.getElementById('discount-code-hidden').value = code;
+                        document.getElementById('discount-amount-hidden').value = discountAmount;
+
+                        // Cập nhật giá
+                        updateBookingInfo();
+
+                        showDiscountMessage(
+                            `✓ Áp dụng thành công! Giảm ${discountAmount.toLocaleString('vi-VN')}đ (${data.discount_percent}%)`,
+                            'success'
+                        );
+
+                        // Disable input và button sau khi áp dụng thành công
+                        codeInput.disabled = true;
+                        applyBtn.disabled = true;
+                        applyBtn.innerHTML = '<i class="fas fa-check"></i> Đã áp dụng';
+                    } else {
+                        showDiscountMessage(data.message || 'Mã giảm giá không hợp lệ!', 'error');
+                        applyBtn.disabled = false;
+                        applyBtn.innerHTML = '<i class="fas fa-check"></i> Áp dụng';
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    showDiscountMessage('Lỗi khi kiểm tra mã giảm giá. Vui lòng thử lại!', 'error');
+                    applyBtn.disabled = false;
+                    applyBtn.innerHTML = '<i class="fas fa-check"></i> Áp dụng';
+                }
+            });
+
+            function showDiscountMessage(message, type) {
+                const messageDiv = document.getElementById('discount-message');
+                messageDiv.textContent = message;
+                messageDiv.className = 'discount-message ' + type;
+                
+                setTimeout(() => {
+                    if (type === 'error') {
+                        messageDiv.className = 'discount-message';
+                    }
+                }, 3000);
             }
 
             // Xử lý submit form

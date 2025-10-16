@@ -194,6 +194,15 @@
                                         title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    @if($item->trang_thai == 'Đã đặt')
+                                    <button type="button" class="btn btn-sm btn-success" 
+                                        onclick="confirmPayment({{ $item->id }}, '{{ $item->ma_ve }}')"
+                                        title="Xác nhận thanh toán">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    @endif
+                                    
                                     @if($item->trang_thai !== 'Đã hủy' && $item->trang_thai !== 'Đã thanh toán')
                                     <form action="{{ route('admin.datve.destroy', $item->id) }}" method="POST"
                                         style="display:inline-block;"
@@ -237,6 +246,54 @@
 function exportData() {
     const params = new URLSearchParams(window.location.search);
     window.location.href = "{{ route('admin.datve.export') }}?" + params.toString();
+}
+
+function confirmPayment(bookingId, bookingCode) {
+    if (!confirm(`Xác nhận thanh toán cho mã vé ${bookingCode}?`)) {
+        return;
+    }
+
+    // Disable button to prevent double click
+    event.target.disabled = true;
+    event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    fetch(`/admin/dat-ve/${bookingId}/xac-nhan-thanh-toan`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show';
+            alertDiv.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>${data.message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            `;
+            document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+            
+            // Reload page after 1 second
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            alert('Lỗi: ' + data.message);
+            event.target.disabled = false;
+            event.target.innerHTML = '<i class="fas fa-check"></i>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Có lỗi xảy ra khi xác nhận thanh toán');
+        event.target.disabled = false;
+        event.target.innerHTML = '<i class="fas fa-check"></i>';
+    });
 }
 </script>
 @endsection

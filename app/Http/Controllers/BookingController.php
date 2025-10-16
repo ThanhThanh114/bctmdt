@@ -181,16 +181,45 @@ class BookingController extends Controller
         try {
             $bookingCode = 'BK' . date('YmdHis') . rand(100, 999);
             $trip = ChuyenXe::findOrFail($bookingInfo['trip_id']);
-            $totalAmount = $trip->gia_ve * count($selectedSeats);
+            $baseAmount = $trip->gia_ve * count($selectedSeats);
+            
+            // Xử lý mã giảm giá
+            $discountAmount = 0;
+            $discountCode = $request->discount_code;
+            $khuyenMaiId = null;
+
+            if ($discountCode) {
+                $khuyenMai = \App\Models\KhuyenMai::where('ma_khuyen_mai', strtoupper($discountCode))
+                    ->where('trang_thai', 'Đang áp dụng')
+                    ->where('ngay_bat_dau', '<=', now())
+                    ->where('ngay_ket_thuc', '>=', now())
+                    ->where('so_luong', '>', 0)
+                    ->first();
+
+                if ($khuyenMai) {
+                    $discountAmount = intval($request->discount_amount ?? 0);
+                    $khuyenMaiId = $khuyenMai->id;
+                    
+                    // Giảm số lượng mã khuyến mãi
+                    $khuyenMai->decrement('so_luong');
+                }
+            }
+
+            $totalAmount = $baseAmount - $discountAmount;
 
             foreach ($selectedSeats as $seat) {
-                DatVe::create([
+                $datVe = DatVe::create([
                     'user_id' => Auth::id(),
                     'chuyen_xe_id' => $bookingInfo['trip_id'],
                     'ma_ve' => $bookingCode,
                     'so_ghe' => $seat,
                     'trang_thai' => 'Đã đặt', // Chờ thanh toán
                 ]);
+
+                // Gắn mã khuyến mãi vào vé
+                if ($khuyenMaiId) {
+                    $datVe->khuyenMais()->attach($khuyenMaiId);
+                }
             }
 
             DB::commit();
@@ -199,6 +228,9 @@ class BookingController extends Controller
             Session::put('payment_info', [
                 'booking_code' => $bookingCode,
                 'total_amount' => $totalAmount,
+                'base_amount' => $baseAmount,
+                'discount_amount' => $discountAmount,
+                'discount_code' => $discountCode,
                 'seats' => $selectedSeats,
                 'trip_id' => $bookingInfo['trip_id']
             ]);
@@ -210,6 +242,7 @@ class BookingController extends Controller
 
         } catch (\Exception $e) {
             DB::rollback();
+            \Log::error('Booking error: ' . $e->getMessage());
             return back()->with('error', 'Có lỗi xảy ra khi đặt vé. Vui lòng thử lại!');
         }
     }
@@ -327,5 +360,50 @@ class BookingController extends Controller
             ->paginate(10);
 
         return view('booking.history', compact('bookings'));
+    }
+
+    /**
+     * Kiểm tra mã giảm giá
+     */
+    public function checkDiscount(Request $request)
+    {
+        $code = strtoupper($request->code);
+        $totalAmount = $request->total_amount;
+
+        // Tìm mã khuyến mãi
+        $discount = \App\Models\KhuyenMai::where('ma_khuyen_mai', $code)
+            ->where('trang_thai', 'Đang áp dụng')
+            ->where('ngay_bat_dau', '<=', now())
+            ->where('ngay_ket_thuc', '>=', now())
+            ->first();
+
+        if (!$discount) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Mã giảm giá không tồn tại hoặc đã hết hạn!'
+            ]);
+        }
+
+        // Kiểm tra số lượng còn lại
+        if ($discount->so_luong <= 0) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Mã giảm giá đã hết lượt sử dụng!'
+            ]);
+        }
+
+        // Tính số tiền giảm
+        $discountPercent = $discount->giam_gia;
+        $discountAmount = ($totalAmount * $discountPercent) / 100;
+
+        // Làm tròn đến 1000đ
+        $discountAmount = round($discountAmount / 1000) * 1000;
+
+        return response()->json([
+            'valid' => true,
+            'discount_percent' => $discountPercent,
+            'discount_amount' => $discountAmount,
+            'message' => "Giảm {$discountPercent}% - Tiết kiệm " . number_format($discountAmount, 0, ',', '.') . 'đ'
+        ]);
     }
 }

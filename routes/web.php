@@ -5,7 +5,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\HomeController;;
+use App\Http\Controllers\HomeController;
+;
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\InvoiceController;
@@ -19,7 +20,7 @@ use App\Http\Controllers\AuthController;
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
+Route::get('/register', [AuthController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
 // Password Reset Routes
@@ -69,6 +70,7 @@ Route::get('/datve/{id}', [BookingController::class, 'show'])->name('booking.sho
 Route::post('/datve', [BookingController::class, 'store'])->name('booking.store');
 Route::get('/chon-ghe', [BookingController::class, 'seatSelection'])->name('booking.seat_selection');
 Route::post('/hoan-tat-dat-ve', [BookingController::class, 'completeBooking'])->name('booking.complete');
+Route::post('/api/check-discount', [BookingController::class, 'checkDiscount'])->name('api.check-discount');
 
 // Payment routes
 Route::get('/thanh-toan/{code}', [BookingController::class, 'showPayment'])->name('payment.show');
@@ -117,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('datve', App\Http\Controllers\Admin\DatVeController::class)->except(['edit']);
         Route::patch('datve/{datve}/status', [App\Http\Controllers\Admin\DatVeController::class, 'updateStatus'])->name('datve.update-status');
         Route::post('datve/{datve}/cancel', [App\Http\Controllers\Admin\DatVeController::class, 'cancel'])->name('datve.cancel');
+        Route::post('dat-ve/{id}/xac-nhan-thanh-toan', [App\Http\Controllers\Admin\DatVeController::class, 'confirmPayment'])->name('datve.confirm-payment');
         Route::get('datve-statistics', [App\Http\Controllers\Admin\DatVeController::class, 'statistics'])->name('datve.statistics');
         Route::get('datve-export', [App\Http\Controllers\Admin\DatVeController::class, 'export'])->name('datve.export');
         Route::post('datve-auto-cancel', [App\Http\Controllers\Admin\DatVeController::class, 'autoCancelExpired'])->name('datve.auto-cancel');
