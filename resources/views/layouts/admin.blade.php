@@ -17,6 +17,7 @@
 
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('css/admin-custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/bus-owner-custom.css') }}">
 
     @stack('styles')
 </head>
@@ -54,7 +55,8 @@
                         <div class="dropdown-divider"></div>
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
-                            <button type="submit" class="dropdown-item" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                            <button type="submit" class="dropdown-item"
+                                style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
                                 <i class="fas fa-sign-out-alt mr-2"></i> Đăng xuất
                             </button>
                         </form>
@@ -68,7 +70,8 @@
         <aside class="main-sidebar sidebar-dark-primary elevation-4">
             <!-- Brand Logo -->
             {{-- <a href="{{ route('admin.dashboard') }}" class="brand-link">
-            <img src="{{ asset('assets/images/logo.jpg') }}" alt="FUTA Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+            <img src="{{ asset('assets/images/logo.jpg') }}" alt="FUTA Logo" class="brand-image img-circle elevation-3"
+                style="opacity: .8">
             <span class="brand-text font-weight-light">FUTA Bus</span>
             </a> --}}
 
@@ -77,7 +80,8 @@
                 <!-- Sidebar user panel (optional) -->
                 <div class="user-panel mt-3 pb-3 mb-3 d-flex">
                     <div class="image">
-                        <img src="{{ asset('assets/images/logo.jpg') }}" class="img-circle elevation-2" alt="User Image">
+                        <img src="{{ asset('assets/images/logo.jpg') }}" class="img-circle elevation-2"
+                            alt="User Image">
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{ Auth::user()->fullname ?? Auth::user()->username }}</a>
@@ -87,19 +91,23 @@
 
                 <!-- Sidebar Menu -->
                 <nav class="mt-2">
-                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                        data-accordion="false">
+
+                        @if(strtolower(Auth::user()->role) === 'admin')
                         <!-- Dashboard -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.dashboard') }}" class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                            <a href="{{ route('admin.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
 
-                        @if(strtolower(Auth::user()->role) === 'admin')
                         <!-- User Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.users.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>Quản lý người dùng</p>
                             </a>
@@ -107,7 +115,8 @@
 
                         <!-- Employee Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.nhanvien.index') }}" class="nav-link {{ request()->routeIs('admin.nhanvien.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.nhanvien.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.nhanvien.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-user-tie"></i>
                                 <p>Quản lý nhân viên</p>
                             </a>
@@ -115,7 +124,8 @@
 
                         <!-- Booking Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.datve.index') }}" class="nav-link {{ request()->routeIs('admin.datve.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.datve.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.datve.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
                                 <p>Quản lý đặt vé</p>
                             </a>
@@ -123,7 +133,8 @@
 
                         <!-- Comment Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.binhluan.index') }}" class="nav-link {{ request()->routeIs('admin.binhluan.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.binhluan.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.binhluan.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-comments"></i>
                                 <p>Quản lý bình luận</p>
                             </a>
@@ -131,7 +142,8 @@
 
                         <!-- Revenue Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.doanhthu.index') }}" class="nav-link {{ request()->routeIs('admin.doanhthu.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.doanhthu.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.doanhthu.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-dollar-sign"></i>
                                 <p>Quản lý doanh thu</p>
                             </a>
@@ -139,7 +151,8 @@
 
                         <!-- Promotion Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.khuyenmai.index') }}" class="nav-link {{ request()->routeIs('admin.khuyenmai.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.khuyenmai.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.khuyenmai.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-tags"></i>
                                 <p>Quản lý khuyến mãi</p>
                             </a>
@@ -147,7 +160,8 @@
 
                         <!-- News Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.tintuc.index') }}" class="nav-link {{ request()->routeIs('admin.tintuc.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.tintuc.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.tintuc.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-newspaper"></i>
                                 <p>Quản lý tin tức</p>
                             </a>
@@ -155,7 +169,8 @@
 
                         <!-- Contact Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.contact.index') }}" class="nav-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.contact.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-envelope"></i>
                                 <p>Quản lý liên hệ</p>
                             </a>
@@ -163,9 +178,19 @@
 
                         <!-- Reports -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.report.index') }}" class="nav-link {{ request()->routeIs('admin.report.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.report.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.report.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-chart-bar"></i>
                                 <p>Quản lý báo cáo</p>
+                            </a>
+                        </li>
+
+                        <!-- Profile -->
+                        <li class="nav-item">
+                            <a href="{{ route('profile.show') }}"
+                                class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Hồ sơ cá nhân</p>
                             </a>
                         </li>
                         @endif
@@ -173,58 +198,99 @@
                         @if(strtolower(Auth::user()->role) === 'staff')
                         <!-- Staff Menu -->
                         <li class="nav-item">
-                            <a href="{{ route('staff.bookings.index') }}" class="nav-link {{ request()->routeIs('staff.bookings.*') ? 'active' : '' }}">
+                            <a href="{{ route('staff.bookings.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.bookings.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
                                 <p>Quản lý đặt vé</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.trips.index') }}" class="nav-link {{ request()->routeIs('staff.trips.*') ? 'active' : '' }}">
+                            <a href="{{ route('staff.trips.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.trips.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-route"></i>
                                 <p>Quản lý chuyến xe</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.customers.index') }}" class="nav-link {{ request()->routeIs('staff.customers.*') ? 'active' : '' }}">
+                            <a href="{{ route('staff.customers.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.customers.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-users"></i>
                                 <p>Khách hàng</p>
+                            </a>
+                        </li>
+
+                        <!-- Profile -->
+                        <li class="nav-item">
+                            <a href="{{ route('profile.show') }}"
+                                class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Hồ sơ cá nhân</p>
                             </a>
                         </li>
                         @endif
 
                         @if(strtolower(Auth::user()->role) === 'bus_owner')
                         <!-- Bus Owner Menu -->
+                        <li class="nav-header">QUẢN LÝ</li>
+
                         <li class="nav-item">
-                            <a href="{{ route('bus-owner.dashboard') }}" class="nav-link {{ request()->routeIs('bus-owner.dashboard') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-bus"></i>
+                            <a href="{{ route('bus-owner.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('bus-owner.nha-xe.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.nha-xe.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-building"></i>
                                 <p>Quản lý nhà xe</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('bus-owner.trips.index') }}" class="nav-link {{ request()->routeIs('bus-owner.trips.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-route"></i>
-                                <p>Chuyến xe của tôi</p>
+                            <a href="{{ route('bus-owner.tram-xe.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.tram-xe.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-map-marker-alt"></i>
+                                <p>Quản lý trạm xe</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('bus-owner.revenue.index') }}" class="nav-link {{ request()->routeIs('bus-owner.revenue.*') ? 'active' : '' }}">
+                            <a href="{{ route('bus-owner.trips.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.trips.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-bus"></i>
+                                <p>Quản lý chuyến xe</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('bus-owner.dat-ve.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.dat-ve.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Quản lý đặt vé</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('bus-owner.doanh-thu.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.doanh-thu.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-chart-line"></i>
-                                <p>Doanh thu</p>
+                                <p>Quản lý doanh thu</p>
                             </a>
                         </li>
-                        @endif
 
-                        <!-- Profile -->
                         <li class="nav-item">
-                            <a href="{{ route('profile.show') }}" class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                            <a href="{{ route('profile.show') }}"
+                                class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>Hồ sơ cá nhân</p>
                             </a>
                         </li>
+                        @endif
                     </ul>
                 </nav>
                 <!-- /.sidebar-menu -->
@@ -286,7 +352,9 @@
 
     <!-- Custom JS -->
     <script src="{{ asset('js/admin-custom.js') }}"></script>
+    <script src="{{ asset('js/bus-owner-custom.js') }}"></script>
 
+    @stack('scripts')
     @yield('scripts')
 </body>
 

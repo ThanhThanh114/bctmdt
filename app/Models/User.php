@@ -26,7 +26,8 @@ class User extends Authenticatable
         'otp_expires_at',
         'reset_token',
         'reset_token_expires_at',
-        'role'
+        'role',
+        'ma_nha_xe'
     ];
 
     // Disable timestamps because they don't exist in database
@@ -61,5 +62,10 @@ class User extends Authenticatable
     public function tinTuc()
     {
         return $this->hasMany(TinTuc::class, 'user_id', 'id');
+    }
+
+    public function nhaXe()
+    {
+        return $this->belongsTo(NhaXe::class, 'ma_nha_xe', 'ma_nha_xe');
     }
 }

@@ -29,7 +29,7 @@ class DashboardController extends Controller
 
         // Recent bookings for staff to manage
         $recent_bookings = DatVe::with(['user', 'chuyenXe'])
-            ->latest()
+            ->orderBy('ngay_dat', 'desc')
             ->limit(15)
             ->get();
 
@@ -42,16 +42,16 @@ class DashboardController extends Controller
         // Pending bookings that need attention
         $pending_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereStatus('pending')
-            ->latest()
+            ->orderBy('ngay_dat', 'desc')
             ->limit(10)
             ->get();
 
         // Monthly booking trend
         $monthly_trend = DatVe::select(
-            DB::raw('DATE(created_at) as date'),
+            DB::raw('DATE(ngay_dat) as date'),
             DB::raw('COUNT(*) as count')
         )
-            ->where('created_at', '>=', now()->subDays(30))
+            ->where('ngay_dat', '>=', now()->subDays(30))
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('count', 'date');

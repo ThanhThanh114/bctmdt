@@ -78,8 +78,8 @@
                         <tr>
                             <td>{{ $booking->id }}</td>
                             <td>{{ $booking->user->fullname ?? $booking->user->username }}</td>
-                            <td>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</td>
-                            <td>{{ $booking->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $booking->chuyenXe->ten_xe ?? 'N/A' }}</td>
+                            <td>{{ $booking->ngay_dat->format('d/m/Y H:i') }}</td>
                             <td>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</td>
                             <td>
                                 <a href="{{ route('staff.bookings.show', $booking) }}" class="btn btn-sm btn-info">
@@ -116,19 +116,19 @@
                     <tbody>
                         @forelse($today_trips as $trip)
                         <tr>
-                            <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $trip->gio_di)->format('H:i') }}</td>
-                            <td>{{ $trip->route_name }}</td>
+                            <td>{{ $trip->gio_di ? \Carbon\Carbon::parse($trip->gio_di)->format('H:i') : 'N/A' }}</td>
+                            <td>{{ $trip->ten_xe }}</td>
                             <td>{{ $trip->nhaXe->name ?? 'N/A' }}</td>
                             <td>
-                                <span class="badge {{ $trip->available_seats > 10 ? 'badge-success' : ($trip->available_seats > 0 ? 'badge-warning' : 'badge-danger') }}">
-                                    {{ $trip->available_seats }}
+                                <span class="badge {{ ($trip->so_cho - $trip->so_ve) > 10 ? 'badge-success' : (($trip->so_cho - $trip->so_ve) > 0 ? 'badge-warning' : 'badge-danger') }}">
+                                    {{ $trip->so_cho - $trip->so_ve }}
                                 </span>
                             </td>
                             <td>
-                                @if($trip->status == 'active')
-                                    <span class="badge badge-success">Hoạt động</span>
+                                @if($trip->loai_chuyen == 'Một chiều')
+                                    <span class="badge badge-success">Một chiều</span>
                                 @else
-                                    <span class="badge badge-secondary">Không hoạt động</span>
+                                    <span class="badge badge-info">Khứ hồi</span>
                                 @endif
                             </td>
                         </tr>
@@ -153,11 +153,11 @@
                 <a href="{{ route('staff.bookings.index') }}" class="btn btn-primary btn-block">
                     <i class="fas fa-ticket-alt mr-2"></i> Quản lý đặt vé
                 </a>
-                <a href="{{ route('staff.trips.index') }}" class="btn btn-success btn-block">
-                    <i class="fas fa-bus mr-2"></i> Quản lý chuyến xe
+                <a href="{{ route('staff.bookings.today') }}" class="btn btn-success btn-block">
+                    <i class="fas fa-bus mr-2"></i> Đặt vé hôm nay
                 </a>
-                <a href="{{ route('staff.customers.index') }}" class="btn btn-warning btn-block">
-                    <i class="fas fa-users mr-2"></i> Danh sách khách hàng
+                <a href="{{ route('staff.bookings.pending') }}" class="btn btn-warning btn-block">
+                    <i class="fas fa-users mr-2"></i> Vé chờ xử lý
                 </a>
             </div>
         </div>

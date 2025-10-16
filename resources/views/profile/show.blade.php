@@ -157,7 +157,7 @@
                             <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">Doanh thu tháng</span>
-                                <span class="info-box-number">{{ number_format($user->nhaXe ? $user->nhaXe->chuyenXe()->whereMonth('ngay_di', date('m'))->get()->sum(function($trip) { return $trip->datVe()->whereStatus('confirmed')->sum('total_price'); }) : 0) }}đ</span>
+                                <span class="info-box-number">{{ number_format($user->nhaXe ? $user->nhaXe->chuyenXe()->whereMonth('ngay_di', date('m'))->get()->sum(function($trip) { return $trip->datVe()->whereStatus('confirmed')->get()->sum(function($booking) { return $booking->chuyenXe->gia_ve ?? 0; }); }) : 0) }}đ</span>
                             </div>
                         </div>
                     </div>
@@ -260,70 +260,70 @@
 
 @push('styles')
 <style>
-.profile-avatar-large {
-    margin-bottom: 20px;
-}
+    .profile-avatar-large {
+        margin-bottom: 20px;
+    }
 
-.info-box {
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    border-radius: 0.25rem;
-    margin-bottom: 1rem;
-    background-color: #fff;
-    display: block;
-}
+    .info-box {
+        box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+        border-radius: 0.25rem;
+        margin-bottom: 1rem;
+        background-color: #fff;
+        display: block;
+    }
 
-.info-box .info-box-icon {
-    border-top-left-radius: 0.25rem;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0.25rem;
-    display: block;
-    float: left;
-    height: 70px;
-    width: 70px;
-    text-align: center;
-    font-size: 30px;
-    line-height: 70px;
-    background-color: rgba(0,0,0,.2);
-}
+    .info-box .info-box-icon {
+        border-top-left-radius: 0.25rem;
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0.25rem;
+        display: block;
+        float: left;
+        height: 70px;
+        width: 70px;
+        text-align: center;
+        font-size: 30px;
+        line-height: 70px;
+        background-color: rgba(0, 0, 0, .2);
+    }
 
-.info-box .info-box-content {
-    padding: 5px 10px;
-    margin-left: 70px;
-}
+    .info-box .info-box-content {
+        padding: 5px 10px;
+        margin-left: 70px;
+    }
 
-.info-box .info-box-text {
-    display: block;
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    .info-box .info-box-text {
+        display: block;
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-.info-box .info-box-number {
-    display: block;
-    font-weight: 700;
-    font-size: 18px;
-}
+    .info-box .info-box-number {
+        display: block;
+        font-weight: 700;
+        font-size: 18px;
+    }
 
-.bg-primary {
-    background-color: #007bff !important;
-}
+    .bg-primary {
+        background-color: #007bff !important;
+    }
 
-.bg-success {
-    background-color: #28a745 !important;
-}
+    .bg-success {
+        background-color: #28a745 !important;
+    }
 
-.bg-info {
-    background-color: #17a2b8 !important;
-}
+    .bg-info {
+        background-color: #17a2b8 !important;
+    }
 
-.bg-warning {
-    background-color: #ffc107 !important;
-}
+    .bg-warning {
+        background-color: #ffc107 !important;
+    }
 
-.bg-danger {
-    background-color: #dc3545 !important;
-}
+    .bg-danger {
+        background-color: #dc3545 !important;
+    }
 </style>
 @endpush

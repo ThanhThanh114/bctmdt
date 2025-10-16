@@ -25,7 +25,14 @@ class BookingsController extends Controller
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
                     ->orWhereHas('chuyenXe', function ($tripQuery) use ($search) {
-                        $tripQuery->where('route_name', 'like', "%{$search}%");
+                        $tripQuery->where(function ($routeQuery) use ($search) {
+                            $routeQuery->whereHas('tramDi', function ($tramDiQuery) use ($search) {
+                                $tramDiQuery->where('ten_tram', 'like', "%{$search}%");
+                            })
+                                ->orWhereHas('tramDen', function ($tramDenQuery) use ($search) {
+                                    $tramDenQuery->where('ten_tram', 'like', "%{$search}%");
+                                });
+                        });
                     });
             });
         }

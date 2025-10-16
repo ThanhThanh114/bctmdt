@@ -5,8 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\HomeController;
-;
+use App\Http\Controllers\HomeController;;
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\InvoiceController;
@@ -184,6 +183,15 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('bus-owner')->name('bus-owner.')->middleware('role:bus_owner')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\BusOwner\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('trips', App\Http\Controllers\BusOwner\TripsController::class);
+        Route::resource('dat-ve', App\Http\Controllers\BusOwner\DatVeController::class);
+        Route::patch('dat-ve/{id}/update-status', [App\Http\Controllers\BusOwner\DatVeController::class, 'updateStatus'])->name('dat-ve.update-status');
+        Route::patch('dat-ve/{id}/confirm', [App\Http\Controllers\BusOwner\DatVeController::class, 'confirm'])->name('dat-ve.confirm');
+        Route::patch('dat-ve/{id}/cancel', [App\Http\Controllers\BusOwner\DatVeController::class, 'cancel'])->name('dat-ve.cancel');
+        Route::resource('doanh-thu', App\Http\Controllers\BusOwner\DoanhThuController::class);
+        Route::resource('nha-xe', App\Http\Controllers\BusOwner\NhaXeController::class);
+        Route::resource('tram-xe', App\Http\Controllers\BusOwner\TramXeController::class);
+        Route::resource('tin-tuc', App\Http\Controllers\BusOwner\TinTucController::class);
+        Route::resource('lien-he', App\Http\Controllers\BusOwner\LienHeController::class);
         // Add more bus owner routes here as needed
     });
 

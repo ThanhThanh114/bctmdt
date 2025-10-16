@@ -13,22 +13,24 @@ class TripsController extends Controller
 
     public function index(Request $request)
     {
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
 
         if (!$bus_company) {
-            return redirect()->route('bus-owner.profile.edit')->with('error', 'Bạn cần tạo thông tin nhà xe trước khi quản lý chuyến xe.');
+            return redirect()->route('bus-owner.dashboard')->with('warning', 'Bạn chưa được gán cho nhà xe nào. Vui lòng liên hệ admin để được hỗ trợ.');
         }
 
-        $query = ChuyenXe::where('nha_xe_id', $bus_company->id)->with(['tramDi', 'tramDen']);
+        $query = ChuyenXe::where('ma_nha_xe', $bus_company->ma_nha_xe)->with(['tramDi', 'tramDen']);
 
-        // Filter by status
+        // Filter by trip type (loai_chuyen)
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $query->where('loai_chuyen', $request->status);
         }
 
-        // Search by route name
+        // Search by trip name
         if ($request->filled('search')) {
-            $query->where('route_name', 'like', '%' . $request->search . '%');
+            $query->where('ten_xe', 'like', '%' . $request->search . '%');
         }
 
         $trips = $query->orderBy('ngay_di', 'desc')->orderBy('gio_di', 'desc')->paginate(10);
@@ -38,10 +40,12 @@ class TripsController extends Controller
 
     public function create()
     {
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
 
         if (!$bus_company) {
-            return redirect()->route('bus-owner.profile.edit')->with('error', 'Bạn cần tạo thông tin nhà xe trước khi thêm chuyến xe.');
+            return redirect()->route('bus-owner.dashboard')->with('warning', 'Bạn chưa được gán cho nhà xe nào. Vui lòng liên hệ admin để được hỗ trợ.');
         }
 
         return view('AdminLTE.bus_owner.trips.create', compact('bus_company'));
@@ -49,27 +53,54 @@ class TripsController extends Controller
 
     public function store(Request $request)
     {
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
 
-        $request->validate([
-            'route_name' => 'required|string|max:255',
-            'ngay_di' => 'required|date',
+        if (!$bus_company) {
+            return redirect()->route('bus-owner.dashboard')->with('warning', 'Bạn chưa được gán cho nhà xe nào. Vui lòng liên hệ admin để được hỗ trợ.');
+        }
+
+        $validated = $request->validate([
+            'ten_xe' => 'required|string|max:255',
+            'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
+            'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
+            'ngay_di' => 'required|date|after_or_equal:today',
             'gio_di' => 'required|date_format:H:i',
-            'price' => 'required|numeric|min:0',
-            'total_seats' => 'required|integer|min:1',
-            'available_seats' => 'required|integer|min:0|lte:total_seats',
-            'status' => 'required|in:active,inactive'
+            'loai_xe' => 'nullable|string|max:100',
+            'gia_ve' => 'required|numeric|min:0',
+            'so_cho' => 'required|integer|min:1',
+            'so_ve' => 'required|integer|min:0|lte:so_cho',
+            'loai_chuyen' => 'required|in:Một chiều,Khứ hồi',
+            'ten_tai_xe' => 'nullable|string|max:255',
+            'sdt_tai_xe' => 'nullable|string|max:20',
+        ], [
+            'ten_xe.required' => 'Vui lòng nhập tên chuyến xe',
+            'ngay_di.required' => 'Vui lòng chọn ngày đi',
+            'ngay_di.after_or_equal' => 'Ngày đi phải từ hôm nay trở đi',
+            'gio_di.required' => 'Vui lòng nhập giờ đi',
+            'gia_ve.required' => 'Vui lòng nhập giá vé',
+            'gia_ve.min' => 'Giá vé phải lớn hơn hoặc bằng 0',
+            'so_cho.required' => 'Vui lòng nhập tổng số chỗ',
+            'so_cho.min' => 'Số chỗ phải lớn hơn 0',
+            'so_ve.lte' => 'Số vé đã bán không được vượt quá tổng số chỗ',
+            'loai_chuyen.required' => 'Vui lòng chọn loại chuyến',
         ]);
 
         ChuyenXe::create([
-            'nha_xe_id' => $bus_company->id,
-            'route_name' => $request->route_name,
-            'ngay_di' => $request->ngay_di,
-            'gio_di' => $request->gio_di,
-            'price' => $request->price,
-            'total_seats' => $request->total_seats,
-            'available_seats' => $request->available_seats,
-            'status' => $request->status
+            'ma_nha_xe' => $bus_company->ma_nha_xe,
+            'ten_xe' => $validated['ten_xe'],
+            'ma_tram_di' => $validated['ma_tram_di'] ?? null,
+            'ma_tram_den' => $validated['ma_tram_den'] ?? null,
+            'ngay_di' => $validated['ngay_di'],
+            'gio_di' => $validated['gio_di'],
+            'loai_xe' => $validated['loai_xe'] ?? null,
+            'gia_ve' => $validated['gia_ve'],
+            'so_cho' => $validated['so_cho'],
+            'so_ve' => $validated['so_ve'],
+            'loai_chuyen' => $validated['loai_chuyen'],
+            'ten_tai_xe' => $validated['ten_tai_xe'] ?? null,
+            'sdt_tai_xe' => $validated['sdt_tai_xe'] ?? null,
         ]);
 
         return redirect()->route('bus-owner.trips.index')->with('success', 'Chuyến xe đã được thêm thành công.');
@@ -77,24 +108,30 @@ class TripsController extends Controller
 
     public function show(ChuyenXe $trip)
     {
-        // Ensure the trip belongs to the current bus owner
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
-        if ($trip->nha_xe_id !== $bus_company->id) {
-            abort(403, 'Bạn không có quyền xem chuyến xe này.');
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
+
+        // Check if the trip belongs to the user's bus company
+        if (!$bus_company || $trip->ma_nha_xe !== $bus_company->ma_nha_xe) {
+            return redirect()->route('bus-owner.dashboard')->with('error', 'Bạn không có quyền xem chuyến xe này.');
         }
 
-        $trip->load(['tramDi', 'tramDen', 'datVes.user']);
-        $recent_bookings = $trip->datVes()->with('user')->latest()->limit(10)->get();
+        $trip->load(['tramDi', 'tramDen', 'datVe.user']);
+        $recent_bookings = $trip->datVe()->with('user')->orderBy('ngay_dat', 'desc')->limit(10)->get();
 
         return view('AdminLTE.bus_owner.trips.show', compact('trip', 'recent_bookings'));
     }
 
     public function edit(ChuyenXe $trip)
     {
-        // Ensure the trip belongs to the current bus owner
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
-        if ($trip->nha_xe_id !== $bus_company->id) {
-            abort(403, 'Bạn không có quyền chỉnh sửa chuyến xe này.');
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
+
+        // Check if the trip belongs to the user's bus company
+        if (!$bus_company || $trip->ma_nha_xe !== $bus_company->ma_nha_xe) {
+            return redirect()->route('bus-owner.dashboard')->with('error', 'Bạn không có quyền chỉnh sửa chuyến xe này.');
         }
 
         return view('AdminLTE.bus_owner.trips.edit', compact('trip'));
@@ -102,45 +139,48 @@ class TripsController extends Controller
 
     public function update(Request $request, ChuyenXe $trip)
     {
-        // Ensure the trip belongs to the current bus owner
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
-        if ($trip->nha_xe_id !== $bus_company->id) {
-            abort(403, 'Bạn không có quyền chỉnh sửa chuyến xe này.');
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
+
+        // Check if the trip belongs to the user's bus company
+        if (!$bus_company || $trip->ma_nha_xe !== $bus_company->ma_nha_xe) {
+            return redirect()->route('bus-owner.dashboard')->with('error', 'Bạn không có quyền cập nhật chuyến xe này.');
         }
 
-        $request->validate([
-            'route_name' => 'required|string|max:255',
+        $validated = $request->validate([
+            'ten_xe' => 'required|string|max:255',
+            'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
+            'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
             'ngay_di' => 'required|date',
             'gio_di' => 'required|date_format:H:i',
-            'price' => 'required|numeric|min:0',
-            'total_seats' => 'required|integer|min:1',
-            'available_seats' => 'required|integer|min:0|lte:total_seats',
-            'status' => 'required|in:active,inactive'
+            'loai_xe' => 'nullable|string|max:100',
+            'gia_ve' => 'required|numeric|min:0',
+            'so_cho' => 'required|integer|min:1',
+            'so_ve' => 'required|integer|min:0|lte:so_cho',
+            'loai_chuyen' => 'required|in:Một chiều,Khứ hồi',
+            'ten_tai_xe' => 'nullable|string|max:255',
+            'sdt_tai_xe' => 'nullable|string|max:20',
         ]);
 
-        $trip->update($request->only([
-            'route_name',
-            'ngay_di',
-            'gio_di',
-            'price',
-            'total_seats',
-            'available_seats',
-            'status'
-        ]));
+        $trip->update($validated);
 
         return redirect()->route('bus-owner.trips.show', $trip)->with('success', 'Chuyến xe đã được cập nhật.');
     }
 
     public function destroy(ChuyenXe $trip)
     {
-        // Ensure the trip belongs to the current bus owner
-        $bus_company = NhaXe::where('user_id', Auth::id())->first();
-        if ($trip->nha_xe_id !== $bus_company->id) {
-            abort(403, 'Bạn không có quyền xóa chuyến xe này.');
+        // Get the authenticated user's bus company
+        $user = Auth::user();
+        $bus_company = $user->nhaXe;
+
+        // Check if the trip belongs to the user's bus company
+        if (!$bus_company || $trip->ma_nha_xe !== $bus_company->ma_nha_xe) {
+            return redirect()->route('bus-owner.dashboard')->with('error', 'Bạn không có quyền xóa chuyến xe này.');
         }
 
         // Check if trip has bookings
-        if ($trip->datVes()->count() > 0) {
+        if ($trip->datVe()->count() > 0) {
             return back()->with('error', 'Không thể xóa chuyến xe này vì còn đặt vé.');
         }
 

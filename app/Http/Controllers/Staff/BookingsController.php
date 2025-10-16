@@ -57,9 +57,12 @@ class BookingsController extends Controller
 
         $oldStatus = $booking->status;
         $booking->update([
-            'status' => $request->status,
-            'staff_notes' => $request->notes
+            'status' => $request->status
+            // 'staff_notes' => $request->notes  // Commented out - column doesn't exist in database yet
         ]);
+
+        // Store notes separately if needed (you can add staff_notes column to dat_ve table later)
+        // For now, we'll just update the status
 
         // If booking is confirmed, you might want to update available seats
         if ($request->status === 'confirmed' && $oldStatus !== 'confirmed') {
