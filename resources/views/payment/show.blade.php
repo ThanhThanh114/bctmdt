@@ -339,9 +339,9 @@
 
             @php
                 $firstBooking = $bookings->first();
-                $bookingTime = \Carbon\Carbon::parse($firstBooking->ngay_dat);
-                $expiresAt = $bookingTime->copy()->addMinutes(15);
-                $remainingSeconds = max(0, now()->diffInSeconds($expiresAt, false));
+                // Tính hạn thanh toán từ thời gian hiện tại + 15 phút
+                $expiresAt = now()->addMinutes(15);
+                $remainingSeconds = max(0, $expiresAt->diffInSeconds(now()));
             @endphp
 
             <div class="countdown-timer" id="countdown-container" data-expires="{{ $expiresAt->timestamp }}">

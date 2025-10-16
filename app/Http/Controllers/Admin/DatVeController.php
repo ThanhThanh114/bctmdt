@@ -333,4 +333,45 @@ class DatVeController extends Controller
         }
         return $total;
     }
+
+    /**
+     * Xác nhận thanh toán thủ công (bằng tay)
+     */
+    public function confirmPayment($id)
+    {
+        try {
+            $booking = DatVe::findOrFail($id);
+
+            // Kiểm tra trạng thái hiện tại
+            if ($booking->trang_thai === 'Đã thanh toán') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vé này đã được thanh toán trước đó!'
+                ]);
+            }
+
+            if ($booking->trang_thai === 'Đã hủy') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không thể xác nhận thanh toán cho vé đã hủy!'
+                ]);
+            }
+
+            // Cập nhật trạng thái thành "Đã thanh toán"
+            $booking->update([
+                'trang_thai' => 'Đã thanh toán'
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "✓ Đã xác nhận thanh toán cho mã vé {$booking->ma_ve}",
+                'booking' => $booking
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

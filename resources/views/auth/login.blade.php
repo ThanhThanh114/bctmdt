@@ -52,29 +52,73 @@
             </div>
 
             <!-- Messages -->
-            <?php if ($message): ?>
-            <div class="message <?= $messageType ?>">
+            @if(session('success'))
+            <div class="message success">
+                <i class="fas fa-check-circle"></i>
+                {{ session('success') }}
+            </div>
+            @endif
+
+            @if(session('error'))
+            <div class="message error">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ session('error') }}
+            </div>
+            @endif
+
+            @if($errors->any())
+            <div class="message error">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Có lỗi xảy ra:</strong>
+                <ul style="margin: 8px 0 0 20px; padding: 0; list-style: disc;">
+                    @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
+            <?php if (isset($message) && $message): ?>
+            <div class="message <?= $messageType ?? 'info' ?>">
                 <?= htmlspecialchars($message) ?>
             </div>
             <?php endif; ?>
 
             <div class="form-content">
                 <!-- Login Form -->
-                <form id="loginForm" method="POST" class="form-group">
+                <form id="loginForm" method="POST" action="{{ route('login.post') }}" class="form-group">
                     @csrf
                     <div class="input-wrapper">
-                        <i class="fas fa-phone input-icon"></i>
-                        <input type="text" name="identifier" class="input-field" placeholder="Nhập số điện thoại"
-                            required>
+                        <i class="fas fa-user input-icon"></i>
+                        <input type="text" 
+                               name="identifier" 
+                               class="input-field @error('identifier') error @enderror" 
+                               placeholder="Tên đăng nhập / Email / Số điện thoại"
+                               value="{{ old('identifier') }}"
+                               required>
                     </div>
+                    @error('identifier')
+                    <div style="color: #dc3545; font-size: 12px; margin-top: -8px; margin-bottom: 8px;">
+                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                    </div>
+                    @enderror
 
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password" class="input-field" placeholder="Nhập mật khẩu" required>
+                        <input type="password" 
+                               name="password" 
+                               class="input-field @error('password') error @enderror" 
+                               placeholder="Nhập mật khẩu" 
+                               required>
                     </div>
+                    @error('password')
+                    <div style="color: #dc3545; font-size: 12px; margin-top: -8px; margin-bottom: 8px;">
+                        <i class="fas fa-exclamation-circle"></i> {{ $message }}
+                    </div>
+                    @enderror
 
                     <button type="submit" name="login" class="submit-btn">
-                        Đăng nhập
+                        <i class="fas fa-sign-in-alt"></i> Đăng nhập
                     </button>
                 </form>
 
