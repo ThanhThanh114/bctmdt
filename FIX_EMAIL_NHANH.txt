@@ -1,0 +1,43 @@
+# ⚡ FIX NHANH - EMAIL KHÔNG GỬI ĐƯỢC
+
+## ❌ Vấn đề:
+- Quên mật khẩu không nhận OTP
+- Đặt vé không nhận email xác nhận
+
+## ✅ Nguyên nhân:
+File `.env` chưa có MAIL_USERNAME và MAIL_PASSWORD
+
+## 🔧 FIX NGAY (3 bước):
+
+### 1. Tạo Gmail App Password
+- Vào: https://myaccount.google.com/apppasswords
+- Bật 2-Step Verification trước (nếu chưa)
+- Tạo App Password → Copy 16 ký tự
+
+### 2. Sửa file .env
+Thêm vào file `.env`:
+
+```env
+MAIL_USERNAME=thanhloi1141308@gmail.com
+MAIL_PASSWORD=xxxx xxxx xxxx xxxx
+MAIL_FROM_ADDRESS="thanhloi1141308@gmail.com"
+```
+
+(Thay `xxxx xxxx xxxx xxxx` bằng App Password vừa tạo)
+
+### 3. Clear cache & Test
+```bash
+php artisan config:clear
+php test_email_config.php
+```
+
+---
+
+## ✅ Kết quả:
+- Thấy "✅ GỬI EMAIL THÀNH CÔNG!" → OK
+- Test quên mật khẩu → Nhận OTP
+- Test đặt vé → Nhận email xác nhận
+
+---
+
+**Chi tiết:** Xem file `FIX_EMAIL_KHONG_GUI_DUOC.md`
