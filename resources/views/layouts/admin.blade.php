@@ -81,7 +81,17 @@
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{ Auth::user()->fullname ?? Auth::user()->username }}</a>
-                        <small class="text-muted">{{ Auth::user()->role }}</small>
+                        <small class="text-muted">
+                            @if(strtolower(Auth::user()->role) === 'admin')
+                                Quản trị
+                            @elseif(Auth::user()->role === 'Staff')
+                                Nhân viên
+                            @elseif(Auth::user()->role === 'Bus_owner')
+                                Nhà xe
+                            @else
+                                Người dùng
+                            @endif
+                        </small>
                     </div>
                 </div>
 
@@ -241,12 +251,12 @@
                         <div class="col-sm-6">
                             <h1 class="m-0">@yield('page-title', 'Dashboard')</h1>
                         </div>
-                        <div class="col-sm-6">
+                        {{-- <div class="col-sm-6">
                             <ol class="breadcrumb float-sm-right">
                                 <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
                                 <li class="breadcrumb-item active">@yield('breadcrumb', 'Tổng quan')</li>
                             </ol>
-                        </div>
+                        </div> --}}
                     </div>
                 </div>
             </div>

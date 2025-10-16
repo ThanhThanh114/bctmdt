@@ -30,9 +30,9 @@ class UsersController extends Controller
         }
 
         // Exclude admin users from regular listing
-        $query->where('role', '!=', 'Admin');
+        $query->where('role', '!=', 'admin');
 
-        $users = $query->paginate(10);
+        $users = $query->paginate(15);
 
         return view('AdminLTE.admin.users.index', compact('users'));
     }
@@ -89,7 +89,7 @@ class UsersController extends Controller
             'fullname' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'required|string|max:15|unique:users,phone,' . $user->id,
-            'role' => 'required|in:User,Staff,Bus_owner'
+            'role' => 'required|in:user,staff,bus_owner'
         ]);
 
         $user->update([

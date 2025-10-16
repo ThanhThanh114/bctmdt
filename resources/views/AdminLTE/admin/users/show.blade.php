@@ -30,7 +30,17 @@
                             <i class="fas fa-user-circle fa-5x text-primary"></i>
                         </div>
                         <h4 class="mt-3">{{ $user->fullname }}</h4>
-                        <p class="text-muted">{{ $user->role }}</p>
+                        <p class="text-muted">
+                            @if(strtolower($user->role) === 'admin')
+                                Quản trị
+                            @elseif(strtolower($user->role) === 'staff')
+                                Nhân viên
+                            @elseif(strtolower($user->role) === 'bus_owner')
+                                Nhà xe
+                            @else
+                                Người dùng
+                            @endif
+                        </p>
                         @if(strtolower($user->role) === 'admin')
                         <span class="badge badge-danger">
                             <i class="fas fa-crown"></i> Quản trị viên
@@ -263,7 +273,15 @@
                     <span>Vai trò:</span>
                     <span
                         class="badge {{ strtolower($user->role) === 'admin' ? 'badge-danger' : (strtolower($user->role) === 'staff' ? 'badge-warning' : (strtolower($user->role) === 'bus_owner' ? 'badge-info' : 'badge-success')) }}">
-                        {{ $user->role }}
+                        @if(strtolower($user->role) === 'admin')
+                            Quản trị
+                        @elseif(strtolower($user->role) === 'staff')
+                            Nhân viên
+                        @elseif(strtolower($user->role) === 'bus_owner')
+                            Nhà xe
+                        @else
+                            Người dùng
+                        @endif
                     </span>
                 </div>
                 <div class="d-flex justify-content-between mb-2">

@@ -179,7 +179,7 @@
 
                 <!-- Pagination -->
                 <div class="mt-3">
-                    {{ $khuyenMai->appends(request()->query())->links() }}
+                    {{ $khuyenMai->appends(request()->query())->links('pagination::bootstrap-4') }}
                 </div>
             </div>
         </div>

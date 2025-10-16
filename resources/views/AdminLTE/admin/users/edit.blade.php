@@ -141,13 +141,13 @@
                                     <select class="form-control @error('role') is-invalid @enderror" id="role"
                                         name="role" required>
                                         <option value="">Chọn vai trò</option>
-                                        <option value="User" {{ old('role', $user->role) == 'User' ? 'selected' : '' }}>
+                                        <option value="user" {{ strtolower(old('role', $user->role)) == 'user' ? 'selected' : '' }}>
                                             Người dùng</option>
-                                        <option value="Staff"
-                                            {{ old('role', $user->role) == 'Staff' ? 'selected' : '' }}>Nhân viên
+                                        <option value="staff"
+                                            {{ strtolower(old('role', $user->role)) == 'staff' ? 'selected' : '' }}>Nhân viên
                                         </option>
-                                        <option value="Bus_owner"
-                                            {{ old('role', $user->role) == 'Bus_owner' ? 'selected' : '' }}>Nhà xe
+                                        <option value="bus_owner"
+                                            {{ strtolower(old('role', $user->role)) == 'bus_owner' ? 'selected' : '' }}>Nhà xe
                                         </option>
                                     </select>
                                     @error('role')
@@ -211,7 +211,17 @@
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <span>Vai trò hiện tại:</span>
-                <span class="badge badge-info">{{ $user->role }}</span>
+                <span class="badge badge-info">
+                    @if(strtolower($user->role) === 'admin')
+                        Quản trị
+                    @elseif(strtolower($user->role) === 'staff')
+                        Nhân viên
+                    @elseif(strtolower($user->role) === 'bus_owner')
+                        Nhà xe
+                    @else
+                        Người dùng
+                    @endif
+                </span>
             </div>
             <div class="d-flex justify-content-between mb-2">
                 <span>Ngày tạo:</span>

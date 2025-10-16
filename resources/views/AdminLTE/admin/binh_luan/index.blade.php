@@ -232,7 +232,7 @@
 
                 <!-- Pagination -->
                 <div class="mt-3">
-                    {{ $binhLuan->appends(request()->query())->links() }}
+                    {{ $binhLuan->appends(request()->query())->links('pagination::bootstrap-4') }}
                 </div>
             </div>
         </div>

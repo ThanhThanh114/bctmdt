@@ -66,9 +66,9 @@
                             <td>
                                 @if(strtolower($user->role) === 'admin')
                                 <span class="badge badge-danger">Quản trị</span>
-                                @elseif($user->role === 'Staff')
+                                @elseif(strtolower($user->role) === 'staff')
                                 <span class="badge badge-warning">Nhân viên</span>
-                                @elseif($user->role === 'Bus_owner')
+                                @elseif(strtolower($user->role) === 'bus_owner')
                                 <span class="badge badge-info">Nhà xe</span>
                                 @else
                                 <span class="badge badge-success">Người dùng</span>
@@ -122,10 +122,10 @@
             </div>
 
             @if($users->hasPages())
-            {{-- <div class="card-footer">
-                {{ $users->appends(request()->query())->links() }}
-        </div> --}}
-        @endif
+            <div class="card-footer">
+                {{ $users->appends(request()->query())->links('pagination::bootstrap-4') }}
+            </div>
+            @endif
     </div>
 </div>
 </div>
