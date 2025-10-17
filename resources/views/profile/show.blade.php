@@ -136,7 +136,7 @@
                             <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">Đặt vé hôm nay</span>
-                                <span class="info-box-number">{{ App\Models\DatVe::whereDate('created_at', date('Y-m-d'))->count() }}</span>
+                                <span class="info-box-number">{{ App\Models\DatVe::whereDate('ngay_dat', date('Y-m-d'))->count() }}</span>
                             </div>
                         </div>
                     </div>
@@ -236,7 +236,7 @@
                 </h3>
             </div>
             <div class="card-body">
-                <h5 class="text-primary">{{ $user->nhaXe->name }}</h5>
+                <h5 class="text-primary">{{ $user->nhaXe->ten_nha_xe }}</h5>
                 <p class="text-muted">{{ $user->nhaXe->description ?? 'Chưa có mô tả' }}</p>
                 <div class="d-flex justify-content-between mb-2">
                     <span>Số chuyến:</span>

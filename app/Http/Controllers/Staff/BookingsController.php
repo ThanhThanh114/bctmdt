@@ -12,7 +12,7 @@ class BookingsController extends Controller
 
     public function index(Request $request)
     {
-        $query = DatVe::with(['user', 'chuyenXe']);
+        $query = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -71,7 +71,7 @@ class BookingsController extends Controller
 
     public function todayBookings()
     {
-        $today_bookings = DatVe::with(['user', 'chuyenXe'])
+        $today_bookings = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe'])
             ->whereDate('ngay_dat', date('Y-m-d'))
             ->orderBy('ngay_dat', 'desc')
             ->get();
@@ -81,7 +81,7 @@ class BookingsController extends Controller
 
     public function pendingBookings()
     {
-        $pending_bookings = DatVe::with(['user', 'chuyenXe'])
+        $pending_bookings = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe'])
             ->whereStatus('pending')
             ->orderBy('ngay_dat', 'asc')
             ->paginate(10);

@@ -36,6 +36,16 @@ class ChuyenXe extends Model
         'gia_ve' => 'decimal:2'
     ];
 
+    // Accessor for route name
+    protected $appends = ['route_name'];
+
+    public function getRouteNameAttribute()
+    {
+        $departure = $this->tramDi ? $this->tramDi->ten_tram : 'N/A';
+        $destination = $this->tramDen ? $this->tramDen->ten_tram : 'N/A';
+        return $departure . ' → ' . $destination;
+    }
+
     // Relationships
     public function nhaXe()
     {

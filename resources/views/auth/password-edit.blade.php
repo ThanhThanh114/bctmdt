@@ -25,7 +25,12 @@
                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                             </div>
                             <input type="password" class="form-control @error('current_password') is-invalid @enderror"
-                                   id="current_password" name="current_password" required>
+                                   id="currentPassword" name="current_password" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePasswordVisibility('currentPassword')">
+                                    <i class="fas fa-eye" id="currentPasswordIcon"></i>
+                                </button>
+                            </div>
                             @error('current_password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -39,7 +44,12 @@
                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
                             </div>
                             <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                   id="password" name="password" required>
+                                   id="newPassword" name="password" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePasswordVisibility('newPassword')">
+                                    <i class="fas fa-eye" id="newPasswordIcon"></i>
+                                </button>
+                            </div>
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -54,7 +64,12 @@
                                 <span class="input-group-text"><i class="fas fa-check-circle"></i></span>
                             </div>
                             <input type="password" class="form-control @error('password_confirmation') is-invalid @enderror"
-                                   id="password_confirmation" name="password_confirmation" required>
+                                   id="confirmPassword" name="password_confirmation" required>
+                            <div class="input-group-append">
+                                <button type="button" class="btn btn-outline-secondary password-toggle" onclick="togglePasswordVisibility('confirmPassword')">
+                                    <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
                             @error('password_confirmation')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -137,6 +152,25 @@
 </div>
 @endsection
 
+@push('scripts')
+<script>
+function togglePasswordVisibility(passwordId) {
+    const passwordInput = document.getElementById(passwordId);
+    const icon = document.getElementById(passwordId + 'Icon');
+
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        passwordInput.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
+@endpush
+
 @push('styles')
 <style>
 .input-group-text {
@@ -166,6 +200,22 @@
 
 .badge {
     font-size: 0.75rem;
+}
+
+.password-toggle {
+    border-left: none !important;
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #6c757d;
+}
+
+.password-toggle:hover {
+    background-color: #e9ecef;
+    color: #495057;
+}
+
+.input-group-append .btn {
+    border-radius: 0 0.25rem 0.25rem 0;
 }
 </style>
 @endpush

@@ -76,7 +76,7 @@
                             </td>
                             <td>{{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di)->format('d/m/Y H:i') }}</td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->seat_number }}</span>
+                                <span class="badge badge-info">{{ $booking->so_ghe ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>

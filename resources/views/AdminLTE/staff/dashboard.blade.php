@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.staff')
 
 @section('title', 'Staff Dashboard')
 
@@ -79,7 +79,7 @@
                             <td>{{ $booking->id }}</td>
                             <td>{{ $booking->user->fullname ?? $booking->user->username }}</td>
                             <td>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</td>
-                            <td>{{ $booking->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $booking->ngay_dat ? $booking->ngay_dat->format('d/m/Y H:i') : 'N/A' }}</td>
                             <td>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</td>
                             <td>
                                 <a href="{{ route('staff.bookings.show', $booking) }}" class="btn btn-sm btn-info">
@@ -118,7 +118,7 @@
                         <tr>
                             <td>{{ \Carbon\Carbon::createFromFormat('H:i:s', $trip->gio_di)->format('H:i') }}</td>
                             <td>{{ $trip->route_name }}</td>
-                            <td>{{ $trip->nhaXe->name ?? 'N/A' }}</td>
+                            <td>{{ $trip->nhaXe->ten_nha_xe ?? 'N/A' }}</td>
                             <td>
                                 <span class="badge {{ $trip->available_seats > 10 ? 'badge-success' : ($trip->available_seats > 0 ? 'badge-warning' : 'badge-danger') }}">
                                     {{ $trip->available_seats }}

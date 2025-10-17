@@ -12,7 +12,7 @@ class BookingsController extends Controller
 
     public function index(Request $request)
     {
-        $query = DatVe::where('user_id', Auth::id())->with(['chuyenXe.nhaXe']);
+        $query = DatVe::where('user_id', Auth::id())->with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -24,8 +24,11 @@ class BookingsController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhereHas('chuyenXe', function ($tripQuery) use ($search) {
-                        $tripQuery->where('route_name', 'like', "%{$search}%");
+                    ->orWhereHas('chuyenXe.tramDi', function ($tripQuery) use ($search) {
+                        $tripQuery->where('ten_tram', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('chuyenXe.tramDen', function ($tripQuery) use ($search) {
+                        $tripQuery->where('ten_tram', 'like', "%{$search}%");
                     });
             });
         }

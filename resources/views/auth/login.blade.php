@@ -90,9 +90,9 @@
                     @csrf
                     <div class="input-wrapper">
                         <i class="fas fa-user input-icon"></i>
-                        <input type="text" 
-                               name="identifier" 
-                               class="input-field @error('identifier') error @enderror" 
+                        <input type="text"
+                               name="identifier"
+                               class="input-field @error('identifier') error @enderror"
                                placeholder="Tên đăng nhập / Email / Số điện thoại"
                                value="{{ old('identifier') }}"
                                required>
@@ -105,11 +105,15 @@
 
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" 
-                               name="password" 
-                               class="input-field @error('password') error @enderror" 
-                               placeholder="Nhập mật khẩu" 
+                        <input type="password"
+                               name="password"
+                               id="loginPassword"
+                               class="input-field @error('password') error @enderror"
+                               placeholder="Nhập mật khẩu"
                                required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('loginPassword')">
+                            <i class="fas fa-eye" id="loginPasswordIcon"></i>
+                        </button>
                     </div>
                     @error('password')
                     <div style="color: #dc3545; font-size: 12px; margin-top: -8px; margin-bottom: 8px;">
@@ -147,13 +151,19 @@
 
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password" class="input-field" placeholder="Mật khẩu" required>
+                        <input type="password" name="password" id="registerPassword" class="input-field" placeholder="Mật khẩu" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPassword')">
+                            <i class="fas fa-eye" id="registerPasswordIcon"></i>
+                        </button>
                     </div>
 
                     <div class="input-wrapper">
                         <i class="fas fa-lock input-icon"></i>
-                        <input type="password" name="password_confirmation" class="input-field"
+                        <input type="password" name="password_confirmation" id="registerPasswordConfirm" class="input-field"
                             placeholder="Xác nhận mật khẩu" required>
+                        <button type="button" class="password-toggle" onclick="togglePasswordVisibility('registerPasswordConfirm')">
+                            <i class="fas fa-eye" id="registerPasswordConfirmIcon"></i>
+                        </button>
                     </div>
 
                     <button type="submit" name="register" class="submit-btn">
@@ -181,6 +191,46 @@
         </div>
     </div>
     <script src="{{ asset('assets/js/login.js') }}"></script>
+
+    <script>
+    function togglePasswordVisibility(passwordId) {
+        const passwordInput = document.getElementById(passwordId);
+        const icon = document.getElementById(passwordId + 'Icon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    </script>
+
+    <style>
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 5px;
+        z-index: 10;
+    }
+
+    .password-toggle:hover {
+        color: #495057;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+    </style>
 </body>
 
 </html>

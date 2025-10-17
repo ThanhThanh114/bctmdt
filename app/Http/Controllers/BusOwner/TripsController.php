@@ -84,7 +84,7 @@ class TripsController extends Controller
         }
 
         $trip->load(['tramDi', 'tramDen', 'datVes.user']);
-        $recent_bookings = $trip->datVes()->with('user')->latest()->limit(10)->get();
+        $recent_bookings = $trip->datVes()->with('user')->orderBy('ngay_dat', 'desc')->limit(10)->get();
 
         return view('AdminLTE.bus_owner.trips.show', compact('trip', 'recent_bookings'));
     }

@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.bus_owner')
 
 @section('title', 'Quản lý chuyến xe')
 
@@ -10,7 +10,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h3 class="card-title">Danh sách chuyến xe của {{ $bus_company->name }}</h3>
+                <h3 class="card-title">Danh sách chuyến xe của {{ $bus_company->ten_nha_xe }}</h3>
                 <div class="card-tools">
                     <a href="{{ route('bus-owner.trips.create') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> Thêm chuyến xe
@@ -83,7 +83,7 @@
                                     <span class="badge badge-secondary">Không hoạt động</span>
                                 @endif
                             </td>
-                            <td>{{ $trip->created_at->format('d/m/Y') }}</td>
+                            <td>{{ $trip->ngay_tao ? \Carbon\Carbon::parse($trip->ngay_tao)->format('d/m/Y') : 'N/A' }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="{{ route('bus-owner.trips.show', $trip) }}" class="btn btn-sm btn-info" title="Xem chi tiết">

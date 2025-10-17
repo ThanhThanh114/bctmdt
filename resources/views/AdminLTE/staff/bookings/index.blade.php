@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.staff')
 
 @section('title', 'Quản lý đặt vé')
 
@@ -84,12 +84,23 @@
                             </td>
                             <td>
                                 <div>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</div>
-                                <small class="text-muted">{{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di)->format('d/m/Y H:i') }}</small>
+                                <small class="text-muted">
+                                    @php
+                                        try {
+                                            $tripDateTime = $booking->chuyenXe->ngay_di && $booking->chuyenXe->gio_di ?
+                                                \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di)->format('d/m/Y H:i') :
+                                                'N/A';
+                                            echo $tripDateTime;
+                                        } catch (Exception $e) {
+                                            echo 'N/A';
+                                        }
+                                    @endphp
+                                </small>
                             </td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->seat_number }}</span>
+                                <span class="badge badge-info">{{ $booking->so_ghe ?? 'N/A' }}</span>
                             </td>
-                            <td>{{ $booking->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $booking->ngay_dat ? $booking->ngay_dat->format('d/m/Y H:i') : 'N/A' }}</td>
                             <td>
                                 <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
                             </td>
@@ -186,7 +197,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>{{ App\Models\DatVe::whereDate('created_at', date('Y-m-d'))->count() }}</h3>
+                <h3>{{ App\Models\DatVe::whereDate('ngay_dat', date('Y-m-d'))->count() }}</h3>
                 <p>Hôm nay</p>
             </div>
             <div class="icon">

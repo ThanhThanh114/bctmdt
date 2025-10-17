@@ -3,18 +3,32 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\AuthenticationService;
+use App\Services\RegistrationService;
+use App\Services\PasswordResetService;
+use App\Services\ProfileService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rules\Password;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception as PHPMailerException;
 
 class AuthController extends Controller
 {
+    private AuthenticationService $authService;
+    private RegistrationService $registrationService;
+    private PasswordResetService $passwordResetService;
+    private ProfileService $profileService;
+
+    public function __construct(
+        AuthenticationService $authService,
+        RegistrationService $registrationService,
+        PasswordResetService $passwordResetService,
+        ProfileService $profileService
+    ) {
+        $this->authService = $authService;
+        $this->registrationService = $registrationService;
+        $this->passwordResetService = $passwordResetService;
+        $this->profileService = $profileService;
+    }
     public function showLoginForm()
     {
         return view('auth.login', [
@@ -32,6 +46,12 @@ class AuthController extends Controller
     }
 
 
+    /**
+     * Authenticate user with enhanced security and rate limiting
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function authenticate(Request $request)
     {
         $validated = $request->validate([
@@ -42,120 +62,39 @@ class AuthController extends Controller
             'password.required' => 'Vui lòng nhập mật khẩu'
         ]);
 
-        $identifier = $validated['identifier'];
-        $password = $validated['password'];
+        // Use authentication service
+        $result = $this->authService->authenticate($validated['identifier'], $validated['password']);
 
-        // Tìm user theo username, email hoặc phone
-        $user = User::where('username', $identifier)
-            ->orWhere('email', $identifier)
-            ->orWhere('phone', $identifier)
-            ->first();
-
-        if (!$user) {
-            Log::warning('Login failed: User not found', ['identifier' => $identifier]);
+        if (!$result['success']) {
             return back()->withErrors([
-                'identifier' => 'Tài khoản không tồn tại trong hệ thống!',
+                'authentication' => $result['message']
             ])->withInput($request->only('identifier'));
         }
 
-        // Kiểm tra mật khẩu (hỗ trợ cả plain text và hash)
-        if ($password === $user->password || Hash::check($password, $user->password)) {
-            Auth::login($user);
-            $request->session()->regenerate();
+        // Redirect based on role
+        $redirectRoute = $result['redirect_route'];
+        $user = $result['user'];
 
-            Log::info('User logged in successfully', [
-                'user_id' => $user->id,
-                'username' => $user->username,
-                'role' => $user->role
-            ]);
-
-            // Chuyển hướng dựa trên role
-            switch (strtolower($user->role)) {
-                case 'admin':
-                    return redirect()->route('admin.dashboard')->with('success', 'Chào mừng Admin ' . $user->fullname);
-                case 'staff':
-                    return redirect()->route('staff.dashboard')->with('success', 'Chào mừng nhân viên ' . $user->fullname);
-                case 'bus_owner':
-                    return redirect()->route('bus-owner.dashboard')->with('success', 'Chào mừng chủ xe ' . $user->fullname);
-                case 'user':
-                default:
-                    return redirect()->route('home')->with('success', 'Đăng nhập thành công! Chào ' . $user->fullname);
-            }
-        }
-
-        Log::warning('Login failed: Invalid password', ['identifier' => $identifier]);
-        return back()->withErrors([
-            'password' => 'Mật khẩu không chính xác!',
-        ])->withInput($request->only('identifier'));
+        return redirect()->route($redirectRoute)->with('success', 'Đăng nhập thành công! Chào ' . $user->fullname);
     }
 
+    /**
+     * Register new user with enhanced validation and security
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function register(Request $request)
     {
-        // Log dữ liệu nhận được
-        Log::info('Registration attempt', [
-            'data' => $request->except('password', 'password_confirmation')
-        ]);
+        // Use registration service
+        $result = $this->registrationService->register($request->all());
 
-        $validated = $request->validate([
-            'username' => 'required|string|max:50|unique:users|regex:/^[a-zA-Z0-9_]+$/',
-            'fullname' => 'required|string|max:100|min:3',
-            'email' => 'required|string|email|max:100|unique:users',
-            'phone' => 'required|string|max:15|unique:users|regex:/^[0-9]{10,11}$/',
-            'password' => 'required|string|min:6|confirmed'
-        ], [
-            // Username messages
-            'username.required' => 'Vui lòng nhập tên đăng nhập',
-            'username.max' => 'Tên đăng nhập không được quá 50 ký tự',
-            'username.unique' => 'Tên đăng nhập đã tồn tại, vui lòng chọn tên khác',
-            'username.regex' => 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới',
-
-            // Fullname messages
-            'fullname.required' => 'Vui lòng nhập họ và tên',
-            'fullname.max' => 'Họ và tên không được quá 100 ký tự',
-            'fullname.min' => 'Họ và tên phải có ít nhất 3 ký tự',
-
-            // Email messages
-            'email.required' => 'Vui lòng nhập địa chỉ email',
-            'email.email' => 'Địa chỉ email không đúng định dạng',
-            'email.max' => 'Email không được quá 100 ký tự',
-            'email.unique' => 'Email đã được sử dụng, vui lòng dùng email khác',
-
-            // Phone messages
-            'phone.required' => 'Vui lòng nhập số điện thoại',
-            'phone.max' => 'Số điện thoại không được quá 15 ký tự',
-            'phone.unique' => 'Số điện thoại đã được đăng ký, vui lòng dùng số khác',
-            'phone.regex' => 'Số điện thoại phải là 10-11 chữ số',
-
-            // Password messages
-            'password.required' => 'Vui lòng nhập mật khẩu',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-            'password.confirmed' => 'Mật khẩu xác nhận không khớp'
-        ]);
-
-        try {
-            $user = User::create([
-                'username' => $validated['username'],
-                'fullname' => $validated['fullname'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
-                'password' => Hash::make($validated['password']),
-                'role' => 'user'
-            ]);
-
-            Log::info('User registered successfully', ['user_id' => $user->id, 'username' => $user->username]);
-
-            Auth::login($user);
-
-            return redirect()->route('home')->with('success', 'Đăng ký thành công! Chào mừng bạn đến với hệ thống.');
-
-        } catch (\Exception $e) {
-            // Log the actual error for debugging
-            Log::error('Registration error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString()
-            ]);
+        if (!$result['success']) {
             return back()->withInput($request->except('password', 'password_confirmation'))
-                ->with('error', 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+                ->with('error', $result['message']);
         }
+
+        return redirect()->route('home')->with('success', $result['message']);
     }
 
     public function logout(Request $request)
@@ -173,124 +112,50 @@ class AuthController extends Controller
         return view('auth.forgot-password');
     }
 
+    /**
+     * Send password reset OTP
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user) {
-            return back()->withErrors(['email' => 'Không tìm thấy tài khoản với email này.']);
-        }
-
-        $otp = rand(100000, 999999);
-        $user->update([
-            'reset_token' => $otp,
-            'reset_token_expires_at' => now()->addMinutes(5)
+        $request->validate([
+            'email' => 'required|email'
+        ], [
+            'email.required' => 'Vui lòng nhập địa chỉ email',
+            'email.email' => 'Địa chỉ email không đúng định dạng'
         ]);
 
-        // Lưu email vào session để verify
-        session(['reset_email' => $user->email]);
+        // Use password reset service
+        $result = $this->passwordResetService->initiateReset($request->email);
 
-        // Gửi OTP qua PHPMailer (không block nếu fail)
-        try {
-            \Log::info('Attempting to send OTP to: ' . $user->email);
-            $this->sendOTPEmail($user->email, $user->fullname, $otp);
-            \Log::info('OTP sent successfully to: ' . $user->email);
-            $message = 'Mã OTP đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.';
-        } catch (\Exception $e) {
-            \Log::error('Failed to send OTP email: ' . $e->getMessage());
-            \Log::error('Stack trace: ' . $e->getTraceAsString());
-            $message = 'Mã OTP: <strong>' . $otp . '</strong> (Email tạm thời không gửi được, vui lòng dùng mã này)';
+        if (!$result['success']) {
+            return back()->withErrors(['email' => $result['message']]);
         }
 
-        return redirect()->route('password.verify-otp')->with('success', $message);
+        return redirect()->route('password.verify-otp')->with('success', $result['message']);
     }
 
-    private function sendOTPEmail($email, $fullname, $otp)
-    {
-        $mail = new PHPMailer(true);
-
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = env('MAIL_USERNAME');
-        $mail->Password = env('MAIL_PASSWORD');
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port = 587;
-        $mail->CharSet = 'UTF-8';
-
-        $mail->setFrom(env('MAIL_FROM_ADDRESS', 'noreply@example.com'), 'Hệ thống đặt vé xe');
-        $mail->addAddress($email, $fullname);
-
-        $mail->isHTML(true);
-        $mail->Subject = 'Mã OTP khôi phục mật khẩu';
-        $mail->Body = $this->getOTPEmailTemplate($fullname, $otp);
-
-        $mail->send();
-    }
-
-    private function getOTPEmailTemplate($fullname, $otp)
-    {
-        return '
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
-        <tr>
-            <td align="center">
-                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 10px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1);">
-                    <tr>
-                        <td style="background: linear-gradient(135deg, #FF7B39 0%, #FF5722 100%); padding: 30px; text-align: center;">
-                            <h1 style="color: white; margin: 0; font-size: 24px;">🔐 Khôi phục mật khẩu</h1>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding: 30px;">
-                            <p style="font-size: 16px; color: #333;">Xin chào <strong>' . htmlspecialchars($fullname) . '</strong>,</p>
-                            <p style="font-size: 14px; color: #666; line-height: 1.6;">Bạn đã yêu cầu khôi phục mật khẩu. Vui lòng sử dụng mã OTP dưới đây để xác nhận:</p>
-                            
-                            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 20px 0; border-radius: 5px; text-align: center;">
-                                <p style="margin: 0; font-size: 14px; color: #856404;">Mã OTP của bạn:</p>
-                                <p style="margin: 10px 0 0 0; font-size: 32px; color: #FF5722; font-weight: bold; letter-spacing: 5px;">' . $otp . '</p>
-                            </div>
-
-                            <div style="background: #fff3cd; border: 1px solid #ffc107; color: #856404; padding: 15px; border-radius: 5px; margin: 20px 0;">
-                                <strong>⚠️ Lưu ý:</strong>
-                                <ul style="margin: 10px 0 0 0; padding-left: 20px;">
-                                    <li>Mã OTP có hiệu lực trong <strong>5 phút</strong></li>
-                                    <li>Không chia sẻ mã này cho bất kỳ ai</li>
-                                    <li>Nếu bạn không yêu cầu khôi phục mật khẩu, vui lòng bỏ qua email này</li>
-                                </ul>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="background: #f8f9fa; padding: 20px; text-align: center; color: #666; font-size: 14px;">
-                            <p style="margin: 0;">Email tự động từ hệ thống - Vui lòng không trả lời</p>
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-</body>
-</html>';
-    }
 
     public function showVerifyOtp()
     {
         return view('auth.verify-otp');
     }
 
+    /**
+     * Verify OTP for password reset
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function verifyOtp(Request $request)
     {
         $request->validate([
             'otp' => 'required|string|size:6'
+        ], [
+            'otp.required' => 'Vui lòng nhập mã OTP',
+            'otp.size' => 'Mã OTP phải có 6 chữ số'
         ]);
 
         $email = session('reset_email');
@@ -299,19 +164,14 @@ class AuthController extends Controller
             return back()->withErrors(['otp' => 'Phiên làm việc đã hết hạn. Vui lòng yêu cầu OTP mới.']);
         }
 
-        $user = User::where('email', $email)
-            ->where('reset_token', $request->otp)
-            ->where('reset_token_expires_at', '>', now())
-            ->first();
+        // Use password reset service
+        $result = $this->passwordResetService->verifyOTP($email, $request->otp);
 
-        if (!$user) {
-            return back()->withErrors(['otp' => 'Mã OTP không hợp lệ hoặc đã hết hạn.']);
+        if (!$result['success']) {
+            return back()->withErrors(['otp' => $result['message']]);
         }
 
-        // OTP valid, lưu token để reset password
-        session(['reset_token' => $request->otp]);
-
-        return redirect()->route('password.reset', ['token' => $request->otp]);
+        return redirect()->route('password.reset', ['token' => $result['reset_token']]);
     }
 
     public function showResetPasswordForm(Request $request, $token)
@@ -327,30 +187,39 @@ class AuthController extends Controller
         return view('auth.reset-password', compact('token', 'user'));
     }
 
+    /**
+     * Reset password with token
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function resetPassword(Request $request)
     {
         $request->validate([
             'token' => 'required',
             'email' => 'required|email',
-            'password' => ['required', 'confirmed', Password::min(8)]
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)]
+        ], [
+            'token.required' => 'Token không hợp lệ',
+            'email.required' => 'Vui lòng nhập địa chỉ email',
+            'email.email' => 'Địa chỉ email không đúng định dạng',
+            'password.required' => 'Vui lòng nhập mật khẩu mới',
+            'password.confirmed' => 'Mật khẩu xác nhận không khớp',
+            'password.min' => 'Mật khẩu phải có ít nhất 8 ký tự'
         ]);
 
-        $user = User::where('email', $request->email)
-            ->where('reset_token', $request->token)
-            ->where('reset_token_expires_at', '>', now())
-            ->first();
+        // Use password reset service
+        $result = $this->passwordResetService->resetPassword(
+            $request->email,
+            $request->token,
+            $request->password
+        );
 
-        if (!$user) {
-            return back()->withErrors(['email' => 'Thông tin đặt lại mật khẩu không hợp lệ.']);
+        if (!$result['success']) {
+            return back()->withErrors(['email' => $result['message']]);
         }
 
-        $user->update([
-            'password' => Hash::make($request->password),
-            'reset_token' => null,
-            'reset_token_expires_at' => null
-        ]);
-
-        return redirect()->route('login')->with('success', 'Mật khẩu đã được đặt lại thành công!');
+        return redirect()->route('login')->with('success', $result['message']);
     }
 
     public function editProfile()
@@ -365,29 +234,22 @@ class AuthController extends Controller
         return view('profile.show', compact('user'));
     }
 
+    /**
+     * Update user profile with enhanced validation and caching
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateProfile(Request $request)
     {
-        $user = Auth::user();
+        $result = $this->profileService->updateProfile($request->all());
 
-        $request->validate([
-            'fullname' => 'required|string|max:100',
-            'phone' => 'required|string|max:15|unique:users,phone,' . $user->id,
-            'email' => 'required|string|email|max:100|unique:users,email,' . $user->id,
-            'address' => 'nullable|string|max:255',
-            'date_of_birth' => 'nullable|date|before:today',
-            'gender' => 'nullable|in:Nam,Nữ,Khác'
-        ]);
+        if (!$result['success']) {
+            return back()->withErrors($result['errors'] ?? ['profile' => $result['message']])
+                ->withInput();
+        }
 
-        $user->update([
-            'fullname' => $request->fullname,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'address' => $request->address,
-            'date_of_birth' => $request->date_of_birth,
-            'gender' => $request->gender,
-        ]);
-
-        return redirect()->route('profile.edit')->with('success', 'Thông tin tài khoản đã được cập nhật thành công!');
+        return redirect()->route('profile.edit')->with('success', $result['message']);
     }
 
     public function editPassword()
@@ -396,25 +258,20 @@ class AuthController extends Controller
         return view('profile.change-password', compact('user'));
     }
 
+    /**
+     * Update user password with enhanced security
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updatePassword(Request $request)
     {
-        $user = Auth::user();
+        $result = $this->profileService->changePassword($request->all());
 
-        $request->validate([
-            'current_password' => 'required|string',
-            'password' => 'required|string|min:8|confirmed'
-        ]);
-
-        // Verify current password
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Mật khẩu hiện tại không đúng!']);
+        if (!$result['success']) {
+            return back()->withErrors(['current_password' => $result['message']]);
         }
 
-        // Update password
-        $user->update([
-            'password' => Hash::make($request->password)
-        ]);
-
-        return redirect()->route('password.edit')->with('success', 'Mật khẩu đã được cập nhật thành công!');
+        return redirect()->route('password.edit')->with('success', $result['message']);
     }
 }

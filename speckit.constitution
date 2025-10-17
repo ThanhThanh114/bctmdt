@@ -1,0 +1,169 @@
+# Speckit Development Constitution
+
+## Code Quality Principles
+
+### 1. Single Responsibility Principle
+Every class, method, and function must have a single, well-defined purpose. If a component does more than one thing, it should be refactored into smaller, focused units.
+
+### 2. DRY (Don't Repeat Yourself)
+Eliminate code duplication through abstraction, inheritance, and composition. Shared logic should be centralized in reusable components, traits, or services.
+
+### 3. SOLID Principles
+- **S**ingle Responsibility: One reason to change
+- **O**pen/Closed: Open for extension, closed for modification
+- **L**iskov Substitution: Subtypes must be substitutable for their base types
+- **I**nterface Segregation: No client should be forced to depend on methods it doesn't use
+- **D**ependency Inversion: Depend on abstractions, not concretions
+
+### 4. Code Documentation
+- All public methods and classes must have PHPDoc comments
+- Complex business logic must be explained with inline comments
+- Database migrations must include descriptive comments
+- API endpoints must be documented with OpenAPI/Swagger annotations
+
+## Clean Code Standards
+
+### 1. Naming Conventions
+- Use descriptive, meaningful names that explain intent
+- Classes: PascalCase (e.g., `UserService`, `BookingManager`)
+- Methods/Functions: camelCase (e.g., `getUserById`, `calculateTotalPrice`)
+- Variables: camelCase (e.g., `userName`, `totalAmount`)
+- Constants: SCREAMING_SNAKE_CASE (e.g., `MAX_RETRY_ATTEMPTS`)
+
+### 2. Code Structure
+- Keep methods under 30 lines when possible
+- Use early returns to avoid deep nesting
+- Group related functionality together
+- Separate concerns: keep controllers thin, business logic in services
+
+### 3. Error Handling
+- Use specific exceptions rather than generic ones
+- Implement proper error logging with context
+- Handle errors gracefully with user-friendly messages
+- Never expose sensitive information in error responses
+
+### 4. Database Best Practices
+- Use migrations for all database schema changes
+- Implement proper foreign key relationships
+- Use soft deletes for auditable entities
+- Optimize queries with proper indexing
+- Avoid N+1 query problems
+
+## Testing Standards
+
+### 1. Test Coverage Requirements
+- Minimum 80% code coverage for all new features
+- Critical business logic must have 100% coverage
+- All public methods must be tested
+- Database seeders must have corresponding tests
+
+### 2. Testing Types
+- **Unit Tests**: Test individual methods and functions in isolation
+- **Feature Tests**: Test complete user workflows
+- **Integration Tests**: Test component interactions
+- **Browser Tests**: Test user interface interactions
+
+### 3. Test Quality
+- Tests must be independent and repeatable
+- Use descriptive test method names (e.g., `test_user_can_create_booking`)
+- Follow AAA pattern: Arrange, Act, Assert
+- Mock external dependencies appropriately
+- Test both success and failure scenarios
+
+### 4. Continuous Integration
+- All tests must pass before code can be merged
+- Run tests on multiple PHP versions
+- Include static analysis (PHPStan, Psalm) in CI pipeline
+- Automated testing on every pull request
+
+## User Experience Consistency
+
+### 1. UI/UX Standards
+- Follow established design system patterns
+- Maintain consistent color schemes and typography
+- Use standard spacing and layout grids
+- Implement responsive design for all screen sizes
+
+### 2. User Feedback
+- Provide clear feedback for all user actions
+- Show loading states for asynchronous operations
+- Display helpful error messages with actionable guidance
+- Implement progressive enhancement
+
+### 3. Accessibility
+- Follow WCAG 2.1 AA guidelines
+- Ensure keyboard navigation for all interactive elements
+- Provide alt text for all images
+- Maintain proper color contrast ratios
+- Support screen readers
+
+### 4. Performance Perception
+- Implement skeleton screens for content loading
+- Use progressive image loading
+- Show progress indicators for long operations
+- Optimize for perceived performance
+
+## Performance Requirements
+
+### 1. Response Time Standards
+- API responses: < 200ms for simple operations
+- Page load time: < 2 seconds on 3G connections
+- Database queries: < 100ms for complex operations
+- File uploads: < 5 seconds for files up to 10MB
+
+### 2. Resource Optimization
+- Optimize images (WebP format, proper sizing)
+- Minimize CSS and JavaScript bundles
+- Implement lazy loading for non-critical resources
+- Use CDN for static assets
+
+### 3. Scalability Requirements
+- Code must support horizontal scaling
+- Database queries must be optimized for high load
+- Implement caching strategies (Redis, file caching)
+- Use queueing for resource-intensive operations
+
+### 4. Monitoring and Metrics
+- Implement application performance monitoring (APM)
+- Track key metrics: response time, error rate, throughput
+- Set up alerts for performance degradation
+- Regular performance testing and optimization
+
+## Code Review Requirements
+
+### 1. Mandatory Review Process
+- All code changes require peer review
+- At least one senior developer approval for critical changes
+- Security-sensitive code requires security team review
+- Database schema changes require DBA review
+
+### 2. Review Criteria
+- Code follows established conventions and standards
+- Tests are included and passing
+- Documentation is updated
+- Performance impact is considered
+- Security implications are addressed
+
+## Continuous Improvement
+
+### 1. Technical Debt Management
+- Regular refactoring of legacy code
+- Address technical debt in sprint planning
+- Maintain code quality metrics and trends
+- Regular code quality audits
+
+### 2. Learning and Development
+- Encourage learning new technologies and best practices
+- Regular knowledge sharing sessions
+- Stay updated with Laravel and PHP ecosystem developments
+- Foster a culture of continuous improvement
+
+## Enforcement
+
+These principles are mandatory for all development activities. Violations should be addressed through:
+- Code review feedback and required changes
+- Pair programming for complex implementations
+- Training and mentoring for repeated violations
+- Regular team discussions on principle improvements
+
+Last updated: October 2025

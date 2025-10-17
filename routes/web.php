@@ -177,6 +177,10 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('bookings/{booking}/status', [App\Http\Controllers\Staff\BookingsController::class, 'updateStatus'])->name('bookings.update-status');
         Route::get('bookings-today', [App\Http\Controllers\Staff\BookingsController::class, 'todayBookings'])->name('bookings.today');
         Route::get('bookings-pending', [App\Http\Controllers\Staff\BookingsController::class, 'pendingBookings'])->name('bookings.pending');
+        // Staff can view trips (read-only)
+        Route::resource('trips', App\Http\Controllers\Staff\TripsController::class)->only(['index', 'show']);
+        // Staff can view customers (read-only)
+        Route::get('customers', [App\Http\Controllers\Staff\CustomersController::class, 'index'])->name('customers.index');
         // Add more staff routes here as needed
     });
 

@@ -89,7 +89,12 @@
 
                     <div class="form-group">
                         <label>Mật khẩu hiện tại *</label>
-                        <input type="password" name="current_password" class="form-input" required>
+                        <div class="input-wrapper">
+                            <input type="password" name="current_password" id="currentPassword" class="form-input" required>
+                            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('currentPassword')">
+                                <i class="fas fa-eye" id="currentPasswordIcon"></i>
+                            </button>
+                        </div>
                         @error('current_password')
                             <span class="error-text">{{ $message }}</span>
                         @enderror
@@ -98,7 +103,12 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Mật khẩu mới *</label>
-                            <input type="password" name="password" class="form-input" required>
+                            <div class="input-wrapper">
+                                <input type="password" name="password" id="newPassword" class="form-input" required>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('newPassword')">
+                                    <i class="fas fa-eye" id="newPasswordIcon"></i>
+                                </button>
+                            </div>
                             @error('password')
                                 <span class="error-text">{{ $message }}</span>
                             @enderror
@@ -109,7 +119,12 @@
 
                         <div class="form-group">
                             <label>Xác nhận mật khẩu mới *</label>
-                            <input type="password" name="password_confirmation" class="form-input" required>
+                            <div class="input-wrapper">
+                                <input type="password" name="password_confirmation" id="confirmPassword" class="form-input" required>
+                                <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword')">
+                                    <i class="fas fa-eye" id="confirmPasswordIcon"></i>
+                                </button>
+                            </div>
                             @error('password_confirmation')
                                 <span class="error-text">{{ $message }}</span>
                             @enderror
@@ -150,6 +165,50 @@
             </div>
         </div>
     </div>
+
+    <script>
+    function togglePasswordVisibility(passwordId) {
+        const passwordInput = document.getElementById(passwordId);
+        const icon = document.getElementById(passwordId + 'Icon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+    </script>
+
+    <style>
+    .input-wrapper {
+        position: relative;
+    }
+
+    .password-toggle {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        color: #6c757d;
+        cursor: pointer;
+        padding: 5px;
+        z-index: 10;
+    }
+
+    .password-toggle:hover {
+        color: #495057;
+    }
+
+    .form-input {
+        padding-right: 45px;
+    }
+    </style>
 </body>
 
 </html>
