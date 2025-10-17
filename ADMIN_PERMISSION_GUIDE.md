@@ -17,7 +17,7 @@ Hệ thống phân quyền đầy đủ cho trang Admin với 7 module quản l�
 - `PUT /admin/users/{user}` - Cập nhật
 - `DELETE /admin/users/{user}` - Xóa
 
-**Chức năng:**
+**Chức năng:**s
 
 - Xem danh sách tất cả người dùng
 - Lọc theo role (user, admin, staff, bus_owner)

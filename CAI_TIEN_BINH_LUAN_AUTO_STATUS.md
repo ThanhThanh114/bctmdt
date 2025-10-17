@@ -13,7 +13,7 @@
 
 ### 3. ❌ Thiếu chức năng Khóa bình luận
 
-**Vấn đề:** Chỉ có thể Xóa, không có Khóa/Mở khóa
+**Vấn đề:** g có Khóa/Mở khóa
 **Giải pháp:** Thêm toggle lock/unlock
 
 ---
