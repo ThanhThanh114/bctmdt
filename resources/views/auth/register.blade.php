@@ -1,175 +1,139 @@
-@extends('app')
+<!DOCTYPE html>
+<html lang="vi">
 
-@section('content')
-<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-orange-400 to-red-500 py-12 px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-6 bg-white p-10 rounded-xl shadow-2xl">
-        <div>
-            <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                Đăng ký tài khoản
-            </h2>
-            <p class="mt-2 text-center text-sm text-gray-600">
-                Hoặc
-                <a href="{{ route('login') }}" class="font-medium text-orange-600 hover:text-orange-500">
-                    đăng nhập nếu đã có tài khoản
-                </a>
-            </p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Đăng ký - FUTA Bus Lines</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="{{ asset('assets/css/Login.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/Login_Enhanced.css') }}?v={{ time() }}">
+    <style>
+    /* Chỉ bố cục, giữ nguyên CSS cũ */
+    .form-columns {
+        display: flex;
+        gap: 16px;
+    }
+
+    .form-column-left,
+    .form-column-right {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    @media (max-width: 768px) {
+        .form-columns {
+            flex-direction: column;
+        }
+    }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="left-section">
+            <button class="back-btn" onclick="window.location.href='{{ route('home') }}'">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="left-content">
+                <div class="brand-title">PHƯƠNG TRANG</div>
+                <div class="brand-subtitle">Cùng bạn trên mọi nẻo đường</div>
+                <div class="bus-illustration"></div>
+                <div class="service-title">XE TRUNG CHUYỂN</div>
+                <div class="service-subtitle">ĐÓN - TRẢ TẬN NƠI</div>
+            </div>
         </div>
 
-        <!-- Hiển thị session messages -->
-        @if(session('error'))
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700 font-medium">{{ session('error') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if(session('success'))
-            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded" role="alert">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-green-700 font-medium">{{ session('success') }}</p>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <!-- Hiển thị tất cả validation errors -->
-        @if ($errors->any())
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded" role="alert">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <h3 class="text-sm font-medium text-red-800 mb-2">Vui lòng kiểm tra lại thông tin:</h3>
-                        <ul class="list-disc list-inside text-sm text-red-700 space-y-1">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        <form class="mt-8 space-y-6" action="{{ route('register.post') }}" method="POST">
-            @csrf
-
-            <div class="space-y-4">
-                <!-- Username -->
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-700 mb-1">
-                        Tên đăng nhập <span class="text-red-500">*</span>
-                    </label>
-                    <input id="username" name="username" type="text" required
-                        value="{{ old('username') }}"
-                        class="appearance-none relative block w-full px-3 py-2 border @error('username') border-red-500 @else border-gray-300 @enderror placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="username">
-                    @error('username')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Fullname -->
-                <div>
-                    <label for="fullname" class="block text-sm font-medium text-gray-700 mb-1">
-                        Họ và tên <span class="text-red-500">*</span>
-                    </label>
-                    <input id="fullname" name="fullname" type="text" required
-                        value="{{ old('fullname') }}"
-                        class="appearance-none relative block w-full px-3 py-2 border @error('fullname') border-red-500 @else border-gray-300 @enderror placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="Nguyễn Văn A">
-                    @error('fullname')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Email -->
-                <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                        Email <span class="text-red-500">*</span>
-                    </label>
-                    <input id="email" name="email" type="email" required
-                        value="{{ old('email') }}"
-                        class="appearance-none relative block w-full px-3 py-2 border @error('email') border-red-500 @else border-gray-300 @enderror placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="email@example.com">
-                    @error('email')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Phone -->
-                <div>
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">
-                        Số điện thoại <span class="text-red-500">*</span>
-                    </label>
-                    <input id="phone" name="phone" type="tel" required
-                        value="{{ old('phone') }}"
-                        class="appearance-none relative block w-full px-3 py-2 border @error('phone') border-red-500 @else border-gray-300 @enderror placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="0901234567">
-                    @error('phone')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Password -->
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
-                        Mật khẩu <span class="text-red-500">*</span>
-                    </label>
-                    <input id="password" name="password" type="password" required
-                        class="appearance-none relative block w-full px-3 py-2 border @error('password') border-red-500 @else border-gray-300 @enderror placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="Tối thiểu 6 ký tự">
-                    @error('password')
-                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                    @enderror
-                </div>
-
-                <!-- Confirm Password -->
-                <div>
-                    <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
-                        Xác nhận mật khẩu <span class="text-red-500">*</span>
-                    </label>
-                    <input id="password_confirmation" name="password_confirmation" type="password" required
-                        class="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-orange-500 focus:border-orange-500 focus:z-10 sm:text-sm"
-                        placeholder="Nhập lại mật khẩu">
-                </div>
+        <div class="right-section">
+            <div class="form-header">
+                <h1 class="form-title">Tạo tài khoản</h1>
             </div>
 
-            <div>
-                <button type="submit"
-                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition-all duration-200">
-                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-                        <svg class="h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                        </svg>
-                    </span>
-                    Đăng ký
-                </button>
-            </div>
+            @if(session('success'))
+            <div class="message success"><i class="fas fa-check-circle"></i> {{ session('success') }}</div>
+            @endif
+            @if(session('error'))
+            <div class="message error"><i class="fas fa-exclamation-circle"></i> {{ session('error') }}</div>
+            @endif
 
-            <div class="text-center text-sm text-gray-600">
-                <p>Bằng cách đăng ký, bạn đồng ý với</p>
-                <a href="#" class="text-orange-600 hover:text-orange-500">Điều khoản dịch vụ</a>
-                và
-                <a href="#" class="text-orange-600 hover:text-orange-500">Chính sách bảo mật</a>
+            <div class="form-content">
+                <form id="registerForm" method="POST" action="{{ route('register.post') }}" class="form-group">
+                    @csrf
+
+                    <div class="form-columns">
+                        <div class="form-column-left">
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" name="username" value="{{ old('username') }}"
+                                    class="input-field @error('username') error @enderror" placeholder="Tên đăng nhập"
+                                    pattern="[a-zA-Z0-9_]+" required>
+                            </div>
+                            @error('username')<div class="field-error"><i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}</div>@enderror
+
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-phone input-icon"></i>
+                                <input type="tel" name="phone" value="{{ old('phone') }}"
+                                    class="input-field @error('phone') error @enderror" placeholder="Số điện thoại"
+                                    pattern="[0-9]{10,11}" required>
+                            </div>
+                            @error('phone')<div class="field-error"><i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}</div>@enderror
+
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input id="regPassword" type="password" name="password"
+                                    class="input-field has-toggle @error('password') error @enderror"
+                                    placeholder="Mật khẩu" minlength="6" required>
+                                <button type="button" class="toggle-password"
+                                    onclick="togglePassword('regPassword', this)"><i class="fas fa-eye"></i></button>
+                            </div>
+                            @error('password')<div class="field-error"><i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}</div>@enderror
+                        </div>
+
+                        <div class="form-column-right">
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-id-card input-icon"></i>
+                                <input type="text" name="fullname" value="{{ old('fullname') }}"
+                                    class="input-field @error('fullname') error @enderror"
+                                    placeholder="Họ và tên đầy đủ" minlength="3" required>
+                            </div>
+                            @error('fullname')<div class="field-error"><i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}</div>@enderror
+
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-envelope input-icon"></i>
+                                <input type="email" name="email" value="{{ old('email') }}"
+                                    class="input-field @error('email') error @enderror" placeholder="Email" required>
+                            </div>
+                            @error('email')<div class="field-error"><i class="fas fa-exclamation-circle"></i>
+                                {{ $message }}</div>@enderror
+
+                            <div class="input-wrapper input-row">
+                                <i class="fas fa-lock input-icon"></i>
+                                <input id="regPasswordConfirm" type="password" name="password_confirmation"
+                                    class="input-field has-toggle" placeholder="Xác nhận mật khẩu" required>
+                                <button type="button" class="toggle-password"
+                                    onclick="togglePassword('regPasswordConfirm', this)"><i
+                                        class="fas fa-eye"></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="submit-btn"><i class="fas fa-user-plus"></i> Đăng ký</button>
+                </form>
+
+                <div class="forgot-password"><a href="{{ route('login') }}">Đã có tài khoản? Đăng nhập</a></div>
             </div>
-        </form>
+        </div>
     </div>
-</div>
-@endsection
+    <script src="{{ asset('assets/js/login_enhanced.js') }}?v={{ time() }}"></script>
+</body>
+
+</html>

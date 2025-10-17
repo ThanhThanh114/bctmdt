@@ -1,0 +1,285 @@
+/* =================================================================
+   ENHANCED LOGIN/REGISTER PAGE STYLES
+   Includes: Toggle Password, Password Strength Meter, Validation
+   ================================================================= */
+
+/* Toggle Password Button */
+.input-wrapper {
+    position: relative;
+    /* keep icon anchored */
+    margin-bottom: 20px;
+    /* Sẽ tăng thêm nếu có hint hoặc feedback */
+}
+
+/* New: Keep icon fixed by positioning relative to the input row only */
+.input-row {
+    position: relative;
+}
+
+/* Normalize input height to prevent vertical jump when states change */
+.input-field {
+    min-height: 44px;
+}
+
+.input-wrapper:has(.form-hint),
+.input-wrapper:has(.invalid-feedback),
+.input-wrapper:has(.valid-feedback) {
+    margin-bottom: 8px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px 10px;
+    transition: color 0.3s ease;
+    z-index: 10;
+}
+
+.toggle-password:hover {
+    color: #FF5722;
+}
+
+.toggle-password:active {
+    transform: scale(0.95);
+}
+
+.toggle-password i {
+    pointer-events: none;
+}
+
+/* Adjust input padding when toggle button exists */
+.input-wrapper input[type="password"],
+.input-wrapper input.has-toggle {
+    padding-right: 45px !important;
+}
+
+/* Form Hints */
+.form-hint {
+    display: block;
+    color: #666;
+    font-size: 11px;
+    margin-top: 4px;
+    margin-bottom: 0;
+    margin-left: 5px;
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Password Strength Meter Container */
+.password-strength-container {
+    margin: 8px 0 15px 0;
+}
+
+/* Password Strength Bar */
+.password-strength-bar {
+    width: 100%;
+    height: 6px;
+    background: #e1e5e9;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.password-strength-fill {
+    height: 100%;
+    width: 0%;
+    transition: all 0.4s ease;
+    border-radius: 3px;
+    background: #ccc;
+}
+
+/* Strength Levels */
+.password-strength-fill.weak {
+    width: 33%;
+    background: linear-gradient(90deg, #dc3545, #e74c3c);
+}
+
+.password-strength-fill.medium {
+    width: 66%;
+    background: linear-gradient(90deg, #ffc107, #ff9800);
+}
+
+.password-strength-fill.strong {
+    width: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+}
+
+/* Password Strength Text */
+.password-strength-text {
+    display: block;
+    font-size: 11px;
+    color: #666;
+    margin-left: 5px;
+    font-weight: 500;
+}
+
+.password-strength-text.weak {
+    color: #dc3545;
+    font-weight: 700;
+}
+
+.password-strength-text.medium {
+    color: #ff9800;
+    font-weight: 700;
+}
+
+.password-strength-text.strong {
+    color: #28a745;
+    font-weight: 700;
+}
+
+/* Password Requirements List */
+.password-requirements {
+    background: #f8f9fa;
+    border-left: 3px solid #dee2e6;
+    padding: 10px 15px;
+    margin: 0 0 20px 0;
+    border-radius: 5px;
+}
+
+.password-requirements small {
+    display: block;
+    color: #495057;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 11px;
+}
+
+.password-requirements ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.password-requirements ul li {
+    font-size: 11px;
+    color: #6c757d;
+    padding: 3px 0;
+    transition: all 0.3s ease;
+}
+
+.password-requirements ul li::before {
+    content: '✗';
+    margin-right: 8px;
+    font-weight: bold;
+    color: #dc3545;
+}
+
+.password-requirements ul li.valid {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.password-requirements ul li.valid::before {
+    content: '✓';
+    color: #28a745;
+}
+
+/* Input Field Validation States */
+.input-field.is-valid {
+    border-color: #28a745 !important;
+    background-color: #f0f9f4;
+}
+
+.input-field.is-valid:focus {
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+
+.input-field.is-invalid {
+    border-color: #dc3545 !important;
+    background-color: #fff5f5;
+}
+
+.input-field.is-invalid:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.15);
+}
+
+/* Validation Feedback Text */
+.invalid-feedback {
+    display: block;
+    color: #dc3545;
+    font-size: 12px;
+    margin-top: 4px;
+    margin-bottom: 0;
+    margin-left: 5px;
+}
+
+.invalid-feedback i {
+    margin-right: 3px;
+}
+
+.valid-feedback {
+    display: block;
+    color: #28a745;
+    font-size: 12px;
+    margin-top: 4px;
+    margin-bottom: 0;
+    margin-left: 5px;
+}
+
+.valid-feedback i {
+    margin-right: 3px;
+}
+
+/* Loading State for Submit Button */
+.submit-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+}
+
+.submit-btn.loading::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    top: 50%;
+    left: 50%;
+    margin-left: -8px;
+    margin-top: -8px;
+    border: 2px solid transparent;
+    border-top-color: white;
+    border-radius: 50%;
+    animation: button-loading-spinner 0.8s ease infinite;
+}
+
+@keyframes button-loading-spinner {
+    from {
+        transform: rotate(0turn);
+    }
+
+    to {
+        transform: rotate(1turn);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .toggle-password {
+        right: 10px;
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+
+    .form-hint {
+        font-size: 10px;
+    }
+
+    .password-requirements {
+        padding: 8px 12px;
+    }
+
+    .password-requirements small {
+        font-size: 10px;
+    }
+
+    .password-requirements ul li {
+        font-size: 10px;
+    }
+}

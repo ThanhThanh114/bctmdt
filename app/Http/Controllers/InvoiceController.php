@@ -21,9 +21,10 @@ class InvoiceController extends Controller
 
         $ma_bimat = $request->input('ma_bimat');
 
-        // Query to fetch invoice data based on the secret code
-        $invoice_data = DB::table('dat_ve as dv')
+        // Lấy TẤT CẢ vé cùng mã đặt
+        $invoices = DB::table('dat_ve as dv')
             ->select(
+                'dv.id as dat_ve_id',
                 'dv.ma_ve AS invoice_number',
                 'dv.ngay_dat AS invoice_date',
                 'dv.trang_thai AS invoice_status',
@@ -36,7 +37,6 @@ class InvoiceController extends Controller
                 'cx.ngay_di AS trip_date',
                 'cx.gio_di AS trip_time',
                 'cx.gia_ve AS ticket_price',
-                'km.giam_gia AS discount_percentage',
                 'tdi.ten_tram AS departure_station',
                 'tdi.tinh_thanh AS departure_province',
                 'tden.ten_tram AS arrival_station',
@@ -50,19 +50,30 @@ class InvoiceController extends Controller
             ->join('tram_xe as tdi', 'cx.ma_tram_di', '=', 'tdi.ma_tram_xe')
             ->join('tram_xe as tden', 'cx.ma_tram_den', '=', 'tden.ma_tram_xe')
             ->join('nha_xe as nx', 'cx.ma_nha_xe', '=', 'nx.ma_nha_xe')
-            ->leftJoin('ve_khuyenmai as vkm', 'dv.id', '=', 'vkm.dat_ve_id')
-            ->leftJoin('khuyen_mai as km', 'vkm.ma_km', '=', 'km.ma_km')
             ->where('dv.ma_ve', $ma_bimat)
-            ->first();
+            ->get();
 
-        if ($invoice_data) {
-            // Store invoice data in session
-            Session::put('invoice_data', (array) $invoice_data);
-            return redirect()->route('invoice.show'); // Redirect to a show route
-        } else {
+        if ($invoices->isEmpty()) {
             Session::put('error_message', 'Không tìm thấy hóa đơn với mã bí mật này. Vui lòng kiểm tra lại.');
             return redirect()->route('invoice.index');
         }
+
+        // Lấy thông tin giảm giá cho từng vé
+        $discounts = DB::table('ve_khuyenmai as vkm')
+            ->join('khuyen_mai as km', 'vkm.ma_km', '=', 'km.ma_km')
+            ->select('vkm.dat_ve_id', 'km.ten_km', 'km.giam_gia')
+            ->whereIn('vkm.dat_ve_id', $invoices->pluck('dat_ve_id'))
+            ->get()
+            ->keyBy('dat_ve_id');
+
+        // Store invoice data in session (convert objects to arrays)
+        Session::put('invoice_data', [
+            'invoices' => $invoices->map(fn($item) => (array) $item)->toArray(),
+            'discounts' => $discounts->map(fn($item) => (array) $item)->toArray(),
+            'booking_code' => $ma_bimat
+        ]);
+
+        return redirect()->route('invoice.show');
     }
 
     public function show()

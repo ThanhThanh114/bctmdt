@@ -36,10 +36,11 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'identifier' => 'required|string',
-            'password' => 'required|string'
+            'password' => 'required|string|min:1'
         ], [
             'identifier.required' => 'Vui lòng nhập tên đăng nhập, email hoặc số điện thoại',
-            'password.required' => 'Vui lòng nhập mật khẩu'
+            'password.required' => 'Vui lòng nhập mật khẩu',
+            'password.min' => 'Mật khẩu không được để trống'
         ]);
 
         $identifier = $validated['identifier'];
@@ -54,12 +55,30 @@ class AuthController extends Controller
         if (!$user) {
             Log::warning('Login failed: User not found', ['identifier' => $identifier]);
             return back()->withErrors([
-                'identifier' => 'Tài khoản không tồn tại trong hệ thống!',
+                'identifier' => '❌ Tài khoản không tồn tại trong hệ thống! Vui lòng kiểm tra lại hoặc đăng ký tài khoản mới.',
             ])->withInput($request->only('identifier'));
         }
 
-        // Kiểm tra mật khẩu (hỗ trợ cả plain text và hash)
-        if ($password === $user->password || Hash::check($password, $user->password)) {
+        // Kiểm tra mật khẩu an toàn (hỗ trợ cả plain text cũ và bcrypt)
+        $storedPassword = (string) $user->password;
+
+        $isBcryptHash = str_starts_with($storedPassword, '$2y$');
+        $passwordValid = false;
+
+        // 1) Tương thích ngược: DB đang lưu plain text
+        if ($storedPassword !== '' && !$isBcryptHash && hash_equals($storedPassword, $password)) {
+            $passwordValid = true;
+            // Nâng cấp: đổi sang bcrypt để đảm bảo an toàn cho lần sau
+            $user->password = Hash::make($password);
+            $user->save();
+        }
+
+        // 2) Chuẩn: DB đã lưu bcrypt
+        if (!$passwordValid && $isBcryptHash && Hash::check($password, $storedPassword)) {
+            $passwordValid = true;
+        }
+
+        if ($passwordValid) {
             Auth::login($user);
             $request->session()->regenerate();
 
@@ -85,7 +104,7 @@ class AuthController extends Controller
 
         Log::warning('Login failed: Invalid password', ['identifier' => $identifier]);
         return back()->withErrors([
-            'password' => 'Mật khẩu không chính xác!',
+            'password' => '❌ Mật khẩu không chính xác! Vui lòng thử lại hoặc sử dụng chức năng "Quên mật khẩu".',
         ])->withInput($request->only('identifier'));
     }
 
@@ -101,35 +120,46 @@ class AuthController extends Controller
             'fullname' => 'required|string|max:100|min:3',
             'email' => 'required|string|email|max:100|unique:users',
             'phone' => 'required|string|max:15|unique:users|regex:/^[0-9]{10,11}$/',
-            'password' => 'required|string|min:6|confirmed'
+            'password' => [
+                'required',
+                'string',
+                'min:6',
+                'confirmed',
+                // Uncomment for stronger password requirements:
+                // Password::min(8)
+                //     ->letters()
+                //     ->mixedCase()
+                //     ->numbers()
+                //     ->symbols()
+            ]
         ], [
             // Username messages
             'username.required' => 'Vui lòng nhập tên đăng nhập',
             'username.max' => 'Tên đăng nhập không được quá 50 ký tự',
-            'username.unique' => 'Tên đăng nhập đã tồn tại, vui lòng chọn tên khác',
-            'username.regex' => 'Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới',
+            'username.unique' => '❌ Tên đăng nhập đã tồn tại! Vui lòng chọn tên khác.',
+            'username.regex' => '❌ Tên đăng nhập chỉ được chứa chữ cái, số và dấu gạch dưới',
 
             // Fullname messages
             'fullname.required' => 'Vui lòng nhập họ và tên',
             'fullname.max' => 'Họ và tên không được quá 100 ký tự',
-            'fullname.min' => 'Họ và tên phải có ít nhất 3 ký tự',
+            'fullname.min' => '❌ Họ và tên phải có ít nhất 3 ký tự',
 
             // Email messages
             'email.required' => 'Vui lòng nhập địa chỉ email',
-            'email.email' => 'Địa chỉ email không đúng định dạng',
+            'email.email' => '❌ Địa chỉ email không đúng định dạng (VD: example@gmail.com)',
             'email.max' => 'Email không được quá 100 ký tự',
-            'email.unique' => 'Email đã được sử dụng, vui lòng dùng email khác',
+            'email.unique' => '❌ Email đã được sử dụng! Vui lòng dùng email khác hoặc đăng nhập.',
 
             // Phone messages
             'phone.required' => 'Vui lòng nhập số điện thoại',
             'phone.max' => 'Số điện thoại không được quá 15 ký tự',
-            'phone.unique' => 'Số điện thoại đã được đăng ký, vui lòng dùng số khác',
-            'phone.regex' => 'Số điện thoại phải là 10-11 chữ số',
+            'phone.unique' => '❌ Số điện thoại đã được đăng ký! Vui lòng dùng số khác hoặc đăng nhập.',
+            'phone.regex' => '❌ Số điện thoại phải là 10-11 chữ số (VD: 0901234567)',
 
             // Password messages
             'password.required' => 'Vui lòng nhập mật khẩu',
-            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
-            'password.confirmed' => 'Mật khẩu xác nhận không khớp'
+            'password.min' => '❌ Mật khẩu phải có ít nhất 6 ký tự để đảm bảo an toàn',
+            'password.confirmed' => '❌ Mật khẩu xác nhận không khớp! Vui lòng kiểm tra lại.'
         ]);
 
         try {
