@@ -247,7 +247,9 @@
             </div>
             <div class="card-body">
                 @php
-                $tripDateTime = \Carbon\Carbon::parse($trip->ngay_di . ' ' . $trip->gio_di);
+                // Parse ngày đi - chỉ lấy phần ngày từ ngay_di và kết hợp với gio_di
+                $ngayDi = \Carbon\Carbon::parse($trip->ngay_di)->format('Y-m-d');
+                $tripDateTime = \Carbon\Carbon::parse($ngayDi . ' ' . $trip->gio_di);
                 $now = \Carbon\Carbon::now();
                 $isPast = $tripDateTime->isPast();
                 $isToday = $tripDateTime->isToday();

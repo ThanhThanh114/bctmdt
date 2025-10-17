@@ -35,4 +35,14 @@ class NhaXe extends Model
     {
         return $this->hasMany(TinTuc::class, 'ma_nha_xe', 'ma_nha_xe');
     }
+
+    public function tramXe()
+    {
+        return $this->hasMany(TramXe::class, 'ma_nha_xe', 'ma_nha_xe');
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'ma_nha_xe', 'ma_nha_xe');
+    }
 }

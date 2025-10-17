@@ -62,6 +62,7 @@ class TripsController extends Controller
         }
 
         $validated = $request->validate([
+            'ma_xe' => 'nullable|string|max:50',
             'ten_xe' => 'required|string|max:255',
             'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
             'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
@@ -70,10 +71,11 @@ class TripsController extends Controller
             'loai_xe' => 'nullable|string|max:100',
             'gia_ve' => 'required|numeric|min:0',
             'so_cho' => 'required|integer|min:1',
-            'so_ve' => 'required|integer|min:0|lte:so_cho',
+            'so_ve' => 'nullable|integer|min:0|lte:so_cho',
             'loai_chuyen' => 'required|in:Một chiều,Khứ hồi',
             'ten_tai_xe' => 'nullable|string|max:255',
             'sdt_tai_xe' => 'nullable|string|max:20',
+            'gio_den' => 'nullable|date_format:H:i',
         ], [
             'ten_xe.required' => 'Vui lòng nhập tên chuyến xe',
             'ngay_di.required' => 'Vui lòng chọn ngày đi',
@@ -87,7 +89,17 @@ class TripsController extends Controller
             'loai_chuyen.required' => 'Vui lòng chọn loại chuyến',
         ]);
 
+        // Generate ma_xe if not provided
+        if (empty($validated['ma_xe'])) {
+            $lastTrip = ChuyenXe::where('ma_nha_xe', $bus_company->ma_nha_xe)
+                ->orderBy('id', 'desc')
+                ->first();
+            $nextNumber = $lastTrip ? ($lastTrip->id + 1) : 1;
+            $validated['ma_xe'] = 'XE' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        }
+
         ChuyenXe::create([
+            'ma_xe' => $validated['ma_xe'],
             'ma_nha_xe' => $bus_company->ma_nha_xe,
             'ten_xe' => $validated['ten_xe'],
             'ma_tram_di' => $validated['ma_tram_di'] ?? null,
@@ -97,10 +109,11 @@ class TripsController extends Controller
             'loai_xe' => $validated['loai_xe'] ?? null,
             'gia_ve' => $validated['gia_ve'],
             'so_cho' => $validated['so_cho'],
-            'so_ve' => $validated['so_ve'],
+            'so_ve' => $validated['so_ve'] ?? 0,
             'loai_chuyen' => $validated['loai_chuyen'],
             'ten_tai_xe' => $validated['ten_tai_xe'] ?? null,
             'sdt_tai_xe' => $validated['sdt_tai_xe'] ?? null,
+            'gio_den' => $validated['gio_den'] ?? null,
         ]);
 
         return redirect()->route('bus-owner.trips.index')->with('success', 'Chuyến xe đã được thêm thành công.');
@@ -149,6 +162,7 @@ class TripsController extends Controller
         }
 
         $validated = $request->validate([
+            'ma_xe' => 'nullable|string|max:50',
             'ten_xe' => 'required|string|max:255',
             'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
             'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
@@ -157,10 +171,11 @@ class TripsController extends Controller
             'loai_xe' => 'nullable|string|max:100',
             'gia_ve' => 'required|numeric|min:0',
             'so_cho' => 'required|integer|min:1',
-            'so_ve' => 'required|integer|min:0|lte:so_cho',
+            'so_ve' => 'nullable|integer|min:0|lte:so_cho',
             'loai_chuyen' => 'required|in:Một chiều,Khứ hồi',
             'ten_tai_xe' => 'nullable|string|max:255',
             'sdt_tai_xe' => 'nullable|string|max:20',
+            'gio_den' => 'nullable|date_format:H:i',
         ]);
 
         $trip->update($validated);

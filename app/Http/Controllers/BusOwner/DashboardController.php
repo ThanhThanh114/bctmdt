@@ -37,13 +37,17 @@ class DashboardController extends Controller
                         'average_booking_value' => 0,
                         'occupancy_rate' => 0,
                         'growth_rate' => 0,
+                        'total_stations' => 0,
+                        'total_routes' => 0,
                     ],
                     'recent_bookings' => collect(),
                     'today_trips' => collect(),
                     'monthly_revenue' => collect(),
+                    'monthly_revenue_data' => collect(),
                     'trip_performance' => collect(),
                     'bus_company' => null,
                     'weekly_trend' => collect(),
+                    'weekly_data' => [],
                     'upcoming_trips' => collect(),
                     'top_routes' => collect(),
                     'customer_insights' => collect(),
@@ -115,9 +119,17 @@ class DashboardController extends Controller
 
             // Calculate occupancy rate (simplified version)
             $totalSeats = ChuyenXe::where('ma_nha_xe', $bus_company->ma_nha_xe)->sum('so_cho');
-            $bookedSeats = DatVe::whereHas('chuyenXe', function ($q) use ($bus_company) {
+
+            // Count booked seats from so_ghe column (comma-separated seat numbers)
+            $bookedSeatsData = DatVe::whereHas('chuyenXe', function ($q) use ($bus_company) {
                 $q->where('ma_nha_xe', $bus_company->ma_nha_xe);
-            })->where('trang_thai', '!=', 'Đã hủy')->sum('so_luong_ve');
+            })->where('trang_thai', '!=', 'Đã hủy')->pluck('so_ghe');
+
+            $bookedSeats = $bookedSeatsData->reduce(function ($carry, $seats) {
+                // Count commas + 1 to get number of seats (e.g., "A1,A2,A3" = 3 seats)
+                return $carry + (empty($seats) ? 0 : substr_count($seats, ',') + 1);
+            }, 0);
+
             $occupancyRate = $totalSeats > 0 ? round(($bookedSeats / $totalSeats) * 100, 1) : 0;
 
             // Calculate growth rate (compare this month with last month)
@@ -135,6 +147,15 @@ class DashboardController extends Controller
             $growthRate = $lastMonthRevenue > 0 ?
                 round((($monthlyRevenue - $lastMonthRevenue) / $lastMonthRevenue) * 100, 1) : 0;
 
+            // Thống kê trạm xe
+            $totalStations = \App\Models\TramXe::where('ma_nha_xe', $bus_company->ma_nha_xe)->count();
+
+            // Thống kê tuyến đường (điểm đi - điểm đến unique)
+            $totalRoutes = ChuyenXe::where('ma_nha_xe', $bus_company->ma_nha_xe)
+                ->select('diem_di', 'diem_den')
+                ->distinct()
+                ->count();
+
             $stats = [
                 'total_trips' => $totalTrips,
                 'today_trips' => $todayTrips,
@@ -149,6 +170,8 @@ class DashboardController extends Controller
                 'average_booking_value' => $averageBookingValue,
                 'occupancy_rate' => $occupancyRate,
                 'growth_rate' => $growthRate,
+                'total_stations' => $totalStations,
+                'total_routes' => $totalRoutes,
             ];
 
             // Recent bookings for this bus company (with enhanced data)
@@ -285,8 +308,7 @@ class DashboardController extends Controller
             ));
         } catch (\Exception $e) {
             // Log the error for debugging
-            Log::error('Dashboard Error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
+            Log::error('Bus Owner Dashboard Error: ' . $e->getMessage());
 
             // Return view with error message but still show basic structure
             return view('AdminLTE.bus_owner.dashboard', [
@@ -304,6 +326,8 @@ class DashboardController extends Controller
                     'average_booking_value' => 0,
                     'occupancy_rate' => 0,
                     'growth_rate' => 0,
+                    'total_stations' => 0,
+                    'total_routes' => 0,
                 ],
                 'recent_bookings' => collect(),
                 'today_trips' => collect(),

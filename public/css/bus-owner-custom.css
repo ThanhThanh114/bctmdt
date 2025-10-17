@@ -1,13 +1,20 @@
-/* Custom styles for Bus Owner Dashboard */
+/* Custom styles for Bus Owner Dashboard - White Theme */
+
+/* Overall white background */
+body {
+    background-color: #ffffff !important;
+}
 
 /* Card animations */
 .card {
     transition: all 0.3s ease;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
 }
 
 .card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Small box improvements */
@@ -90,29 +97,34 @@
     color: #999;
 }
 
-/* Filter section */
+/* Filter section - White theme */
 .filter-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     padding: 20px;
     border-radius: 12px;
-    color: white;
+    color: #333333;
     margin-bottom: 20px;
+    border: 1px solid #dee2e6;
 }
 
 .filter-section .form-control {
     border-radius: 8px;
-    border: none;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    color: #333333;
 }
 
-/* Stats card with gradient */
+/* Stats card with gradient - White theme */
 .stats-gradient-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #333333;
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
     position: relative;
     overflow: hidden;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .stats-gradient-card::before {
@@ -122,7 +134,7 @@
     right: -50%;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.05);
     transform: rotate(45deg);
     transition: all 0.3s ease;
 }
@@ -191,13 +203,14 @@
     100% { transform: rotate(360deg); }
 }
 
-/* Card header improvements */
+/* Card header improvements - White theme */
 .card-header {
     border-top-left-radius: 12px;
     border-top-right-radius: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #333333;
     font-weight: 600;
+    border-bottom: 1px solid #dee2e6;
 }
 
 .card-outline.card-primary {
@@ -264,18 +277,66 @@
     }
 }
 
-/* Dark mode support */
+/* Dark mode support - Override to maintain white theme */
 @media (prefers-color-scheme: dark) {
     .card {
-        background-color: #2d3748;
-        color: #e2e8f0;
+        background-color: #ffffff !important;
+        color: #333333 !important;
     }
-    
+
     .table {
-        color: #e2e8f0;
+        color: #333333 !important;
     }
-    
+
     .table-hover tbody tr:hover {
-        background-color: #4a5568;
+        background-color: #f8f9fa !important;
     }
+}
+
+/* Ensure white theme even in dark mode preference */
+.card {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+}
+
+.table {
+    color: #333333 !important;
+}
+
+body {
+    background-color: #ffffff !important;
+}
+
+/* Sidebar styling for white theme */
+.sidebar-light-primary .nav-sidebar .nav-link {
+    color: #333333 !important;
+}
+
+.sidebar-light-primary .nav-sidebar .nav-link:hover {
+    background-color: #f8f9fa !important;
+    color: #007bff !important;
+}
+
+.sidebar-light-primary .nav-sidebar .nav-link.active {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+}
+
+/* Navbar styling for white theme */
+.navbar-light {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #333333 !important;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #007bff !important;
+}
+
+/* Content wrapper for white theme */
+.content-wrapper {
+    background-color: #ffffff !important;
 }

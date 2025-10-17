@@ -20,73 +20,51 @@
 
             <!-- Filters -->
             <div class="card-header border-0 bg-light">
-                <form method="GET" class="row align-items-end">
-                    <div class="col-md-3">
-                        <label class="small mb-1">Tìm kiếm</label>
-                        <div class="search-box">
-                            <i class="fas fa-search"></i>
-                            <input type="text" name="search" id="tableSearch" class="form-control"
+                <form method="GET" id="searchForm">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="small mb-1"><i class="fas fa-search mr-1"></i>Tìm kiếm</label>
+                            <input type="text" name="search" class="form-control"
                                 placeholder="Tên chuyến, tuyến đường..." value="{{ request('search') }}">
                         </div>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="small mb-1">Loại xe</label>
-                        <select name="loai_xe" class="form-control">
-                            <option value="">Tất cả</option>
-                            <option value="Giường nằm" {{ request('loai_xe') == 'Giường nằm' ? 'selected' : '' }}>Giường nằm</option>
-                            <option value="Ghế ngồi" {{ request('loai_xe') == 'Ghế ngồi' ? 'selected' : '' }}>Ghế ngồi</option>
-                            <option value="Limousine" {{ request('loai_xe') == 'Limousine' ? 'selected' : '' }}>Limousine</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="small mb-1">Loại chuyến</label>
-                        <select name="loai_chuyen" class="form-control">
-                            <option value="">Tất cả</option>
-                            <option value="Một chiều" {{ request('loai_chuyen') == 'Một chiều' ? 'selected' : '' }}>Một chiều</option>
-                            <option value="Khứ hồi" {{ request('loai_chuyen') == 'Khứ hồi' ? 'selected' : '' }}>Khứ hồi</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="small mb-1">Từ ngày</label>
-                        <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
-                    </div>
-                    <div class="col-md-1">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-search"></i>
-                        </button>
-                    </div>
-                    <div class="col-md-1">
-                        <a href="{{ route('bus-owner.trips.index') }}" class="btn btn-secondary btn-block" title="Reset">
-                            <i class="fas fa-redo"></i>
-                        </a>
-                    </div>
-                    <div class="col-md-1">
-                        <button type="button" class="btn btn-success btn-block" id="exportExcel" title="Xuất Excel">
-                            <i class="fas fa-file-excel"></i>
-                        </button>
+                        <div class="col-md-2">
+                            <label class="small mb-1"><i class="fas fa-car mr-1"></i>Loại xe</label>
+                            <select name="loai_xe" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Giường nằm" {{ request('loai_xe') == 'Giường nằm' ? 'selected' : '' }}>Giường nằm</option>
+                                <option value="Ghế ngồi" {{ request('loai_xe') == 'Ghế ngồi' ? 'selected' : '' }}>Ghế ngồi</option>
+                                <option value="Limousine" {{ request('loai_xe') == 'Limousine' ? 'selected' : '' }}>Limousine</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="small mb-1"><i class="fas fa-route mr-1"></i>Loại chuyến</label>
+                            <select name="loai_chuyen" class="form-control">
+                                <option value="">Tất cả</option>
+                                <option value="Một chiều" {{ request('loai_chuyen') == 'Một chiều' ? 'selected' : '' }}>Một chiều</option>
+                                <option value="Khứ hồi" {{ request('loai_chuyen') == 'Khứ hồi' ? 'selected' : '' }}>Khứ hồi</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="small mb-1"><i class="fas fa-calendar mr-1"></i>Từ ngày</label>
+                            <input type="date" name="from_date" class="form-control" value="{{ request('from_date') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="small mb-1 d-block">&nbsp;</label>
+                            <button type="submit" class="btn btn-primary mr-1" title="Tìm kiếm">
+                                <i class="fas fa-search"></i> Tìm
+                            </button>
+                            <a href="{{ route('bus-owner.trips.index') }}" class="btn btn-secondary" title="Làm mới">
+                                <i class="fas fa-redo"></i>
+                            </a>
+                        </div>
                     </div>
                 </form>
-            </div>
-
-            <!-- Bulk Actions Bar -->
-            <div id="bulkActions" class="card-header bg-warning d-none">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span><i class="fas fa-check-square mr-2"></i>Đã chọn <strong class="count">0</strong> mục</span>
-                    <div>
-                        <button type="button" class="btn btn-sm btn-danger" id="bulkDelete">
-                            <i class="fas fa-trash mr-1"></i>Xóa đã chọn
-                        </button>
-                    </div>
-                </div>
             </div>
 
             <div class="card-body table-responsive p-0">
                 <table class="table table-hover text-nowrap" id="dataTable">
                     <thead class="bg-light">
                         <tr>
-                            <th width="30">
-                                <input type="checkbox" id="selectAll" class="form-check-input">
-                            </th>
                             <th>ID</th>
                             <th>Tuyến đường</th>
                             <th>Ngày/Giờ khởi hành</th>
@@ -101,9 +79,6 @@
                     <tbody>
                         @forelse($trips as $trip)
                         <tr>
-                            <td>
-                                <input type="checkbox" class="form-check-input item-checkbox" value="{{ $trip->id }}">
-                            </td>
                             <td><strong class="text-primary">#{{ $trip->id }}</strong></td>
                             <td>
                                 <strong>{{ $trip->ten_xe }}</strong><br>
@@ -153,30 +128,40 @@
                                 @endif
                             </td>
                             <td>
-                                <div class="btn-group">
-                                    <a href="{{ route('bus-owner.trips.show', $trip) }}" class="btn btn-sm btn-info"
-                                        title="Xem chi tiết">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('bus-owner.trips.show', $trip->id) }}"
+                                        class="btn btn-sm btn-info"
+                                        title="Xem chi tiết"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="{{ route('bus-owner.trips.edit', $trip) }}" class="btn btn-sm btn-warning"
-                                        title="Chỉnh sửa">
+                                    <a href="{{ route('bus-owner.trips.edit', $trip->id) }}"
+                                        class="btn btn-sm btn-warning"
+                                        title="Chỉnh sửa"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <form method="POST" action="{{ route('bus-owner.trips.destroy', $trip) }}"
-                                        style="display: inline;"
-                                        onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyến xe này?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    </form>
+                                    <button type="button"
+                                        class="btn btn-sm btn-danger btn-delete"
+                                        data-id="{{ $trip->id }}"
+                                        data-name="{{ $trip->ten_xe }}"
+                                        title="Xóa"
+                                        data-toggle="tooltip">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
+                                <form id="delete-form-{{ $trip->id }}"
+                                    method="POST"
+                                    action="{{ route('bus-owner.trips.destroy', $trip->id) }}"
+                                    style="display: none;">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="9" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <i class="fas fa-bus fa-2x text-muted mb-2"></i>
                                 <p class="text-muted">Chưa có chuyến xe nào</p>
                                 <a href="{{ route('bus-owner.trips.create') }}" class="btn btn-primary">Thêm chuyến xe
@@ -339,4 +324,49 @@
         background-color: #dc3545 !important;
     }
 </style>
+@endpush
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Handle delete button click with SweetAlert
+        $('.btn-delete').on('click', function() {
+            const tripId = $(this).data('id');
+            const tripName = $(this).data('name');
+
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                html: `Bạn có chắc chắn muốn xóa chuyến xe:<br><strong>${tripName}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '<i class="fas fa-trash mr-1"></i> Xóa',
+                cancelButtonText: '<i class="fas fa-times mr-1"></i> Hủy',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the delete form
+                    $(`#delete-form-${tripId}`).submit();
+                }
+            });
+        });
+
+        // Auto-submit form on select change
+        $('select[name="loai_xe"], select[name="loai_chuyen"]').on('change', function() {
+            $('#searchForm').submit();
+        });
+
+        // Handle Enter key in search input
+        $('input[name="search"]').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#searchForm').submit();
+            }
+        });
+    });
+</script>
 @endpush
