@@ -182,7 +182,7 @@ class BookingController extends Controller
             $bookingCode = 'BK' . date('YmdHis') . rand(100, 999);
             $trip = ChuyenXe::findOrFail($bookingInfo['trip_id']);
             $baseAmount = $trip->gia_ve * count($selectedSeats);
-            
+
             // Xử lý mã giảm giá
             $discountAmount = 0;
             $discountCode = $request->discount_code;
@@ -199,7 +199,7 @@ class BookingController extends Controller
                 if ($khuyenMai) {
                     $discountAmount = intval($request->discount_amount ?? 0);
                     $khuyenMaiId = $khuyenMai->id;
-                    
+
                     // Giảm số lượng mã khuyến mãi
                     $khuyenMai->decrement('so_luong');
                 }
@@ -315,6 +315,26 @@ class BookingController extends Controller
             // Cập nhật trạng thái booking
             DatVe::where('ma_ve', $bookingCode)
                 ->update(['trang_thai' => 'Đã thanh toán']);
+
+            // Gửi email xác nhận
+            try {
+                $bookings = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
+                    ->where('ma_ve', $bookingCode)
+                    ->get();
+
+                if ($bookings->isNotEmpty() && $bookings->first()->user && $bookings->first()->user->email) {
+                    \Mail::to($bookings->first()->user->email)
+                        ->send(new \App\Mail\BookingConfirmation(
+                            $bookings,
+                            $bookingCode,
+                            $paymentInfo['total_amount'],
+                            $paymentInfo['discount_amount'] ?? 0
+                        ));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send booking confirmation email: ' . $e->getMessage());
+                // Không báo lỗi cho user, vì thanh toán đã thành công
+            }
 
             Session::forget('payment_info');
 

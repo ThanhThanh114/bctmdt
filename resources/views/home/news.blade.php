@@ -18,10 +18,10 @@
                         <div class="swiper-slide">
                             <div class="news-card">
                                 <div class="news-image">
-                                    @if($news->hinh_anh)
-                                        <img src="{{ asset('storage/' . $news->hinh_anh) }}" alt="{{ $news->tieu_de }}">
+                                    @if($news->hinh_anh && file_exists(public_path('assets/images/' . $news->hinh_anh)))
+                                        <img src="{{ asset('assets/images/' . $news->hinh_anh) }}" alt="{{ $news->tieu_de }}">
                                     @else
-                                        <img src="{{ asset('assets/images/default-news.jpg') }}" alt="{{ $news->tieu_de }}">
+                                        <img src="{{ asset('assets/images/header.jpg') }}" alt="{{ $news->tieu_de }}">
                                     @endif
                                     <div class="news-overlay"></div>
                                 </div>
