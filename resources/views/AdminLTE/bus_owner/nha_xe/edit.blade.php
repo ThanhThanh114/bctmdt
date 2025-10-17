@@ -37,12 +37,8 @@
                                         <i class="fas fa-hashtag text-muted mr-1"></i>
                                         Mã nhà xe
                                     </label>
-                                    <input type="text"
-                                        class="form-control form-control-lg"
-                                        id="ma_nha_xe"
-                                        value="{{ $nhaXe->ma_nha_xe }}"
-                                        readonly
-                                        disabled>
+                                    <input type="text" class="form-control form-control-lg" id="ma_nha_xe"
+                                        value="{{ $nhaXe->ma_nha_xe }}" readonly disabled>
                                     <small class="form-text text-muted">Không thể thay đổi</small>
                                 </div>
                             </div>
@@ -56,12 +52,9 @@
                                     </label>
                                     <input type="text"
                                         class="form-control form-control-lg @error('ten_nha_xe') is-invalid @enderror"
-                                        id="ten_nha_xe"
-                                        name="ten_nha_xe"
+                                        id="ten_nha_xe" name="ten_nha_xe"
                                         value="{{ old('ten_nha_xe', $nhaXe->ten_nha_xe) }}"
-                                        placeholder="Nhập tên nhà xe"
-                                        required
-                                        maxlength="100">
+                                        placeholder="Nhập tên nhà xe" required maxlength="100">
                                     @error('ten_nha_xe')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -77,11 +70,8 @@
                                     </label>
                                     <input type="text"
                                         class="form-control form-control-lg @error('dia_chi') is-invalid @enderror"
-                                        id="dia_chi"
-                                        name="dia_chi"
-                                        value="{{ old('dia_chi', $nhaXe->dia_chi) }}"
-                                        placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                                        required
+                                        id="dia_chi" name="dia_chi" value="{{ old('dia_chi', $nhaXe->dia_chi) }}"
+                                        placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required
                                         maxlength="255">
                                     @error('dia_chi')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -98,13 +88,9 @@
                                     </label>
                                     <input type="tel"
                                         class="form-control form-control-lg @error('so_dien_thoai') is-invalid @enderror"
-                                        id="so_dien_thoai"
-                                        name="so_dien_thoai"
+                                        id="so_dien_thoai" name="so_dien_thoai"
                                         value="{{ old('so_dien_thoai', $nhaXe->so_dien_thoai) }}"
-                                        placeholder="0xxxxxxxxx"
-                                        required
-                                        maxlength="15"
-                                        pattern="[0-9]{10,11}">
+                                        placeholder="0xxxxxxxxx" required maxlength="15" pattern="[0-9]{10,11}">
                                     @error('so_dien_thoai')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -120,11 +106,8 @@
                                     </label>
                                     <input type="email"
                                         class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                        id="email"
-                                        name="email"
-                                        value="{{ old('email', $nhaXe->email) }}"
-                                        placeholder="email@example.com"
-                                        maxlength="100">
+                                        id="email" name="email" value="{{ old('email', $nhaXe->email) }}"
+                                        placeholder="email@example.com" maxlength="100">
                                     @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -137,7 +120,8 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <i class="fas fa-info-circle text-info mr-2"></i>
-                                    <strong>Ghi chú:</strong> Các trường có dấu <span class="text-danger">*</span> là bắt buộc
+                                    <strong>Ghi chú:</strong> Các trường có dấu <span class="text-danger">*</span> là
+                                    bắt buộc
                                 </div>
                                 <div class="col-md-6 text-right text-muted">
                                     <small>
@@ -162,7 +146,8 @@
                                 </button>
                             </div>
                             <div class="col-md-6 text-right">
-                                <a href="{{ route('bus-owner.nha-xe.show', $nhaXe->ma_nha_xe) }}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{{ route('bus-owner.nha-xe.show', $nhaXe->ma_nha_xe) }}"
+                                    class="btn btn-outline-secondary btn-lg">
                                     <i class="fas fa-times mr-2"></i>
                                     Hủy bỏ
                                 </a>
@@ -200,7 +185,7 @@
         });
 
         // Show validation errors if any
-        @if($errors - > any())
+        @if($errors->any())
         Swal.fire({
             icon: 'error',
             title: 'Có lỗi xảy ra!',

@@ -268,6 +268,14 @@
                         </li>
 
                         <li class="nav-item">
+                            <a href="{{ route('bus-owner.nhan-vien.index') }}"
+                                class="nav-link {{ request()->routeIs('bus-owner.nhan-vien.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-users"></i>
+                                <p>Quản lý nhân viên</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('bus-owner.dat-ve.index') }}"
                                 class="nav-link {{ request()->routeIs('bus-owner.dat-ve.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-ticket-alt"></i>

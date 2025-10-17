@@ -29,17 +29,22 @@
                             <label class="small mb-1"><i class="fas fa-car mr-1"></i>Loại xe</label>
                             <select name="loai_xe" class="form-control">
                                 <option value="">Tất cả</option>
-                                <option value="Giường nằm" <?php echo e(request('loai_xe') == 'Giường nằm' ? 'selected' : ''); ?>>Giường nằm</option>
-                                <option value="Ghế ngồi" <?php echo e(request('loai_xe') == 'Ghế ngồi' ? 'selected' : ''); ?>>Ghế ngồi</option>
-                                <option value="Limousine" <?php echo e(request('loai_xe') == 'Limousine' ? 'selected' : ''); ?>>Limousine</option>
+                                <option value="Giường nằm" <?php echo e(request('loai_xe') == 'Giường nằm' ? 'selected' : ''); ?>>
+                                    Giường nằm</option>
+                                <option value="Ghế ngồi" <?php echo e(request('loai_xe') == 'Ghế ngồi' ? 'selected' : ''); ?>>Ghế
+                                    ngồi</option>
+                                <option value="Limousine" <?php echo e(request('loai_xe') == 'Limousine' ? 'selected' : ''); ?>>
+                                    Limousine</option>
                             </select>
                         </div>
                         <div class="col-md-2">
                             <label class="small mb-1"><i class="fas fa-route mr-1"></i>Loại chuyến</label>
                             <select name="loai_chuyen" class="form-control">
                                 <option value="">Tất cả</option>
-                                <option value="Một chiều" <?php echo e(request('loai_chuyen') == 'Một chiều' ? 'selected' : ''); ?>>Một chiều</option>
-                                <option value="Khứ hồi" <?php echo e(request('loai_chuyen') == 'Khứ hồi' ? 'selected' : ''); ?>>Khứ hồi</option>
+                                <option value="Một chiều" <?php echo e(request('loai_chuyen') == 'Một chiều' ? 'selected' : ''); ?>>
+                                    Một chiều</option>
+                                <option value="Khứ hồi" <?php echo e(request('loai_chuyen') == 'Khứ hồi' ? 'selected' : ''); ?>>Khứ
+                                    hồi</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -130,31 +135,22 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="<?php echo e(route('bus-owner.trips.show', $trip->id)); ?>" 
-                                       class="btn btn-sm btn-info" 
-                                       title="Xem chi tiết"
-                                       data-toggle="tooltip">
+                                    <a href="<?php echo e(route('bus-owner.trips.show', $trip->id)); ?>" class="btn btn-sm btn-info"
+                                        title="Xem chi tiết" data-toggle="tooltip">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="<?php echo e(route('bus-owner.trips.edit', $trip->id)); ?>" 
-                                       class="btn btn-sm btn-warning" 
-                                       title="Chỉnh sửa"
-                                       data-toggle="tooltip">
+                                    <a href="<?php echo e(route('bus-owner.trips.edit', $trip->id)); ?>"
+                                        class="btn btn-sm btn-warning" title="Chỉnh sửa" data-toggle="tooltip">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" 
-                                            class="btn btn-sm btn-danger btn-delete" 
-                                            data-id="<?php echo e($trip->id); ?>"
-                                            data-name="<?php echo e($trip->ten_xe); ?>"
-                                            title="Xóa"
-                                            data-toggle="tooltip">
+                                    <button type="button" class="btn btn-sm btn-danger btn-delete"
+                                        data-id="<?php echo e($trip->id); ?>" data-name="<?php echo e($trip->ten_xe); ?>" title="Xóa"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
-                                <form id="delete-form-<?php echo e($trip->id); ?>" 
-                                      method="POST" 
-                                      action="<?php echo e(route('bus-owner.trips.destroy', $trip->id)); ?>" 
-                                      style="display: none;">
+                                <form id="delete-form-<?php echo e($trip->id); ?>" method="POST"
+                                    action="<?php echo e(route('bus-owner.trips.destroy', $trip->id)); ?>" style="display: none;">
                                     <?php echo csrf_field(); ?>
                                     <?php echo method_field('DELETE'); ?>
                                 </form>
@@ -259,71 +255,70 @@
 
 <?php $__env->startPush('styles'); ?>
 <style>
-    .small-box {
-        border-radius: 0.375rem;
-        margin-bottom: 1.5rem;
-        position: relative;
-        display: block;
-        background-color: #fff;
-        border: 1px solid rgba(0, 0, 0, .125);
-        box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
-    }
+.small-box {
+    border-radius: 0.375rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    display: block;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, .125);
+    box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
+}
 
-    .small-box .icon {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        font-size: 3rem;
-        color: rgba(255, 255, 255, .15);
-    }
+.small-box .icon {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 3rem;
+    color: rgba(255, 255, 255, .15);
+}
 
-    .small-box .inner {
-        padding: 10px;
-    }
+.small-box .inner {
+    padding: 10px;
+}
 
-    .small-box h3 {
-        font-size: 2.2rem;
-        font-weight: 700;
-        margin: 0 0 10px 0;
-        white-space: nowrap;
-        padding: 0;
-    }
+.small-box h3 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    white-space: nowrap;
+    padding: 0;
+}
 
-    .small-box p {
-        font-size: 1rem;
-        margin: 0;
-    }
+.small-box p {
+    font-size: 1rem;
+    margin: 0;
+}
 
-    .small-box-footer {
-        background-color: rgba(0, 0, 0, .1);
-        color: rgba(255, 255, 255, .8);
-        display: block;
-        padding: 3px 10px;
-        position: relative;
-        text-decoration: none;
-        transition: all .15s linear;
-    }
+.small-box-footer {
+    background-color: rgba(0, 0, 0, .1);
+    color: rgba(255, 255, 255, .8);
+    display: block;
+    padding: 3px 10px;
+    position: relative;
+    text-decoration: none;
+}
 
-    .small-box-footer:hover {
-        text-decoration: none;
-        color: #fff;
-    }
+.small-box-footer:hover {
+    text-decoration: none;
+    color: #fff;
+}
 
-    .bg-info {
-        background-color: #17a2b8 !important;
-    }
+.bg-info {
+    background-color: #17a2b8 !important;
+}
 
-    .bg-warning {
-        background-color: #ffc107 !important;
-    }
+.bg-warning {
+    background-color: #ffc107 !important;
+}
 
-    .bg-success {
-        background-color: #28a745 !important;
-    }
+.bg-success {
+    background-color: #28a745 !important;
+}
 
-    .bg-danger {
-        background-color: #dc3545 !important;
-    }
+.bg-danger {
+    background-color: #dc3545 !important;
+}
 </style>
 <?php $__env->stopPush(); ?>
 
@@ -332,12 +327,12 @@
 $(document).ready(function() {
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
-    
+
     // Handle delete button click with SweetAlert
     $('.btn-delete').on('click', function() {
         const tripId = $(this).data('id');
         const tripName = $(this).data('name');
-        
+
         Swal.fire({
             title: 'Xác nhận xóa?',
             html: `Bạn có chắc chắn muốn xóa chuyến xe:<br><strong>${tripName}</strong>?`,
@@ -355,12 +350,12 @@ $(document).ready(function() {
             }
         });
     });
-    
+
     // Auto-submit form on select change
     $('select[name="loai_xe"], select[name="loai_chuyen"]').on('change', function() {
         $('#searchForm').submit();
     });
-    
+
     // Handle Enter key in search input
     $('input[name="search"]').on('keypress', function(e) {
         if (e.which === 13) {

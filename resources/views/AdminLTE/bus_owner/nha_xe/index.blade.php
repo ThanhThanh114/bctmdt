@@ -63,11 +63,8 @@
                 <div class="col-md-8">
                     <form action="{{ route('bus-owner.nha-xe.index') }}" method="GET" class="form-inline">
                         <div class="input-group input-group-lg" style="width: 100%;">
-                            <input type="text"
-                                name="search"
-                                class="form-control"
-                                placeholder="Tìm kiếm theo tên, địa chỉ, SĐT, email..."
-                                value="{{ request('search') }}">
+                            <input type="text" name="search" class="form-control"
+                                placeholder="Tìm kiếm theo tên, địa chỉ, SĐT, email..." value="{{ request('search') }}">
                             <div class="input-group-append">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fas fa-search"></i> Tìm kiếm
@@ -158,27 +155,22 @@
                             <td class="text-center">
                                 <div class="btn-group btn-group-sm" role="group">
                                     <a href="{{ route('bus-owner.nha-xe.show', $nhaXe->ma_nha_xe) }}"
-                                        class="btn btn-info"
-                                        title="Xem chi tiết">
+                                        class="btn btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                     <a href="{{ route('bus-owner.nha-xe.edit', $nhaXe->ma_nha_xe) }}"
-                                        class="btn btn-warning"
-                                        title="Chỉnh sửa">
+                                        class="btn btn-warning" title="Chỉnh sửa">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button"
-                                        class="btn btn-danger"
-                                        onclick="confirmDelete({{ $nhaXe->ma_nha_xe }})"
-                                        title="Xóa">
+                                    <button type="button" class="btn btn-danger"
+                                        onclick="confirmDelete({{ $nhaXe->ma_nha_xe }})" title="Xóa">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
 
                                 <!-- Hidden Delete Form -->
                                 <form id="delete-form-{{ $nhaXe->ma_nha_xe }}"
-                                    action="{{ route('bus-owner.nha-xe.destroy', $nhaXe->ma_nha_xe) }}"
-                                    method="POST"
+                                    action="{{ route('bus-owner.nha-xe.destroy', $nhaXe->ma_nha_xe) }}" method="POST"
                                     style="display: none;">
                                     @csrf
                                     @method('DELETE')
@@ -288,12 +280,6 @@
 
     .small-box {
         border-radius: 10px;
-        transition: transform 0.3s ease;
-    }
-
-    .small-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     }
 
     .card {

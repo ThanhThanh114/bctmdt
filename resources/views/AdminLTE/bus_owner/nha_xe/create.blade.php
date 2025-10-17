@@ -38,12 +38,8 @@
                                     </label>
                                     <input type="text"
                                         class="form-control form-control-lg @error('ten_nha_xe') is-invalid @enderror"
-                                        id="ten_nha_xe"
-                                        name="ten_nha_xe"
-                                        value="{{ old('ten_nha_xe') }}"
-                                        placeholder="Nhập tên nhà xe"
-                                        required
-                                        maxlength="100">
+                                        id="ten_nha_xe" name="ten_nha_xe" value="{{ old('ten_nha_xe') }}"
+                                        placeholder="Nhập tên nhà xe" required maxlength="100">
                                     @error('ten_nha_xe')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -60,11 +56,8 @@
                                     </label>
                                     <input type="email"
                                         class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                        id="email"
-                                        name="email"
-                                        value="{{ old('email') }}"
-                                        placeholder="email@example.com"
-                                        maxlength="100">
+                                        id="email" name="email" value="{{ old('email') }}"
+                                        placeholder="email@example.com" maxlength="100">
                                     @error('email')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -81,11 +74,8 @@
                                     </label>
                                     <input type="text"
                                         class="form-control form-control-lg @error('dia_chi') is-invalid @enderror"
-                                        id="dia_chi"
-                                        name="dia_chi"
-                                        value="{{ old('dia_chi') }}"
-                                        placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố"
-                                        required
+                                        id="dia_chi" name="dia_chi" value="{{ old('dia_chi') }}"
+                                        placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required
                                         maxlength="255">
                                     @error('dia_chi')
                                     <div class="invalid-feedback">{{ $message }}</div>
@@ -103,13 +93,8 @@
                                     </label>
                                     <input type="tel"
                                         class="form-control form-control-lg @error('so_dien_thoai') is-invalid @enderror"
-                                        id="so_dien_thoai"
-                                        name="so_dien_thoai"
-                                        value="{{ old('so_dien_thoai') }}"
-                                        placeholder="0xxxxxxxxx"
-                                        required
-                                        maxlength="15"
-                                        pattern="[0-9]{10,11}">
+                                        id="so_dien_thoai" name="so_dien_thoai" value="{{ old('so_dien_thoai') }}"
+                                        placeholder="0xxxxxxxxx" required maxlength="15" pattern="[0-9]{10,11}">
                                     @error('so_dien_thoai')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -121,7 +106,8 @@
                         <!-- Alert -->
                         <div class="alert alert-info mt-3">
                             <i class="icon fas fa-info-circle"></i>
-                            <strong>Lưu ý:</strong> Các trường có dấu <span class="text-danger">*</span> là bắt buộc phải nhập.
+                            <strong>Lưu ý:</strong> Các trường có dấu <span class="text-danger">*</span> là bắt buộc
+                            phải nhập.
                         </div>
                     </div>
 
@@ -138,7 +124,8 @@
                                 </button>
                             </div>
                             <div class="col-md-6 text-right">
-                                <a href="{{ route('bus-owner.nha-xe.index') }}" class="btn btn-outline-secondary btn-lg">
+                                <a href="{{ route('bus-owner.nha-xe.index') }}"
+                                    class="btn btn-outline-secondary btn-lg">
                                     <i class="fas fa-times mr-2"></i>
                                     Hủy bỏ
                                 </a>
@@ -153,70 +140,70 @@
 
 @push('scripts')
 <script>
-    $(document).ready(function() {
-        // Form validation
-        $('#createForm').on('submit', function(e) {
-            var isValid = true;
+$(document).ready(function() {
+    // Form validation
+    $('#createForm').on('submit', function(e) {
+        var isValid = true;
 
-            // Validate phone number
-            var phone = $('#so_dien_thoai').val();
-            if (phone && !/^[0-9]{10,11}$/.test(phone)) {
-                $('#so_dien_thoai').addClass('is-invalid');
-                isValid = false;
-            }
+        // Validate phone number
+        var phone = $('#so_dien_thoai').val();
+        if (phone && !/^[0-9]{10,11}$/.test(phone)) {
+            $('#so_dien_thoai').addClass('is-invalid');
+            isValid = false;
+        }
 
-            if (!isValid) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Lỗi!',
-                    text: 'Vui lòng kiểm tra lại thông tin nhập vào.',
-                });
-            }
-        });
-
-        // Show validation errors if any
-        @if($errors - > any())
-        Swal.fire({
-            icon: 'error',
-            title: 'Có lỗi xảy ra!',
-            html: '<ul class="text-left">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
-        });
-        @endif
+        if (!isValid) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi!',
+                text: 'Vui lòng kiểm tra lại thông tin nhập vào.',
+            });
+        }
     });
+
+    // Show validation errors if any
+    @if($errors->any())
+    Swal.fire({
+        icon: 'error',
+        title: 'Có lỗi xảy ra!',
+        html: '<ul class="text-left">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+    });
+    @endif
+});
 </script>
 @endpush
 
 @push('styles')
 <style>
-    .required:after {
-        content: " *";
-        color: red;
-    }
+.required:after {
+    content: " *";
+    color: red;
+}
 
-    .form-control-lg {
-        border-radius: 8px;
-    }
+.form-control-lg {
+    border-radius: 8px;
+}
 
-    .card {
-        border-radius: 15px;
-        border: none;
-    }
+.card {
+    border-radius: 15px;
+    border: none;
+}
 
-    .card-header {
-        border-top-left-radius: 15px;
-        border-top-right-radius: 15px;
-    }
+.card-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
 
-    .form-group label {
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
+.form-group label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
 
-    .invalid-feedback {
-        display: block;
-        font-weight: 500;
-    }
+.invalid-feedback {
+    display: block;
+    font-weight: 500;
+}
 </style>
 @endpush
 @endsection

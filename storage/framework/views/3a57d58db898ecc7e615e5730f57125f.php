@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Chi tiết Chuyến xe'); ?>
 <?php $__env->startSection('page-title', 'Chi tiết Chuyến xe #' . $trip->id); ?>
 <?php $__env->startSection('breadcrumb'); ?>
@@ -46,6 +44,18 @@
                                 <td>
                                     <?php if($trip->tramDi && $trip->tramDen): ?>
                                     <span class="badge badge-success"><?php echo e($trip->tramDi->ten_tram); ?></span>
+                                    
+                                    <?php if($trip->tram_trung_gian): ?>
+                                        <?php
+                                            $tramTrungGianIds = explode(',', $trip->tram_trung_gian);
+                                            $tramTrungGian = \App\Models\TramXe::whereIn('ma_tram_xe', $tramTrungGianIds)->get();
+                                        ?>
+                                        <?php $__currentLoopData = $tramTrungGian; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <i class="fas fa-arrow-right mx-1"></i>
+                                            <span class="badge badge-info"><?php echo e($tram->ten_tram); ?></span>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php endif; ?>
+                                    
                                     <i class="fas fa-arrow-right mx-1"></i>
                                     <span class="badge badge-danger"><?php echo e($trip->tramDen->ten_tram); ?></span>
                                     <?php else: ?>
@@ -249,9 +259,11 @@
             </div>
             <div class="card-body">
                 <?php
-                // Parse ngày đi - chỉ lấy phần ngày từ ngay_di và kết hợp với gio_di
-                $ngayDi = \Carbon\Carbon::parse($trip->ngay_di)->format('Y-m-d');
-                $tripDateTime = \Carbon\Carbon::parse($ngayDi . ' ' . $trip->gio_di);
+                // Parse ngày đi và giờ đi
+                $ngayDi = \Carbon\Carbon::parse($trip->ngay_di);
+                $gioDi = \Carbon\Carbon::parse($trip->gio_di);
+                // Tạo datetime bằng cách set time cho ngày đi
+                $tripDateTime = $ngayDi->copy()->setTime($gioDi->hour, $gioDi->minute, $gioDi->second);
                 $now = \Carbon\Carbon::now();
                 $isPast = $tripDateTime->isPast();
                 $isToday = $tripDateTime->isToday();
@@ -332,17 +344,7 @@
 
     .progress-bar {
         border-radius: 15px;
-        transition: width 0.6s ease;
     }
 </style>
 <?php $__env->stopPush(); ?>
-</a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-</div>
-<?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\bctmdt\resources\views/AdminLTE/bus_owner/trips/show.blade.php ENDPATH**/ ?>

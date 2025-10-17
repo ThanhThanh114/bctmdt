@@ -45,6 +45,18 @@
                                 <td>
                                     @if($trip->tramDi && $trip->tramDen)
                                     <span class="badge badge-success">{{ $trip->tramDi->ten_tram }}</span>
+
+                                    @if($trip->tram_trung_gian)
+                                    @php
+                                    $tramTrungGianIds = explode(',', $trip->tram_trung_gian);
+                                    $tramTrungGian = \App\Models\TramXe::whereIn('ma_tram_xe', $tramTrungGianIds)->get();
+                                    @endphp
+                                    @foreach($tramTrungGian as $tram)
+                                    <i class="fas fa-arrow-right mx-1"></i>
+                                    <span class="badge badge-info">{{ $tram->ten_tram }}</span>
+                                    @endforeach
+                                    @endif
+
                                     <i class="fas fa-arrow-right mx-1"></i>
                                     <span class="badge badge-danger">{{ $trip->tramDen->ten_tram }}</span>
                                     @else
@@ -247,9 +259,11 @@
             </div>
             <div class="card-body">
                 @php
-                // Parse ngày đi - chỉ lấy phần ngày từ ngay_di và kết hợp với gio_di
-                $ngayDi = \Carbon\Carbon::parse($trip->ngay_di)->format('Y-m-d');
-                $tripDateTime = \Carbon\Carbon::parse($ngayDi . ' ' . $trip->gio_di);
+                // Parse ngày đi và giờ đi
+                $ngayDi = \Carbon\Carbon::parse($trip->ngay_di);
+                $gioDi = \Carbon\Carbon::parse($trip->gio_di);
+                // Tạo datetime bằng cách set time cho ngày đi
+                $tripDateTime = $ngayDi->copy()->setTime($gioDi->hour, $gioDi->minute, $gioDi->second);
                 $now = \Carbon\Carbon::now();
                 $isPast = $tripDateTime->isPast();
                 $isToday = $tripDateTime->isToday();
@@ -330,16 +344,6 @@
 
     .progress-bar {
         border-radius: 15px;
-        transition: width 0.6s ease;
     }
 </style>
 @endpush
-</a>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-</div>
-@endsection
