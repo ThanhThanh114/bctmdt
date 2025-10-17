@@ -18,7 +18,7 @@
 
 ---
 
-## Chi tiết các thay đổi
+
 
 ### 1. Tự động set Trạng thái dựa vào Số sao ⭐
 
