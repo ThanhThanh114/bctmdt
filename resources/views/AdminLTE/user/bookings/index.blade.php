@@ -12,7 +12,7 @@
             <div class="card-header">
                 <h3 class="card-title">Lịch sử đặt vé</h3>
                 <div class="card-tools">
-                    <a href="{{ route('trips.index') }}" class="btn btn-primary btn-sm">
+                    <a href="{{ route('trips.trips') }}" class="btn btn-primary btn-sm">
                         <i class="fas fa-plus mr-1"></i> Đặt vé mới
                     </a>
                 </div>
@@ -74,7 +74,7 @@
                                 <div>{{ $booking->chuyenXe->route_name }}</div>
                                 <small class="text-muted">{{ $booking->chuyenXe->nhaXe->name ?? 'N/A' }}</small>
                             </td>
-                            <td>{{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di)->format('d/m/Y H:i') }}</td>
+                            <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</td>
                             <td>
                                 <span class="badge badge-info">{{ $booking->seat_number }}</span>
                             </td>
@@ -92,13 +92,13 @@
                                     <span class="badge badge-secondary">{{ $booking->status }}</span>
                                 @endif
                             </td>
-                            <td>{{ $booking->created_at->format('d/m/Y H:i') }}</td>
+                            <td>{{ $booking->created_at ? $booking->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="{{ route('user.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    @if($booking->status == 'confirmed' && \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di) > now()->addHours(2))
+                                    @if($booking->status == 'confirmed' && \Carbon\Carbon::parse($booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di) > now()->addHours(2))
                                     <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
                                         @csrf
                                         @method('PATCH')
@@ -115,7 +115,7 @@
                             <td colspan="8" class="text-center py-4">
                                 <i class="fas fa-ticket-alt fa-2x text-muted mb-2"></i>
                                 <p class="text-muted">Chưa có đặt vé nào</p>
-                                <a href="{{ route('trips.index') }}" class="btn btn-primary">Đặt vé ngay</a>
+                                <a href="{{ route('trips.trips') }}" class="btn btn-primary">Đặt vé ngay</a>
                             </td>
                         </tr>
                         @endforelse
@@ -132,7 +132,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-primary">
             <div class="inner">
-                <h3>{{ $bookings->whereStatus('confirmed')->count() }}</h3>
+                <h3>{{ $bookings->where('status', 'confirmed')->count() }}</h3>
                 <p>Vé đã xác nhận</p>
             </div>
             <div class="icon">
@@ -147,7 +147,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ $bookings->whereStatus('pending')->count() }}</h3>
+                <h3>{{ $bookings->where('status', 'pending')->count() }}</h3>
                 <p>Chờ xử lý</p>
             </div>
             <div class="icon">
@@ -162,7 +162,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>{{ $bookings->whereStatus('cancelled')->count() }}</h3>
+                <h3>{{ $bookings->where('status', 'cancelled')->count() }}</h3>
                 <p>Đã hủy</p>
             </div>
             <div class="icon">
@@ -177,7 +177,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
             <div class="inner">
-                <h3>{{ number_format($bookings->whereStatus('confirmed')->sum(function($booking) { return $booking->chuyenXe->gia_ve ?? 0; })) }}đ</h3>
+                <h3>{{ number_format($bookings->where('status', 'confirmed')->sum(function($booking) { return $booking->chuyenXe->gia_ve ?? 0; })) }}đ</h3>
                 <p>Tổng chi tiêu</p>
             </div>
             <div class="icon">

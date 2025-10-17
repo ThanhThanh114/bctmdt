@@ -1,0 +1,226 @@
+@extends('layouts.admin')
+
+@section('title', 'Thêm chuyến xe mới')
+
+@section('page-title', 'Thêm chuyến xe mới')
+@section('breadcrumb')
+<li class="breadcrumb-item"><a href="{{ route('bus-owner.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{{ route('bus-owner.trips.index') }}">Quản lý chuyến xe</a></li>
+<li class="breadcrumb-item active">Thêm mới</li>
+@endsection
+
+@section('content')
+<div class="row">
+    <div class="col-md-12">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">Thông tin chuyến xe</h3>
+            </div>
+
+            <form action="{{ route('bus-owner.trips.store') }}" method="POST">
+                @csrf
+                <div class="card-body">
+                    @if($errors->any())
+                    <div class="alert alert-danger alert-dismissible">
+                        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                        <h5><i class="icon fas fa-ban"></i> Lỗi!</h5>
+                        <ul>
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ten_xe">Tên chuyến xe <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('ten_xe') is-invalid @enderror"
+                                    id="ten_xe" name="ten_xe" placeholder="VD: Hà Nội - Hải Phòng"
+                                    value="{{ old('ten_xe') }}" required>
+                                @error('ten_xe')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ma_tram_di">Trạm đi <span class="text-danger">*</span></label>
+                                <select class="form-control @error('ma_tram_di') is-invalid @enderror"
+                                    id="ma_tram_di" name="ma_tram_di">
+                                    <option value="">-- Chọn trạm đi --</option>
+                                    @foreach(\App\Models\TramXe::all() as $tram)
+                                    <option value="{{ $tram->ma_tram_xe }}" {{ old('ma_tram_di') == $tram->ma_tram_xe ? 'selected' : '' }}>
+                                        {{ $tram->ten_tram }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('ma_tram_di')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ma_tram_den">Trạm đến <span class="text-danger">*</span></label>
+                                <select class="form-control @error('ma_tram_den') is-invalid @enderror"
+                                    id="ma_tram_den" name="ma_tram_den">
+                                    <option value="">-- Chọn trạm đến --</option>
+                                    @foreach(\App\Models\TramXe::all() as $tram)
+                                    <option value="{{ $tram->ma_tram_xe }}" {{ old('ma_tram_den') == $tram->ma_tram_xe ? 'selected' : '' }}>
+                                        {{ $tram->ten_tram }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                @error('ma_tram_den')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="ngay_di">Ngày đi <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control @error('ngay_di') is-invalid @enderror"
+                                    id="ngay_di" name="ngay_di" value="{{ old('ngay_di', date('Y-m-d')) }}"
+                                    min="{{ date('Y-m-d') }}" required>
+                                @error('ngay_di')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gio_di">Giờ đi <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control @error('gio_di') is-invalid @enderror"
+                                    id="gio_di" name="gio_di" value="{{ old('gio_di') }}" required>
+                                @error('gio_di')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="loai_xe">Loại xe</label>
+                                <select class="form-control @error('loai_xe') is-invalid @enderror"
+                                    id="loai_xe" name="loai_xe">
+                                    <option value="">-- Chọn loại xe --</option>
+                                    <option value="Giường nằm" {{ old('loai_xe') == 'Giường nằm' ? 'selected' : '' }}>Giường nằm</option>
+                                    <option value="Ghế ngồi" {{ old('loai_xe') == 'Ghế ngồi' ? 'selected' : '' }}>Ghế ngồi</option>
+                                    <option value="Limousine" {{ old('loai_xe') == 'Limousine' ? 'selected' : '' }}>Limousine</option>
+                                </select>
+                                @error('loai_xe')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="loai_chuyen">Loại chuyến <span class="text-danger">*</span></label>
+                                <select class="form-control @error('loai_chuyen') is-invalid @enderror"
+                                    id="loai_chuyen" name="loai_chuyen" required>
+                                    <option value="Một chiều" {{ old('loai_chuyen') == 'Một chiều' ? 'selected' : '' }}>Một chiều</option>
+                                    <option value="Khứ hồi" {{ old('loai_chuyen') == 'Khứ hồi' ? 'selected' : '' }}>Khứ hồi</option>
+                                </select>
+                                @error('loai_chuyen')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="gia_ve">Giá vé (VNĐ) <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control @error('gia_ve') is-invalid @enderror"
+                                    id="gia_ve" name="gia_ve" placeholder="VD: 150000"
+                                    value="{{ old('gia_ve') }}" min="0" step="1000" required>
+                                @error('gia_ve')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="so_cho">Tổng số chỗ ngồi <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control @error('so_cho') is-invalid @enderror"
+                                    id="so_cho" name="so_cho" placeholder="VD: 40"
+                                    value="{{ old('so_cho') }}" min="1" required>
+                                @error('so_cho')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="so_ve">Số vé đã bán</label>
+                                <input type="number" class="form-control @error('so_ve') is-invalid @enderror"
+                                    id="so_ve" name="so_ve" placeholder="VD: 0"
+                                    value="{{ old('so_ve', 0) }}" min="0">
+                                <small class="form-text text-muted">Để trống hoặc nhập 0 nếu chưa bán vé nào</small>
+                                @error('so_ve')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="ten_tai_xe">Tên tài xế</label>
+                                <input type="text" class="form-control @error('ten_tai_xe') is-invalid @enderror"
+                                    id="ten_tai_xe" name="ten_tai_xe" placeholder="VD: Nguyễn Văn A"
+                                    value="{{ old('ten_tai_xe') }}">
+                                @error('ten_tai_xe')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="sdt_tai_xe">Số điện thoại tài xế</label>
+                                <input type="text" class="form-control @error('sdt_tai_xe') is-invalid @enderror"
+                                    id="sdt_tai_xe" name="sdt_tai_xe" placeholder="VD: 0912345678"
+                                    value="{{ old('sdt_tai_xe') }}">
+                                @error('sdt_tai_xe')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save mr-2"></i>Lưu chuyến xe
+                    </button>
+                    <a href="{{ route('bus-owner.trips.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-times mr-2"></i>Hủy bỏ
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Validate form before submit
+        $('#so_ve').on('input', function() {
+            var soVe = parseInt($(this).val()) || 0;
+            var soCho = parseInt($('#so_cho').val()) || 0;
+
+            if (soVe > soCho) {
+                $(this).addClass('is-invalid');
+                alert('Số vé đã bán không được vượt quá tổng số chỗ ngồi!');
+                $(this).val(soCho);
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+
+        $('#so_cho').on('input', function() {
+            var soVe = parseInt($('#so_ve').val()) || 0;
+            var soCho = parseInt($(this).val()) || 0;
+
+            if (soVe > soCho) {
+                $('#so_ve').val(soCho);
+            }
+        });
+    });
+</script>
+@endpush

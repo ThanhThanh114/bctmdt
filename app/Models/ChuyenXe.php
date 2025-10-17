@@ -23,6 +23,7 @@ class ChuyenXe extends Model
         'ma_tram_den',
         'ngay_di',
         'gio_di',
+        'gio_den',
         'loai_xe',
         'so_cho',
         'so_ve',

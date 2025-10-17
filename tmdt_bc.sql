@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 15, 2025 lúc 10:29 AM
+-- Thời gian đã tạo: Th10 17, 2025 lúc 07:07 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -34,10 +34,10 @@ CREATE TABLE `binh_luan` (
   `chuyen_xe_id` int(11) NOT NULL,
   `noi_dung` text NOT NULL,
   `noi_dung_tl` text NOT NULL,
-  `so_sao` int(11) DEFAULT NULL CHECK (`so_sao` between 1 and 5),
+  `so_sao` tinyint(1) DEFAULT NULL,
   `ngay_bl` timestamp NOT NULL DEFAULT current_timestamp(),
   `ngay_tl` timestamp NOT NULL DEFAULT current_timestamp(),
-  `nv_id` int(11) NOT NULL,
+  `nv_id` int(11) DEFAULT NULL,
   `ngay_tao` datetime DEFAULT current_timestamp(),
   `trang_thai` enum('cho_duyet','da_duyet','tu_choi') DEFAULT 'cho_duyet' COMMENT 'Trạng thái duyệt bình luận',
   `ngay_duyet` datetime DEFAULT NULL COMMENT 'Ngày duyệt bình luận',
@@ -49,18 +49,14 @@ CREATE TABLE `binh_luan` (
 --
 
 INSERT INTO `binh_luan` (`ma_bl`, `parent_id`, `user_id`, `chuyen_xe_id`, `noi_dung`, `noi_dung_tl`, `so_sao`, `ngay_bl`, `ngay_tl`, `nv_id`, `ngay_tao`, `trang_thai`, `ngay_duyet`, `ly_do_tu_choi`) VALUES
-(1, NULL, 1, 1, 'chao ban', '', 5, '2025-09-30 05:32:07', '2025-10-31 05:32:07', 1, '2025-10-06 17:02:46', 'da_duyet', '2025-09-30 12:32:07', NULL),
 (2, NULL, 2, 2, 'Giá Quá Thấp', '', 4, '2025-09-30 05:33:18', '2025-10-01 05:33:18', 2, '2025-10-06 17:02:46', 'da_duyet', '2025-09-30 12:33:18', NULL),
-(3, NULL, 3, 3, 'Chạy Quá Êm', '1 + 1  = 2', 3, '2025-09-30 05:34:08', '2025-09-30 08:35:41', 1, '2025-10-06 17:02:46', 'da_duyet', '2025-09-30 12:34:08', NULL),
-(4, NULL, 4, 4, 'có cái nịt', 'chao ban nha', 5, '2025-10-01 05:35:40', '2025-09-30 08:36:24', 1, '2025-10-06 17:02:46', 'da_duyet', '2025-10-01 12:35:40', NULL),
-(13, NULL, 1, 15, 'Toi Muon ban Noi CHuyen', '', 5, '2025-10-06 10:09:28', '2025-10-06 10:09:28', 1, '2025-10-06 17:09:28', 'da_duyet', '2025-10-06 17:09:28', NULL),
-(14, NULL, 1, 15, 'Toi Muon ban Noi CHuyen', '', 5, '2025-10-06 10:12:35', '2025-10-06 10:12:35', 1, '2025-10-06 17:12:35', 'da_duyet', '2025-10-06 17:12:35', NULL),
 (21, NULL, 15, 17, 'quá trinh cao', '', 5, '2025-10-07 00:37:35', '2025-10-07 00:37:35', 1, '2025-10-07 07:37:35', 'da_duyet', '2025-10-07 07:37:35', NULL),
 (22, NULL, 15, 17, 'xàm', '', 1, '2025-10-07 00:38:32', '2025-10-07 00:38:32', 1, '2025-10-07 07:38:32', 'tu_choi', NULL, 'xàm'),
 (23, 21, 20, 17, 'ok chưa ban', '', 5, '2025-10-07 00:39:14', '2025-10-07 00:39:14', 1, '2025-10-07 07:39:14', 'da_duyet', '2025-10-07 07:39:14', NULL),
 (24, NULL, 15, 17, '**', '', 5, '2025-10-07 00:42:23', '2025-10-07 00:42:23', 1, '2025-10-07 07:42:23', 'da_duyet', '2025-10-07 07:42:23', NULL),
 (26, 21, 20, 17, 'ok', '', 5, '2025-10-07 00:48:23', '2025-10-07 00:48:23', 1, '2025-10-07 07:48:23', 'da_duyet', '2025-10-07 07:48:23', NULL),
-(27, NULL, 20, 17, 'pp', '', 5, '2025-10-07 00:50:42', '2025-10-07 00:50:42', 1, '2025-10-07 07:50:42', 'da_duyet', '2025-10-07 07:50:42', NULL);
+(27, NULL, 20, 17, 'pp', '', 5, '2025-10-07 00:50:42', '2025-10-07 00:50:42', 1, '2025-10-07 07:50:42', 'da_duyet', '2025-10-07 07:50:42', NULL),
+(29, 27, 31, 17, 'chao', '', NULL, '2025-10-16 21:03:14', '2025-10-16 21:03:14', NULL, '2025-10-17 04:03:14', 'da_duyet', '2025-10-17 04:03:14', NULL);
 
 -- --------------------------------------------------------
 
@@ -170,41 +166,20 @@ INSERT INTO `dat_ve` (`id`, `user_id`, `chuyen_xe_id`, `ma_ve`, `so_ghe`, `ngay_
 (47, 15, 17, 'VE1001', 'A20', '2025-10-06 04:03:56', 'Đã hủy'),
 (49, 2, 14, 'BK20251014022429908', 'B02', '2025-10-14 00:24:29', 'Đã hủy'),
 (64, 34, 1, 'BK20251015034759992', 'A10', '2025-10-15 03:47:59', 'Đã đặt'),
-(68, 1, 1, 'VE001', 'A01', '2025-09-30 05:45:17', 'Đã hủy'),
-(69, 1, 1, 'VE001', 'A02', '2025-09-30 05:45:17', 'Đã hủy'),
-(70, 1, 1, 'VE001', 'A03', '2025-09-30 05:45:17', 'Đã hủy'),
-(71, 1, 1, 'VE002', 'A01', '2025-09-30 05:46:21', 'Đã hủy'),
-(72, 1, 1, 'VE002', 'A02', '2025-09-30 05:46:21', 'Đã hủy'),
-(73, 1, 1, 'VE002', 'A03', '2025-09-30 05:46:21', 'Đã hủy'),
-(74, 3, 3, 'VE003', 'A01', '2025-10-01 05:46:47', 'Đã thanh toán'),
-(75, 3, 3, 'VE003', 'A02', '2025-10-01 05:46:47', 'Đã thanh toán'),
-(76, 3, 3, 'VE003', 'A03', '2025-10-01 05:46:47', 'Đã thanh toán'),
-(77, 4, 4, 'VE004', 'A01', '2025-10-02 05:47:11', 'Đã thanh toán'),
-(78, 4, 4, 'VE004', 'A02', '2025-10-02 05:47:11', 'Đã thanh toán'),
-(79, 4, 4, 'VE004', 'A03', '2025-10-02 05:47:11', 'Đã thanh toán'),
-(80, 5, 5, 'VE005', 'A01', '2025-10-03 05:47:37', 'Đã hủy'),
-(81, 5, 5, 'VE005', 'A02', '2025-10-03 05:47:37', 'Đã hủy'),
-(82, 5, 5, 'VE005', 'A03', '2025-10-03 05:47:37', 'Đã hủy'),
-(83, 6, 6, 'VE006', 'A01', '2025-09-30 05:49:52', 'Đã hủy'),
-(84, 6, 6, 'VE006', 'A02', '2025-09-30 05:49:52', 'Đã hủy'),
-(85, 6, 6, 'VE006', 'A03', '2025-09-30 05:49:52', 'Đã hủy'),
 (86, 31, 7, 'VE07', 'A01', '2025-10-03 06:20:00', 'Đã hủy'),
 (87, 31, 7, 'VE07', 'A02', '2025-10-03 06:20:00', 'Đã hủy'),
 (88, 31, 7, 'VE07', 'A03', '2025-10-03 06:20:00', 'Đã hủy'),
 (89, 31, 7, 'VE07', 'A10', '2025-10-03 06:20:00', 'Đã hủy'),
-(90, 1, 1, 'VE011', 'A01', '2025-10-06 03:27:12', 'Đã hủy'),
-(91, 1, 1, 'VE011', 'A02', '2025-10-06 03:27:12', 'Đã hủy'),
-(92, 1, 1, 'VE011', 'A03', '2025-10-06 03:27:12', 'Đã hủy'),
 (93, 34, 1, 'BK20251015035501962', 'B17', '2025-10-15 03:55:01', 'Đã thanh toán'),
 (94, 34, 1, 'BK20251015035610461', 'B15', '2025-10-15 03:56:10', 'Đã đặt'),
 (95, 34, 1, 'BK20251015040109251', 'A11', '2025-10-15 04:01:09', 'Đã đặt'),
 (96, 34, 1, 'BK20251015040127672', 'A16', '2025-10-15 04:01:27', 'Đã thanh toán'),
 (97, 34, 1, 'BK20251015060206001', 'A05', '2025-10-15 04:02:06', 'Đã thanh toán'),
-(98, 1, 1, 'BK20251015060207002', 'A05', '2025-10-15 04:02:07', 'Đã hủy'),
 (99, 34, 1, 'BK20251015040234723', 'A01', '2025-10-15 04:02:34', 'Đã thanh toán'),
 (100, 34, 1, 'BK20251015040856902', 'A03', '2025-10-15 04:08:56', 'Đã thanh toán'),
 (101, 34, 1, 'BK20251015041346263', 'B16', '2025-10-15 04:13:46', 'Đã thanh toán'),
-(102, 15, 3, 'BK20251015074539353', 'A08', '2025-10-15 07:45:39', 'Đã đặt');
+(102, 15, 3, 'BK20251015074539353', 'A08', '2025-10-15 07:45:39', 'Đã thanh toán'),
+(103, 15, 17, 'BK20251015190202336', 'B17', '2025-10-15 19:02:02', 'Đã đặt');
 
 -- --------------------------------------------------------
 
@@ -288,7 +263,13 @@ CREATE TABLE `migrations` (
 
 INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (1, '2025_10_03_004313_create_sessions_table', 1),
-(2, '2025_10_09_171601_create_contacts_table', 2);
+(2, '2025_10_09_171601_create_contacts_table', 2),
+(3, '2025_10_15_173821_add_ma_nha_xe_to_users_table', 3),
+(4, '2025_10_15_081016_add_profile_fields_to_users_table', 4),
+(5, '2025_10_15_162000_allow_null_so_sao_binh_luan', 4),
+(6, '2025_10_16_051205_allow_null_nv_id_in_binh_luan_table', 4),
+(7, '2025_10_16_075221_add_reset_token_to_users_table', 4),
+(9, '2025_10_16_083259_add_customer_info_to_dat_ve_table', 5);
 
 -- --------------------------------------------------------
 
@@ -399,19 +380,11 @@ CREATE TABLE `tin_tuc` (
 --
 
 INSERT INTO `tin_tuc` (`ma_tin`, `tieu_de`, `noi_dung`, `hinh_anh`, `ngay_dang`, `user_id`, `ma_nha_xe`) VALUES
-(1, 'Khuyến mãi tháng 10', 'Giảm giá 20% cho tuyến Sài Gòn - Cần Thơ', '9af5064f224aee94.png', '2025-09-22 23:24:29', 1, 1),
 (2, 'Mở tuyến mới', 'Khai trương tuyến Hà Nội - Sapa', 'daca0127e0801231.jpg', '2025-09-22 23:24:29', 2, 2),
-(3, 'Tặng quà khách hàng', 'Khách hàng thân thiết nhận quà', '49d3b4769159d90b.jpg', '2025-09-22 23:24:29', 3, 3),
-(4, 'Cập nhật lịch trình', 'Điều chỉnh giờ khởi hành Đà Nẵng - Huế', 'f91ca5ef766de9c9.png', '2025-09-22 23:24:29', 4, 4),
-(5, 'Thông báo nghỉ lễ', 'Nghỉ lễ 2/9 toàn hệ thống', '214242e5eef60213.jpg', '2025-09-22 23:24:29', 5, 5),
-(7, 'Giảm giá cuối tuần', 'Khuyến mãi vé cuối tuần', 'km3.png', '2025-09-22 23:24:29', 7, 7),
-(8, 'Cảnh báo lừa đảo', 'Không chuyển khoản ngoài hệ thống', 'km3.png', '2025-09-22 23:24:29', 8, 8),
-(9, 'Tin tuyển dụng', 'Tuyển tài xế, phụ xe', 'km3.png', '2025-09-22 23:24:29', 9, 9),
-(10, 'Cập nhật ứng dụng', 'App đặt vé mới ra mắt', 'km3.png', '2025-09-22 23:24:29', 10, 10),
-(11, 'Giảm giá cực cháy', 'Nhanh Tay có ngay giảm giá có hạn', 'tin_68e4a351ab1ae_1759814481.jpg', '2025-09-30 11:10:53', 1, 1),
 (12, 'TEST1', 'TEST OK CHUA', '93dd42351ebdbaae.jpg', '2025-10-06 23:00:23', 20, 7),
 (13, 'TEST_THEM', 'TEST_THEM_NHA', '195b68eede786ece.png', '2025-10-07 08:09:19', 32, 15),
-(14, 'Hoang huy', 'Hoang huy', '21c5f37e60a4f0bf.jpg', '2025-10-07 09:33:27', 32, 15);
+(14, 'Hoang huy', 'Hoang huy', '21c5f37e60a4f0bf.jpg', '2025-10-07 09:33:27', 32, 15),
+(17, 'chao bab', 'chao babn', 'tin_tuc/0i4SKF8YEeGx4rsMFc3DPjxRWflI3D1uQHfJfxJY.png', '2025-10-16 15:00:35', 38, NULL);
 
 -- --------------------------------------------------------
 
@@ -437,7 +410,7 @@ INSERT INTO `tram_xe` (`ma_tram_xe`, `ten_tram`, `dia_chi`, `tinh_thanh`, `ma_nh
 (3, 'Bắc Giang', 'Đường Hùng Vương, Thành phố Bắc Giang', 'Bắc Giang', 3),
 (4, 'Bắc Kạn', 'Đường Hùng Vương, Thành phố Bắc Kạn', 'Bắc Kạn', 1),
 (5, 'Bạc Liêu', 'Đường Trần Huỳnh, Thành phố Bạc Liêu', 'Bạc Liêu', 15),
-(6, 'Bắc Ninh', 'Đường Trần Hưng Đạo, Thành phố Bắc Ninh', 'Bắc Ninh', NULL),
+(6, 'Bắc Ninh', 'Đường Trần Hưng Đạo, Thành phố Bắc Ninh', 'Bắc Ninh', 3),
 (7, 'Bến Tre', 'Đường Đồng Khởi, Thành phố Bến Tre', 'Bến Tre', NULL),
 (8, 'Bình Định', 'Đường Trần Hưng Đạo, Thành phố Quy Nhơn', 'Bình Định', NULL),
 (9, 'Bình Dương', 'Đại lộ Bình Dương, Thành phố Thủ Dầu Một', 'Bình Dương', NULL),
@@ -495,7 +468,8 @@ INSERT INTO `tram_xe` (`ma_tram_xe`, `ten_tram`, `dia_chi`, `tinh_thanh`, `ma_nh
 (61, 'Vĩnh Long', 'Đường Hùng Vương, Thành phố Vĩnh Long', 'Vĩnh Long', NULL),
 (62, 'Vĩnh Phúc', 'Đường Trần Phú, Thành phố Vĩnh Yên', 'Vĩnh Phúc', NULL),
 (63, 'Yên Bái', 'Đường Trần Hưng Đạo, Thành phố Yên Bái', 'Yên Bái', NULL),
-(66, 'TEST1', 'TEST', 'TEST', 15);
+(66, 'TEST1', 'TEST', 'TEST', 15),
+(67, 'test_tram', 'test_tram', 'Vĩnh Long', 3);
 
 -- --------------------------------------------------------
 
@@ -578,11 +552,16 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
   `phone` varchar(15) DEFAULT NULL,
+  `address` varchar(255) DEFAULT NULL,
+  `date_of_birth` date DEFAULT NULL,
+  `gender` enum('Nam','Nữ','Khác') DEFAULT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `fullname` varchar(100) DEFAULT NULL,
-  `role` enum('user','admin','bus_owner','staff') DEFAULT 'user',
+  `role` enum('user','admin','bus_owner','staff','driver') DEFAULT 'user',
+  `ma_nha_xe` varchar(10) DEFAULT NULL,
   `reset_token` varchar(255) DEFAULT NULL,
+  `reset_token_expires_at` timestamp NULL DEFAULT NULL,
   `reset_expiry` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
@@ -591,27 +570,17 @@ CREATE TABLE `users` (
 -- Đang đổ dữ liệu cho bảng `users`
 --
 
-INSERT INTO `users` (`id`, `username`, `phone`, `email`, `password`, `fullname`, `role`, `reset_token`, `reset_expiry`, `created_at`) VALUES
-(1, 'user1', '0939206174', 'granarskafel@gmail.com', 'user1@mail.com', 'Nguyen Van A', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(2, 'user2', '0902222222', 'user2@mail.com', 'pass2', 'Tran Thi B', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(3, 'user3', '0903333333', 'user3@mail.com', 'pass3', 'Le Van C', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(4, 'user4', '0904444444', 'user4@mail.com', 'user4@mail.com', 'Pham Thi D', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(5, 'user5', '0905555555', 'user5@mail.com', 'pass5', 'Hoang Van E', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(6, 'user6', '0906666666', 'user6@mail.com', 'pass6', 'Vo Thi F', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(7, 'user7', '0907777777', 'user7@mail.com', 'pass7', 'Dang Van G', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(8, 'user8', '0908888888', 'user8@mail.com', 'pass8', 'Bui Thi H', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(9, 'user9', '0909999999', 'user9@mail.com', 'pass9', 'Do Van I', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(10, 'user10', '0910000000', 'admin1000@gmail.com', 'admin1000@gmail.com', 'Nguyen Thi J', 'admin', NULL, NULL, '2025-09-23 06:24:29'),
-(11, 'user11', '0911111111', 'user11@mail.com', 'pass11', 'Tran Van K', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(12, 'user12', '0912222222', 'user12@mail.com', 'pass12', 'Le Thi L', 'user', NULL, NULL, '2025-09-23 06:24:29'),
-(13, 'busowner', '0913333333', 'busowner@mail.com', '$2y$12$CWSxrf4IZQGNuRsXxkbQl.eCQctzxrE.IeYTwW.DUKFH3GI9NH36i', 'Pham Van M', 'bus_owner', NULL, NULL, '2025-09-23 06:24:29'),
-(14, 'staff', '0914444444', 'staff@mail.com', '$2y$12$oKTFRhJHSMn9aHGm6L.fJue.y3ZqBi/Uy081.8E0Ok7brUug4tsK2', 'Hoang Thi N', 'staff', NULL, NULL, '2025-09-23 06:24:29'),
-(15, 'admin', '0915555555', 'admin@gmail.com', 'admin@gmail.com', 'Admin System', 'admin', NULL, NULL, '2025-09-23 06:24:29'),
-(20, '09390120331', '09390120331', 'vofanh1710@gmail.com', '$2y$10$Yqldr0xo1aprTsWbkNYcMOj1YQMpPeQd2njCv1tTbslMfAMs7mbDy', 'ADMIN1000', 'admin', NULL, NULL, '2025-09-30 05:57:37'),
-(31, 'ADMIN2', '1234567890', 'ADMIN2@gmail.com', '$2y$10$pH12MGthFRwmb2H3iqyHle.ebb1Le31D35qz3c5g8b.ddYEXIXH6q', 'ADMIN2', 'admin', NULL, NULL, '2025-10-04 00:05:43'),
-(32, '0939206179', '0939206179', 'huy@gmail.com', '$2y$10$xUOgvW4BAku4sU1YSO7luOSXsYKkUzicNH7C0o8BVnCIKgC7Yw5FO', 'hoang huy', 'user', NULL, NULL, '2025-10-07 00:44:51'),
-(33, 'testuser', '0123456789', 'test@example.com', '$2y$12$bnWZ6MhzkMXeihjct/4u8uUOEyFAB21YYQ.UqKxeVv/Tn8.LtW6Wm', 'Test User', 'user', NULL, NULL, '2025-10-15 02:56:58'),
-(34, 'thanhloine', '0966421557', 'admin100@gmail.com', '$2y$12$gTQPTsRGg2JlQLTFzUxJwuVYfKh3sFINkrOvqvGJTzF3dBmhGu3Km', 'Lê Thành Lợi', 'user', NULL, NULL, '2025-10-15 03:08:46');
+INSERT INTO `users` (`id`, `username`, `phone`, `address`, `date_of_birth`, `gender`, `email`, `password`, `fullname`, `role`, `ma_nha_xe`, `reset_token`, `reset_token_expires_at`, `reset_expiry`, `created_at`) VALUES
+(2, 'user2', '0902222222', NULL, NULL, NULL, 'user2@mail.com', 'pass2', 'Tran Thi B', 'user', NULL, NULL, NULL, NULL, '2025-09-23 06:24:29'),
+(15, 'admin', '0915555555', NULL, NULL, NULL, 'admin@gmail.com', 'admin@gmail.com', 'Admin System', 'admin', NULL, NULL, NULL, NULL, '2025-09-23 06:24:29'),
+(20, '09390120331', '09390120331', NULL, NULL, NULL, 'vofanh1710@gmail.com', '$2y$10$Yqldr0xo1aprTsWbkNYcMOj1YQMpPeQd2njCv1tTbslMfAMs7mbDy', 'ADMIN1000', 'admin', NULL, NULL, NULL, NULL, '2025-09-30 05:57:37'),
+(31, 'ADMIN2', '1234567890', NULL, NULL, NULL, 'ADMIN2@gmail.com', '$2y$10$pH12MGthFRwmb2H3iqyHle.ebb1Le31D35qz3c5g8b.ddYEXIXH6q', 'ADMIN2', 'admin', NULL, NULL, NULL, NULL, '2025-10-04 00:05:43'),
+(32, '0939206179', '0939206179', NULL, NULL, NULL, 'huy@gmail.com', '$2y$10$xUOgvW4BAku4sU1YSO7luOSXsYKkUzicNH7C0o8BVnCIKgC7Yw5FO', 'hoang huy', 'user', NULL, NULL, NULL, NULL, '2025-10-07 00:44:51'),
+(34, 'thanhloine', '0966421557', NULL, NULL, NULL, 'admin100@gmail.com', '$2y$12$gTQPTsRGg2JlQLTFzUxJwuVYfKh3sFINkrOvqvGJTzF3dBmhGu3Km', 'Lê Thành Lợi', 'user', NULL, NULL, NULL, NULL, '2025-10-15 03:08:46'),
+(35, 'teststaff', '0123456789', NULL, NULL, NULL, 'teststaff@test.com', '$2y$12$f4vG1TblrDoYZtLH8wBgH.2eqs3mK3pGxkCBbwW/0xdnivXBMfWiW', 'Test Staff', 'staff', NULL, NULL, NULL, NULL, '2025-10-15 11:39:47'),
+(36, 'testbusowner', '0987654322', NULL, NULL, NULL, 'testbusowner@test.com', '$2y$12$LuWoJs.nMEc.6JLj9AUcxuan0rOiD7gQ4FGkYmUJHRL91t33ACqyS', 'Test Bus Owner', 'bus_owner', '1', NULL, NULL, NULL, '2025-10-15 11:39:47'),
+(37, 'staff', '0123456789', NULL, NULL, NULL, 'staff@busbooking.com', '$2y$12$yFDq0alVu0ONlq6muzBDx.ILiz7/x4Bw7r/fuEdXEGAJJIulylvaG', 'Staff User', 'staff', NULL, NULL, NULL, NULL, '2025-10-15 11:41:10'),
+(38, 'busowner', '0987654321', NULL, NULL, NULL, 'busower@gmail.com', 'busower@gmail.com', 'Bus Owner', 'bus_owner', '3', NULL, NULL, NULL, '2025-10-15 11:41:24');
 
 -- --------------------------------------------------------
 
@@ -710,7 +679,8 @@ ALTER TABLE `nhan_vien`
 -- Chỉ mục cho bảng `nha_xe`
 --
 ALTER TABLE `nha_xe`
-  ADD PRIMARY KEY (`ma_nha_xe`);
+  ADD PRIMARY KEY (`ma_nha_xe`),
+  ADD UNIQUE KEY `uq_ma_nha_xe` (`ma_nha_xe`);
 
 --
 -- Chỉ mục cho bảng `sessions`
@@ -733,6 +703,7 @@ ALTER TABLE `tin_tuc`
 --
 ALTER TABLE `tram_xe`
   ADD PRIMARY KEY (`ma_tram_xe`),
+  ADD UNIQUE KEY `uq_ma_tram_xe` (`ma_tram_xe`),
   ADD KEY `fk_tramxe_nhaxe` (`ma_nha_xe`);
 
 --
@@ -756,7 +727,9 @@ ALTER TABLE `tu_ngu_nhay_cam`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `username` (`username`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD UNIQUE KEY `email` (`email`),
+  ADD UNIQUE KEY `uq_username` (`username`),
+  ADD UNIQUE KEY `uq_email` (`email`);
 
 --
 -- Chỉ mục cho bảng `ve_khuyenmai`
@@ -774,7 +747,7 @@ ALTER TABLE `ve_khuyenmai`
 -- AUTO_INCREMENT cho bảng `binh_luan`
 --
 ALTER TABLE `binh_luan`
-  MODIFY `ma_bl` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `ma_bl` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
 
 --
 -- AUTO_INCREMENT cho bảng `booking_sessions`
@@ -798,7 +771,7 @@ ALTER TABLE `contact`
 -- AUTO_INCREMENT cho bảng `dat_ve`
 --
 ALTER TABLE `dat_ve`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=103;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
 
 --
 -- AUTO_INCREMENT cho bảng `doanh_thu`
@@ -816,7 +789,7 @@ ALTER TABLE `khuyen_mai`
 -- AUTO_INCREMENT cho bảng `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `nhan_vien`
@@ -834,13 +807,13 @@ ALTER TABLE `nha_xe`
 -- AUTO_INCREMENT cho bảng `tin_tuc`
 --
 ALTER TABLE `tin_tuc`
-  MODIFY `ma_tin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `ma_tin` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT cho bảng `tram_xe`
 --
 ALTER TABLE `tram_xe`
-  MODIFY `ma_tram_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
+  MODIFY `ma_tram_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=68;
 
 --
 -- AUTO_INCREMENT cho bảng `tuyenphobien`
@@ -858,7 +831,7 @@ ALTER TABLE `tu_ngu_nhay_cam`
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT cho bảng `ve_khuyenmai`

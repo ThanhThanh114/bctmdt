@@ -1,0 +1,342 @@
+/* Custom styles for Bus Owner Dashboard - White Theme */
+
+/* Overall white background */
+body {
+    background-color: #ffffff !important;
+}
+
+/* Card animations */
+.card {
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Small box improvements */
+.small-box {
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.small-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.small-box .icon {
+    transition: all 0.3s ease;
+}
+
+.small-box:hover .icon {
+    font-size: 3.5rem;
+}
+
+/* Badge enhancements */
+.badge {
+    font-weight: 500;
+    padding: 6px 12px;
+    border-radius: 20px;
+    transition: all 0.2s ease;
+}
+
+.badge:hover {
+    transform: scale(1.1);
+}
+
+/* Button improvements */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Table hover effect */
+.table-hover tbody tr {
+    transition: all 0.2s ease;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: scale(1.01);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Search box styling */
+.search-box {
+    position: relative;
+}
+
+.search-box input {
+    padding-left: 40px;
+    border-radius: 25px;
+    border: 2px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.search-box input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.search-box i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #999;
+}
+
+/* Filter section - White theme */
+.filter-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    border-radius: 12px;
+    color: #333333;
+    margin-bottom: 20px;
+    border: 1px solid #dee2e6;
+}
+
+.filter-section .form-control {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    color: #333333;
+}
+
+/* Stats card with gradient - White theme */
+.stats-gradient-card {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    color: #333333;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.stats-gradient-card::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.05);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+}
+
+.stats-gradient-card:hover::before {
+    transform: rotate(45deg) translateX(20px);
+}
+
+/* Info box improvements */
+.info-box {
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.info-box:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Progress bar styling */
+.progress {
+    height: 25px;
+    border-radius: 15px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    border-radius: 15px;
+    font-weight: 600;
+    line-height: 25px;
+    transition: width 0.6s ease;
+}
+
+/* Alert improvements */
+.alert {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading spinner */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Card header improvements - White theme */
+.card-header {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    color: #333333;
+    font-weight: 600;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.card-outline.card-primary {
+    border-top: 3px solid #007bff;
+}
+
+.card-outline.card-success {
+    border-top: 3px solid #28a745;
+}
+
+.card-outline.card-warning {
+    border-top: 3px solid #ffc107;
+}
+
+.card-outline.card-danger {
+    border-top: 3px solid #dc3545;
+}
+
+.card-outline.card-info {
+    border-top: 3px solid #17a2b8;
+}
+
+/* Table action buttons */
+.btn-group .btn {
+    margin: 0 2px;
+}
+
+/* Custom pagination */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+    transition: all 0.3s ease;
+}
+
+.pagination .page-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background: transparent;
+    padding: 0;
+    margin-bottom: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: "›";
+    font-size: 1.2em;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .small-box {
+        margin-bottom: 15px;
+    }
+    
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .btn-block {
+        margin-bottom: 10px;
+    }
+}
+
+/* Dark mode support - Override to maintain white theme */
+@media (prefers-color-scheme: dark) {
+    .card {
+        background-color: #ffffff !important;
+        color: #333333 !important;
+    }
+
+    .table {
+        color: #333333 !important;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
+}
+
+/* Ensure white theme even in dark mode preference */
+.card {
+    background-color: #ffffff !important;
+    color: #333333 !important;
+}
+
+.table {
+    color: #333333 !important;
+}
+
+body {
+    background-color: #ffffff !important;
+}
+
+/* Sidebar styling for white theme */
+.sidebar-light-primary .nav-sidebar .nav-link {
+    color: #333333 !important;
+}
+
+.sidebar-light-primary .nav-sidebar .nav-link:hover {
+    background-color: #f8f9fa !important;
+    color: #007bff !important;
+}
+
+.sidebar-light-primary .nav-sidebar .nav-link.active {
+    background-color: #007bff !important;
+    color: #ffffff !important;
+}
+
+/* Navbar styling for white theme */
+.navbar-light {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #e0e0e0 !important;
+}
+
+.navbar-light .navbar-nav .nav-link {
+    color: #333333 !important;
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+    color: #007bff !important;
+}
+
+/* Content wrapper for white theme */
+.content-wrapper {
+    background-color: #ffffff !important;
+}

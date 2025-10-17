@@ -15,10 +15,18 @@ class TramXe extends Model
 
     protected $fillable = [
         'ten_tram',
-        'dia_chi_tram'
+        'dia_chi',
+        'dia_chi_tram',
+        'tinh_thanh',
+        'ma_nha_xe'
     ];
 
     // Relationships
+    public function nhaXe()
+    {
+        return $this->belongsTo(NhaXe::class, 'ma_nha_xe', 'ma_nha_xe');
+    }
+
     public function chuyenXeDi()
     {
         return $this->hasMany(ChuyenXe::class, 'ma_tram_di', 'ma_tram_xe');

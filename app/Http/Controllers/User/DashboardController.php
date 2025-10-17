@@ -74,12 +74,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Popular routes for quick booking - get from bookings
-        $popular_routes = DatVe::select('chuyen_xe_id')
-            ->selectRaw('COUNT(*) as trip_count')
-            ->groupBy('chuyen_xe_id')
+        // Popular routes for quick booking
+        $popular_routes = ChuyenXe::selectRaw("CONCAT(tram_di.ten_tram, ' - ', tram_den.ten_tram) as route_name, COUNT(*) as trip_count")
+            ->join('tram_xe as tram_di', 'chuyen_xe.ma_tram_di', '=', 'tram_di.ma_tram_xe')
+            ->join('tram_xe as tram_den', 'chuyen_xe.ma_tram_den', '=', 'tram_den.ma_tram_xe')
+            ->groupBy('tram_di.ten_tram', 'tram_den.ten_tram')
             ->orderBy('trip_count', 'desc')
-            ->with('chuyenXe.tramDi', 'chuyenXe.tramDen')
             ->limit(6)
             ->get();
 
