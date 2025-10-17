@@ -190,6 +190,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('doanh-thu', App\Http\Controllers\BusOwner\DoanhThuController::class);
         Route::resource('nha-xe', App\Http\Controllers\BusOwner\NhaXeController::class);
         Route::resource('tram-xe', App\Http\Controllers\BusOwner\TramXeController::class);
+        Route::resource('nhan-vien', App\Http\Controllers\BusOwner\NhanVienController::class);
         Route::resource('tin-tuc', App\Http\Controllers\BusOwner\TinTucController::class);
         Route::resource('lien-he', App\Http\Controllers\BusOwner\LienHeController::class);
         // Add more bus owner routes here as needed

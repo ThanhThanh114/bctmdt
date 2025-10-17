@@ -1,13 +1,13 @@
-@extends('layouts.admin')
 
-@section('title', 'Thêm nhà xe mới')
-@section('page-title', 'Thêm nhà xe mới')
-@section('breadcrumb')
-<li class="breadcrumb-item"><a href="{{ route('bus-owner.nha-xe.index') }}">Quản lý Nhà xe</a></li>
+
+<?php $__env->startSection('title', 'Thêm nhà xe mới'); ?>
+<?php $__env->startSection('page-title', 'Thêm nhà xe mới'); ?>
+<?php $__env->startSection('breadcrumb'); ?>
+<li class="breadcrumb-item"><a href="<?php echo e(route('bus-owner.nha-xe.index')); ?>">Quản lý Nhà xe</a></li>
 <li class="breadcrumb-item active">Thêm mới</li>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('content')
+<?php $__env->startSection('content'); ?>
 <div class="container-fluid">
     <div class="row justify-content-center">
         <div class="col-md-10">
@@ -18,14 +18,14 @@
                         Thêm nhà xe mới
                     </h3>
                     <div class="card-tools">
-                        <a href="{{ route('bus-owner.nha-xe.index') }}" class="btn btn-sm btn-light">
+                        <a href="<?php echo e(route('bus-owner.nha-xe.index')); ?>" class="btn btn-sm btn-light">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
                     </div>
                 </div>
 
-                <form action="{{ route('bus-owner.nha-xe.store') }}" method="POST" id="createForm">
-                    @csrf
+                <form action="<?php echo e(route('bus-owner.nha-xe.store')); ?>" method="POST" id="createForm">
+                    <?php echo csrf_field(); ?>
 
                     <div class="card-body">
                         <div class="row">
@@ -37,12 +37,26 @@
                                         Tên nhà xe
                                     </label>
                                     <input type="text"
-                                        class="form-control form-control-lg @error('ten_nha_xe') is-invalid @enderror"
-                                        id="ten_nha_xe" name="ten_nha_xe" value="{{ old('ten_nha_xe') }}"
+                                        class="form-control form-control-lg <?php $__errorArgs = ['ten_nha_xe'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                        id="ten_nha_xe" name="ten_nha_xe" value="<?php echo e(old('ten_nha_xe')); ?>"
                                         placeholder="Nhập tên nhà xe" required maxlength="100">
-                                    @error('ten_nha_xe')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['ten_nha_xe'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     <small class="form-text text-muted">Tối đa 100 ký tự</small>
                                 </div>
                             </div>
@@ -55,12 +69,26 @@
                                         Email
                                     </label>
                                     <input type="email"
-                                        class="form-control form-control-lg @error('email') is-invalid @enderror"
-                                        id="email" name="email" value="{{ old('email') }}"
+                                        class="form-control form-control-lg <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                        id="email" name="email" value="<?php echo e(old('email')); ?>"
                                         placeholder="email@example.com" maxlength="100">
-                                    @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['email'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     <small class="form-text text-muted">Email liên hệ của nhà xe</small>
                                 </div>
                             </div>
@@ -73,13 +101,27 @@
                                         Địa chỉ
                                     </label>
                                     <input type="text"
-                                        class="form-control form-control-lg @error('dia_chi') is-invalid @enderror"
-                                        id="dia_chi" name="dia_chi" value="{{ old('dia_chi') }}"
+                                        class="form-control form-control-lg <?php $__errorArgs = ['dia_chi'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                        id="dia_chi" name="dia_chi" value="<?php echo e(old('dia_chi')); ?>"
                                         placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố" required
                                         maxlength="255">
-                                    @error('dia_chi')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['dia_chi'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     <small class="form-text text-muted">Địa chỉ trụ sở chính</small>
                                 </div>
                             </div>
@@ -92,12 +134,26 @@
                                         Số điện thoại
                                     </label>
                                     <input type="tel"
-                                        class="form-control form-control-lg @error('so_dien_thoai') is-invalid @enderror"
-                                        id="so_dien_thoai" name="so_dien_thoai" value="{{ old('so_dien_thoai') }}"
+                                        class="form-control form-control-lg <?php $__errorArgs = ['so_dien_thoai'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>"
+                                        id="so_dien_thoai" name="so_dien_thoai" value="<?php echo e(old('so_dien_thoai')); ?>"
                                         placeholder="0xxxxxxxxx" required maxlength="15" pattern="[0-9]{10,11}">
-                                    @error('so_dien_thoai')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
+                                    <?php $__errorArgs = ['so_dien_thoai'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                    <div class="invalid-feedback"><?php echo e($message); ?></div>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                     <small class="form-text text-muted">10-11 chữ số</small>
                                 </div>
                             </div>
@@ -124,7 +180,7 @@
                                 </button>
                             </div>
                             <div class="col-md-6 text-right">
-                                <a href="{{ route('bus-owner.nha-xe.index') }}"
+                                <a href="<?php echo e(route('bus-owner.nha-xe.index')); ?>"
                                     class="btn btn-outline-secondary btn-lg">
                                     <i class="fas fa-times mr-2"></i>
                                     Hủy bỏ
@@ -138,7 +194,7 @@
     </div>
 </div>
 
-@push('scripts')
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).ready(function() {
     // Form validation
@@ -163,18 +219,18 @@ $(document).ready(function() {
     });
 
     // Show validation errors if any
-    @if($errors->any())
+    <?php if($errors->any()): ?>
     Swal.fire({
         icon: 'error',
         title: 'Có lỗi xảy ra!',
-        html: '<ul class="text-left">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul>',
+        html: '<ul class="text-left"><?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?><li><?php echo e($error); ?></li><?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?></ul>',
     });
-    @endif
+    <?php endif; ?>
 });
 </script>
-@endpush
+<?php $__env->stopPush(); ?>
 
-@push('styles')
+<?php $__env->startPush('styles'); ?>
 <style>
 .required:after {
     content: " *";
@@ -205,5 +261,7 @@ $(document).ready(function() {
     font-weight: 500;
 }
 </style>
-@endpush
-@endsection
+<?php $__env->stopPush(); ?>
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\bctmdt\resources\views/AdminLTE/bus_owner/nha_xe/create.blade.php ENDPATH**/ ?>

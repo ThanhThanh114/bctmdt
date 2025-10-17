@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Chi tiết Nhà xe'); ?>
 <?php $__env->startSection('page-title', 'Chi tiết Nhà xe'); ?>
 <?php $__env->startSection('breadcrumb'); ?>
@@ -171,8 +169,7 @@
                         </h5>
                         <div class="progress" style="height: 30px;">
                             <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
-                                role="progressbar"
-                                style="width: 75%">
+                                role="progressbar" style="width: 75%">
                                 <strong><?php echo e(number_format($statistics['total_revenue'])); ?> VNĐ</strong>
                             </div>
                         </div>
@@ -266,7 +263,8 @@
                             <i class="fas fa-chart-bar mr-2"></i>
                             Xem doanh thu
                         </a>
-                        <a href="<?php echo e(route('bus-owner.nha-xe.edit', $nhaXe->ma_nha_xe)); ?>" class="btn btn-warning btn-block">
+                        <a href="<?php echo e(route('bus-owner.nha-xe.edit', $nhaXe->ma_nha_xe)); ?>"
+                            class="btn btn-warning btn-block">
                             <i class="fas fa-edit mr-2"></i>
                             Cập nhật thông tin
                         </a>
@@ -281,12 +279,6 @@
 <style>
     .small-box {
         border-radius: 10px;
-        transition: all 0.3s ease;
-    }
-
-    .small-box:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
     .card {

@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Chi tiết Trạm xe'); ?>
 <?php $__env->startSection('page-title', 'Chi tiết Trạm xe'); ?>
 <?php $__env->startSection('breadcrumb'); ?>

@@ -330,7 +330,6 @@
 
     .progress-bar {
         border-radius: 15px;
-        transition: width 0.6s ease;
     }
 </style>
 @endpush

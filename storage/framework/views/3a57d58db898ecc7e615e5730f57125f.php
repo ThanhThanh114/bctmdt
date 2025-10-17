@@ -1,5 +1,3 @@
-
-
 <?php $__env->startSection('title', 'Chi tiết Chuyến xe'); ?>
 <?php $__env->startSection('page-title', 'Chi tiết Chuyến xe #' . $trip->id); ?>
 <?php $__env->startSection('breadcrumb'); ?>
@@ -332,7 +330,6 @@
 
     .progress-bar {
         border-radius: 15px;
-        transition: width 0.6s ease;
     }
 </style>
 <?php $__env->stopPush(); ?>

@@ -130,31 +130,31 @@
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="<?php echo e(route('bus-owner.trips.show', $trip->id)); ?>" 
-                                       class="btn btn-sm btn-info" 
-                                       title="Xem chi tiết"
-                                       data-toggle="tooltip">
+                                    <a href="<?php echo e(route('bus-owner.trips.show', $trip->id)); ?>"
+                                        class="btn btn-sm btn-info"
+                                        title="Xem chi tiết"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <a href="<?php echo e(route('bus-owner.trips.edit', $trip->id)); ?>" 
-                                       class="btn btn-sm btn-warning" 
-                                       title="Chỉnh sửa"
-                                       data-toggle="tooltip">
+                                    <a href="<?php echo e(route('bus-owner.trips.edit', $trip->id)); ?>"
+                                        class="btn btn-sm btn-warning"
+                                        title="Chỉnh sửa"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" 
-                                            class="btn btn-sm btn-danger btn-delete" 
-                                            data-id="<?php echo e($trip->id); ?>"
-                                            data-name="<?php echo e($trip->ten_xe); ?>"
-                                            title="Xóa"
-                                            data-toggle="tooltip">
+                                    <button type="button"
+                                        class="btn btn-sm btn-danger btn-delete"
+                                        data-id="<?php echo e($trip->id); ?>"
+                                        data-name="<?php echo e($trip->ten_xe); ?>"
+                                        title="Xóa"
+                                        data-toggle="tooltip">
                                         <i class="fas fa-trash"></i>
                                     </button>
                                 </div>
-                                <form id="delete-form-<?php echo e($trip->id); ?>" 
-                                      method="POST" 
-                                      action="<?php echo e(route('bus-owner.trips.destroy', $trip->id)); ?>" 
-                                      style="display: none;">
+                                <form id="delete-form-<?php echo e($trip->id); ?>"
+                                    method="POST"
+                                    action="<?php echo e(route('bus-owner.trips.destroy', $trip->id)); ?>"
+                                    style="display: none;">
                                     <?php echo csrf_field(); ?>
                                     <?php echo method_field('DELETE'); ?>
                                 </form>
@@ -301,7 +301,6 @@
         padding: 3px 10px;
         position: relative;
         text-decoration: none;
-        transition: all .15s linear;
     }
 
     .small-box-footer:hover {
@@ -329,46 +328,46 @@
 
 <?php $__env->startPush('scripts'); ?>
 <script>
-$(document).ready(function() {
-    // Initialize tooltips
-    $('[data-toggle="tooltip"]').tooltip();
-    
-    // Handle delete button click with SweetAlert
-    $('.btn-delete').on('click', function() {
-        const tripId = $(this).data('id');
-        const tripName = $(this).data('name');
-        
-        Swal.fire({
-            title: 'Xác nhận xóa?',
-            html: `Bạn có chắc chắn muốn xóa chuyến xe:<br><strong>${tripName}</strong>?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: '<i class="fas fa-trash mr-1"></i> Xóa',
-            cancelButtonText: '<i class="fas fa-times mr-1"></i> Hủy',
-            reverseButtons: true
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Submit the delete form
-                $(`#delete-form-${tripId}`).submit();
+    $(document).ready(function() {
+        // Initialize tooltips
+        $('[data-toggle="tooltip"]').tooltip();
+
+        // Handle delete button click with SweetAlert
+        $('.btn-delete').on('click', function() {
+            const tripId = $(this).data('id');
+            const tripName = $(this).data('name');
+
+            Swal.fire({
+                title: 'Xác nhận xóa?',
+                html: `Bạn có chắc chắn muốn xóa chuyến xe:<br><strong>${tripName}</strong>?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '<i class="fas fa-trash mr-1"></i> Xóa',
+                cancelButtonText: '<i class="fas fa-times mr-1"></i> Hủy',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Submit the delete form
+                    $(`#delete-form-${tripId}`).submit();
+                }
+            });
+        });
+
+        // Auto-submit form on select change
+        $('select[name="loai_xe"], select[name="loai_chuyen"]').on('change', function() {
+            $('#searchForm').submit();
+        });
+
+        // Handle Enter key in search input
+        $('input[name="search"]').on('keypress', function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                $('#searchForm').submit();
             }
         });
     });
-    
-    // Auto-submit form on select change
-    $('select[name="loai_xe"], select[name="loai_chuyen"]').on('change', function() {
-        $('#searchForm').submit();
-    });
-    
-    // Handle Enter key in search input
-    $('input[name="search"]').on('keypress', function(e) {
-        if (e.which === 13) {
-            e.preventDefault();
-            $('#searchForm').submit();
-        }
-    });
-});
 </script>
 <?php $__env->stopPush(); ?>
 <?php echo $__env->make('layouts.admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH E:\bctmdt\resources\views/AdminLTE/bus_owner/trips/index.blade.php ENDPATH**/ ?>

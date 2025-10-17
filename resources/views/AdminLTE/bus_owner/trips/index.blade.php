@@ -300,7 +300,6 @@
         padding: 3px 10px;
         position: relative;
         text-decoration: none;
-        transition: all .15s linear;
     }
 
     .small-box-footer:hover {
