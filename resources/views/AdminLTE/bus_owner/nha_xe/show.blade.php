@@ -167,7 +167,7 @@
                             Doanh thu ước tính
                         </h5>
                         <div class="progress" style="height: 30px;">
-                            <div class="progress-bar bg-success progress-bar-striped progress-bar-animated"
+                            <div class="progress-bar bg-success"
                                 role="progressbar" style="width: 75%">
                                 <strong>{{ number_format($statistics['total_revenue']) }} VNĐ</strong>
                             </div>

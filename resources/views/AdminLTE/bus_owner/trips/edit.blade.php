@@ -50,10 +50,10 @@
                                 <select class="form-control @error('ma_tram_di') is-invalid @enderror"
                                     id="ma_tram_di" name="ma_tram_di">
                                     <option value="">-- Chọn trạm đi --</option>
-                                    @foreach(\App\Models\TramXe::all() as $tram)
+                                    @foreach(\App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get() as $tram)
                                     <option value="{{ $tram->ma_tram_xe }}"
                                         {{ old('ma_tram_di', $trip->ma_tram_di) == $tram->ma_tram_xe ? 'selected' : '' }}>
-                                        {{ $tram->ten_tram }}
+                                        {{ $tram->ten_tram }} - {{ $tram->tinh_thanh }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -67,15 +67,37 @@
                                 <select class="form-control @error('ma_tram_den') is-invalid @enderror"
                                     id="ma_tram_den" name="ma_tram_den">
                                     <option value="">-- Chọn trạm đến --</option>
-                                    @foreach(\App\Models\TramXe::all() as $tram)
+                                    @foreach(\App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get() as $tram)
                                     <option value="{{ $tram->ma_tram_xe }}"
                                         {{ old('ma_tram_den', $trip->ma_tram_den) == $tram->ma_tram_xe ? 'selected' : '' }}>
-                                        {{ $tram->ten_tram }}
+                                        {{ $tram->ten_tram }} - {{ $tram->tinh_thanh }}
                                     </option>
                                     @endforeach
                                 </select>
                                 @error('ma_tram_den')
                                 <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tram_trung_gian">Trạm trung gian (tùy chọn)</label>
+                                @php
+                                $selectedTramTrungGian = [];
+                                if ($trip->tram_trung_gian) {
+                                $selectedTramTrungGian = explode(',', $trip->tram_trung_gian);
+                                }
+                                @endphp
+                                <select class="form-control select2" id="tram_trung_gian" name="tram_trung_gian[]" multiple>
+                                    @foreach(\App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get() as $tram)
+                                    <option value="{{ $tram->ma_tram_xe }}"
+                                        {{ in_array($tram->ma_tram_xe, $selectedTramTrungGian) ? 'selected' : '' }}>
+                                        {{ $tram->ten_tram }} - {{ $tram->tinh_thanh }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <small class="form-text text-muted">Chọn nhiều trạm trung gian (nếu có). Giữ Ctrl để chọn nhiều.</small>
+                                @error('tram_trung_gian')
+                                <span class="invalid-feedback d-block">{{ $message }}</span>
                                 @enderror
                             </div>
 
@@ -165,24 +187,36 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="ten_tai_xe">Tên tài xế</label>
-                                <input type="text" class="form-control @error('ten_tai_xe') is-invalid @enderror"
-                                    id="ten_tai_xe" name="ten_tai_xe" placeholder="VD: Nguyễn Văn A"
-                                    value="{{ old('ten_tai_xe', $trip->ten_tai_xe) }}">
-                                @error('ten_tai_xe')
+                                <label for="tai_xe_id">Tài xế</label>
+                                <select class="form-control @error('tai_xe_id') is-invalid @enderror"
+                                    id="tai_xe_id" name="tai_xe_id">
+                                    <option value="">-- Chọn tài xế --</option>
+                                    @foreach(\App\Models\NhanVien::where('ma_nha_xe', $trip->ma_nha_xe)->where('chuc_vu', 'Tài xế')->get() as $taixe)
+                                    <option value="{{ $taixe->ma_nv }}"
+                                        data-name="{{ $taixe->ten_nv }}"
+                                        data-phone="{{ $taixe->so_dien_thoai }}"
+                                        {{ old('ten_tai_xe', $trip->ten_tai_xe) == $taixe->ten_nv ? 'selected' : '' }}>
+                                        {{ $taixe->ten_nv }} - {{ $taixe->so_dien_thoai }}
+                                    </option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" name="ten_tai_xe" id="ten_tai_xe" value="{{ old('ten_tai_xe', $trip->ten_tai_xe) }}">
+                                <input type="hidden" name="sdt_tai_xe" id="sdt_tai_xe" value="{{ old('sdt_tai_xe', $trip->sdt_tai_xe) }}">
+                                @error('tai_xe_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
+                                <small class="form-text text-muted">Chọn tài xế từ danh sách nhân viên</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="sdt_tai_xe">Số điện thoại tài xế</label>
-                                <input type="text" class="form-control @error('sdt_tai_xe') is-invalid @enderror"
-                                    id="sdt_tai_xe" name="sdt_tai_xe" placeholder="VD: 0912345678"
-                                    value="{{ old('sdt_tai_xe', $trip->sdt_tai_xe) }}">
-                                @error('sdt_tai_xe')
+                                <label for="gio_den">Giờ đến (dự kiến)</label>
+                                <input type="time" class="form-control @error('gio_den') is-invalid @enderror"
+                                    id="gio_den" name="gio_den" value="{{ old('gio_den', $trip->gio_den ? \Carbon\Carbon::parse($trip->gio_den)->format('H:i') : '') }}">
+                                @error('gio_den')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
+                                <small class="form-text text-muted">Thời gian đến dự kiến</small>
                             </div>
                         </div>
                     </div>
@@ -205,9 +239,33 @@
 </div>
 @endsection
 
+@push('styles')
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+@endpush
+
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Initialize Select2 for trạm trung gian
+        $('#tram_trung_gian').select2({
+            theme: 'bootstrap4',
+            placeholder: 'Chọn trạm trung gian',
+            allowClear: true,
+            width: '100%'
+        });
+
+        // Auto fill driver info when selecting from dropdown
+        $('#tai_xe_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var driverName = selectedOption.data('name');
+            var driverPhone = selectedOption.data('phone');
+
+            $('#ten_tai_xe').val(driverName || '');
+            $('#sdt_tai_xe').val(driverPhone || '');
+        });
+
         // Validate form before submit
         $('#so_ve').on('input', function() {
             var soVe = parseInt($(this).val()) || 0;

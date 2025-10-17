@@ -183,7 +183,7 @@
         $('#deleteBtn').on('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             Swal.fire({
                 title: 'Xác nhận xóa?',
                 html: `Bạn có chắc chắn muốn xóa nhân viên:<br><strong>{{ $nhanVien->ten_nv }}</strong>?<br><br><span class="text-danger">Hành động này không thể hoàn tác!</span>`,
@@ -206,7 +206,8 @@
         Swal.fire({
             icon: 'success',
             title: 'Thành công!',
-            text: '{{ session('success') }}',
+            text: '{{ session('
+            success ') }}',
             timer: 3000,
             showConfirmButton: false
         });
@@ -216,7 +217,8 @@
         Swal.fire({
             icon: 'error',
             title: 'Lỗi!',
-            text: '{{ session('error') }}',
+            text: '{{ session('
+            error ') }}',
         });
         @endif
     });
@@ -251,7 +253,7 @@
     .progress-group {
         margin-bottom: 1rem;
     }
-    
+
     /* Ensure links work properly */
     a {
         pointer-events: auto !important;

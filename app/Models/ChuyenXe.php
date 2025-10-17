@@ -21,6 +21,7 @@ class ChuyenXe extends Model
         'sdt_tai_xe',
         'ma_tram_di',
         'ma_tram_den',
+        'tram_trung_gian',
         'ngay_di',
         'gio_di',
         'gio_den',

@@ -69,10 +69,10 @@ endif;
 unset($__errorArgs, $__bag); ?>"
                                     id="ma_tram_di" name="ma_tram_di">
                                     <option value="">-- Chọn trạm đi --</option>
-                                    <?php $__currentLoopData = \App\Models\TramXe::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php $__currentLoopData = \App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($tram->ma_tram_xe); ?>"
                                         <?php echo e(old('ma_tram_di', $trip->ma_tram_di) == $tram->ma_tram_xe ? 'selected' : ''); ?>>
-                                        <?php echo e($tram->ten_tram); ?>
+                                        <?php echo e($tram->ten_tram); ?> - <?php echo e($tram->tinh_thanh); ?>
 
                                     </option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -101,10 +101,10 @@ endif;
 unset($__errorArgs, $__bag); ?>"
                                     id="ma_tram_den" name="ma_tram_den">
                                     <option value="">-- Chọn trạm đến --</option>
-                                    <?php $__currentLoopData = \App\Models\TramXe::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php $__currentLoopData = \App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <option value="<?php echo e($tram->ma_tram_xe); ?>"
                                         <?php echo e(old('ma_tram_den', $trip->ma_tram_den) == $tram->ma_tram_xe ? 'selected' : ''); ?>>
-                                        <?php echo e($tram->ten_tram); ?>
+                                        <?php echo e($tram->ten_tram); ?> - <?php echo e($tram->tinh_thanh); ?>
 
                                     </option>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -115,6 +115,36 @@ if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
                                 <span class="invalid-feedback"><?php echo e($message); ?></span>
+                                <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="tram_trung_gian">Trạm trung gian (tùy chọn)</label>
+                                <?php
+                                $selectedTramTrungGian = [];
+                                if ($trip->tram_trung_gian) {
+                                    $selectedTramTrungGian = explode(',', $trip->tram_trung_gian);
+                                }
+                                ?>
+                                <select class="form-control select2" id="tram_trung_gian" name="tram_trung_gian[]" multiple>
+                                    <?php $__currentLoopData = \App\Models\TramXe::where('ma_nha_xe', $trip->ma_nha_xe)->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tram): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($tram->ma_tram_xe); ?>"
+                                        <?php echo e(in_array($tram->ma_tram_xe, $selectedTramTrungGian) ? 'selected' : ''); ?>>
+                                        <?php echo e($tram->ten_tram); ?> - <?php echo e($tram->tinh_thanh); ?>
+
+                                    </option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                                <small class="form-text text-muted">Chọn nhiều trạm trung gian (nếu có). Giữ Ctrl để chọn nhiều.</small>
+                                <?php $__errorArgs = ['tram_trung_gian'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                <span class="invalid-feedback d-block"><?php echo e($message); ?></span>
                                 <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
@@ -305,8 +335,8 @@ unset($__errorArgs, $__bag); ?>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="ten_tai_xe">Tên tài xế</label>
-                                <input type="text" class="form-control <?php $__errorArgs = ['ten_tai_xe'];
+                                <label for="tai_xe_id">Tài xế</label>
+                                <select class="form-control <?php $__errorArgs = ['tai_xe_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -314,9 +344,21 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                    id="ten_tai_xe" name="ten_tai_xe" placeholder="VD: Nguyễn Văn A"
-                                    value="<?php echo e(old('ten_tai_xe', $trip->ten_tai_xe)); ?>">
-                                <?php $__errorArgs = ['ten_tai_xe'];
+                                    id="tai_xe_id" name="tai_xe_id">
+                                    <option value="">-- Chọn tài xế --</option>
+                                    <?php $__currentLoopData = \App\Models\NhanVien::where('ma_nha_xe', $trip->ma_nha_xe)->where('chuc_vu', 'Tài xế')->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $taixe): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <option value="<?php echo e($taixe->ma_nv); ?>"
+                                        data-name="<?php echo e($taixe->ten_nv); ?>"
+                                        data-phone="<?php echo e($taixe->so_dien_thoai); ?>"
+                                        <?php echo e(old('ten_tai_xe', $trip->ten_tai_xe) == $taixe->ten_nv ? 'selected' : ''); ?>>
+                                        <?php echo e($taixe->ten_nv); ?> - <?php echo e($taixe->so_dien_thoai); ?>
+
+                                    </option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                                <input type="hidden" name="ten_tai_xe" id="ten_tai_xe" value="<?php echo e(old('ten_tai_xe', $trip->ten_tai_xe)); ?>">
+                                <input type="hidden" name="sdt_tai_xe" id="sdt_tai_xe" value="<?php echo e(old('sdt_tai_xe', $trip->sdt_tai_xe)); ?>">
+                                <?php $__errorArgs = ['tai_xe_id'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -326,12 +368,13 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                                <small class="form-text text-muted">Chọn tài xế từ danh sách nhân viên</small>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="sdt_tai_xe">Số điện thoại tài xế</label>
-                                <input type="text" class="form-control <?php $__errorArgs = ['sdt_tai_xe'];
+                                <label for="gio_den">Giờ đến (dự kiến)</label>
+                                <input type="time" class="form-control <?php $__errorArgs = ['gio_den'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -339,9 +382,8 @@ $message = $__bag->first($__errorArgs[0]); ?> is-invalid <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>"
-                                    id="sdt_tai_xe" name="sdt_tai_xe" placeholder="VD: 0912345678"
-                                    value="<?php echo e(old('sdt_tai_xe', $trip->sdt_tai_xe)); ?>">
-                                <?php $__errorArgs = ['sdt_tai_xe'];
+                                    id="gio_den" name="gio_den" value="<?php echo e(old('gio_den', $trip->gio_den ? \Carbon\Carbon::parse($trip->gio_den)->format('H:i') : '')); ?>">
+                                <?php $__errorArgs = ['gio_den'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -351,6 +393,7 @@ $message = $__bag->first($__errorArgs[0]); ?>
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                                <small class="form-text text-muted">Thời gian đến dự kiến</small>
                             </div>
                         </div>
                     </div>
@@ -373,9 +416,33 @@ unset($__errorArgs, $__bag); ?>
 </div>
 <?php $__env->stopSection(); ?>
 
+<?php $__env->startPush('styles'); ?>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
+<?php $__env->stopPush(); ?>
+
 <?php $__env->startPush('scripts'); ?>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Initialize Select2 for trạm trung gian
+        $('#tram_trung_gian').select2({
+            theme: 'bootstrap4',
+            placeholder: 'Chọn trạm trung gian',
+            allowClear: true,
+            width: '100%'
+        });
+        
+        // Auto fill driver info when selecting from dropdown
+        $('#tai_xe_id').on('change', function() {
+            var selectedOption = $(this).find('option:selected');
+            var driverName = selectedOption.data('name');
+            var driverPhone = selectedOption.data('phone');
+
+            $('#ten_tai_xe').val(driverName || '');
+            $('#sdt_tai_xe').val(driverPhone || '');
+        });
+
         // Validate form before submit
         $('#so_ve').on('input', function() {
             var soVe = parseInt($(this).val()) || 0;

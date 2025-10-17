@@ -64,8 +64,10 @@ class TripsController extends Controller
         $validated = $request->validate([
             'ma_xe' => 'nullable|string|max:50',
             'ten_xe' => 'required|string|max:255',
-            'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
-            'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
+            'ma_tram_di' => 'required|exists:tram_xe,ma_tram_xe',
+            'ma_tram_den' => 'required|exists:tram_xe,ma_tram_xe',
+            'tram_trung_gian' => 'nullable|array',
+            'tram_trung_gian.*' => 'exists:tram_xe,ma_tram_xe',
             'ngay_di' => 'required|date|after_or_equal:today',
             'gio_di' => 'required|date_format:H:i',
             'loai_xe' => 'nullable|string|max:100',
@@ -78,6 +80,8 @@ class TripsController extends Controller
             'gio_den' => 'nullable|date_format:H:i',
         ], [
             'ten_xe.required' => 'Vui lòng nhập tên chuyến xe',
+            'ma_tram_di.required' => 'Vui lòng chọn trạm đi',
+            'ma_tram_den.required' => 'Vui lòng chọn trạm đến',
             'ngay_di.required' => 'Vui lòng chọn ngày đi',
             'ngay_di.after_or_equal' => 'Ngày đi phải từ hôm nay trở đi',
             'gio_di.required' => 'Vui lòng nhập giờ đi',
@@ -98,12 +102,19 @@ class TripsController extends Controller
             $validated['ma_xe'] = 'XE' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
         }
 
+        // Convert array trạm trung gian thành chuỗi
+        $tramTrungGian = null;
+        if (isset($validated['tram_trung_gian']) && is_array($validated['tram_trung_gian'])) {
+            $tramTrungGian = implode(',', array_filter($validated['tram_trung_gian']));
+        }
+
         ChuyenXe::create([
             'ma_xe' => $validated['ma_xe'],
             'ma_nha_xe' => $bus_company->ma_nha_xe,
             'ten_xe' => $validated['ten_xe'],
             'ma_tram_di' => $validated['ma_tram_di'] ?? null,
             'ma_tram_den' => $validated['ma_tram_den'] ?? null,
+            'tram_trung_gian' => $tramTrungGian,
             'ngay_di' => $validated['ngay_di'],
             'gio_di' => $validated['gio_di'],
             'loai_xe' => $validated['loai_xe'] ?? null,
@@ -164,8 +175,10 @@ class TripsController extends Controller
         $validated = $request->validate([
             'ma_xe' => 'nullable|string|max:50',
             'ten_xe' => 'required|string|max:255',
-            'ma_tram_di' => 'nullable|exists:tram_xe,ma_tram_xe',
-            'ma_tram_den' => 'nullable|exists:tram_xe,ma_tram_xe',
+            'ma_tram_di' => 'required|exists:tram_xe,ma_tram_xe',
+            'ma_tram_den' => 'required|exists:tram_xe,ma_tram_xe',
+            'tram_trung_gian' => 'nullable|array',
+            'tram_trung_gian.*' => 'exists:tram_xe,ma_tram_xe',
             'ngay_di' => 'required|date',
             'gio_di' => 'required|date_format:H:i',
             'loai_xe' => 'nullable|string|max:100',
@@ -176,7 +189,15 @@ class TripsController extends Controller
             'ten_tai_xe' => 'nullable|string|max:255',
             'sdt_tai_xe' => 'nullable|string|max:20',
             'gio_den' => 'nullable|date_format:H:i',
+        ], [
+            'ma_tram_di.required' => 'Vui lòng chọn trạm đi',
+            'ma_tram_den.required' => 'Vui lòng chọn trạm đến',
         ]);
+
+        // Convert array trạm trung gian thành chuỗi
+        if (isset($validated['tram_trung_gian']) && is_array($validated['tram_trung_gian'])) {
+            $validated['tram_trung_gian'] = implode(',', array_filter($validated['tram_trung_gian']));
+        }
 
         $trip->update($validated);
 

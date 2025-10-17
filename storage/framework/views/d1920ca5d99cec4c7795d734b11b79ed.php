@@ -315,7 +315,6 @@
         position: absolute;
         right: 15px;
         top: 15px;
-        transition: all .3s linear;
     }
 
     .bg-info {

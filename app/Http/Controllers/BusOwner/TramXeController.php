@@ -20,8 +20,8 @@ class TramXeController extends Controller
                 ->with('warning', 'Bạn chưa được gán cho nhà xe nào.');
         }
 
-        // Build query with search
-        $query = TramXe::with('nhaXe');
+        // Build query with search - CHỈ LẤY TRẠM CỦA NHÀ XE NÀY
+        $query = TramXe::with('nhaXe')->where('ma_nha_xe', $busCompany->ma_nha_xe);
 
         // Search functionality
         if ($request->has('search') && $request->search != '') {
@@ -34,7 +34,7 @@ class TramXeController extends Controller
             });
         }
 
-        // Get all stations with bus company info
+        // Get stations of this bus company only
         $tramXe = $query->orderBy('ma_tram_xe', 'asc')->paginate(20);
 
         return view('AdminLTE.bus_owner.tram_xe.index', compact('tramXe', 'busCompany'));
