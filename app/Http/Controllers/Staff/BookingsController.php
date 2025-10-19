@@ -1,94 +1,130 @@
 <?php
-
 namespace App\Http\Controllers\Staff;
-
 use App\Http\Controllers\Controller;
 use App\Models\DatVe;
 use App\Models\ChuyenXe;
 use Illuminate\Http\Request;
-
 class BookingsController extends Controller
 {
 
     public function index(Request $request)
     {
-        $query = DatVe::with(['user', 'chuyenXe']);
+        $query = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
 
-        // Filter by status
-        if ($request->filled('status')) {
-            $query->whereStatus($request->status);
+        // Filter by ma_ve
+        if ($request->filled('ma_ve')) {
+            $query->where('ma_ve', 'like', '%' . $request->ma_ve . '%');
         }
 
-        // Filter by date
-        if ($request->filled('date')) {
-            $query->whereDate('ngay_dat', $request->date);
+        // Filter by trang_thai
+        if ($request->filled('trang_thai')) {
+            $query->where('trang_thai', $request->trang_thai);
         }
 
-        // Search by booking ID or customer name
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhereHas('user', function ($userQuery) use ($search) {
-                        $userQuery->where('fullname', 'like', "%{$search}%")
-                            ->orWhere('username', 'like', "%{$search}%");
-                    });
+        // Filter by ngay_dat
+        if ($request->filled('ngay_dat')) {
+            $query->whereDate('ngay_dat', $request->ngay_dat);
+        }
+
+        // Search by user name
+        if ($request->filled('user')) {
+            $search = $request->user;
+            $query->whereHas('user', function ($userQuery) use ($search) {
+                $userQuery->where('fullname', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             });
         }
 
-        $bookings = $query->orderBy('ngay_dat', 'desc')->paginate(10);
+        $datVe = $query->orderBy('ngay_dat', 'desc')->paginate(15);
 
-        return view('AdminLTE.staff.bookings.index', compact('bookings'));
+        // Statistics
+        $stats = [
+            'total' => DatVe::count(),
+            'da_dat' => DatVe::where('trang_thai', 'Đã đặt')->count(),
+            'da_thanh_toan' => DatVe::where('trang_thai', 'Đã thanh toán')->count(),
+            'da_huy' => DatVe::where('trang_thai', 'Đã hủy')->count(),
+        ];
+
+        return view('AdminLTE.staff.bookings.index', compact('datVe', 'stats'));
     }
 
     public function show(DatVe $booking)
+
+    
+        
+          
+    
+
+        
+        Expand All
+    
+    @@ -51,25 +61,37 @@ public function show(DatVe $booking)
+  
     {
         $booking->load(['user', 'chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
-
         return view('AdminLTE.staff.bookings.show', compact('booking'));
     }
-
     public function updateStatus(Request $request, DatVe $booking)
     {
         $request->validate([
-            'status' => 'required|in:pending,confirmed,cancelled',
+            'status' => 'required|string',
             'notes' => 'nullable|string|max:500'
         ]);
 
-        $oldStatus = $booking->status;
-        $booking->update([
-            'status' => $request->status
-            // 'staff_notes' => $request->notes  // Commented out - column doesn't exist in database yet
-        ]);
+        // Map English status to Vietnamese status
+        $statusMap = [
+            'pending' => 'Đã đặt',
+            'confirmed' => 'Đã xác nhận',
+            'cancelled' => 'Đã hủy',
+            'Đã đặt' => 'Đã đặt',
+            'Đã thanh toán' => 'Đã thanh toán',
+            'Đã xác nhận' => 'Đã xác nhận',
+            'Đã hủy' => 'Đã hủy'
+        ];
 
-        // Store notes separately if needed (you can add staff_notes column to dat_ve table later)
-        // For now, we'll just update the status
+        $newStatus = $statusMap[$request->status] ?? $request->status;
 
-        // If booking is confirmed, you might want to update available seats
-        if ($request->status === 'confirmed' && $oldStatus !== 'confirmed') {
-            // Logic to update available seats if needed
+        // Update using direct assignment and save
+        $booking->trang_thai = $newStatus;
+        $booking->save();
+
+        // Check if it's an AJAX request
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Trạng thái đặt vé đã được cập nhật thành công'
+            ]);
         }
 
-        return redirect()->back()->with('success', 'Trạng thái đặt vé đã được cập nhật.');
+        // Otherwise redirect back with success message
+        return redirect()->back()->with('success', 'Trạng thái đặt vé đã được cập nhật thành công');
     }
 
     public function todayBookings()
+
+    
+          
+            
+    
+
+          
+          Expand Down
+    
+    
+  
     {
         $today_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereDate('ngay_dat', date('Y-m-d'))
             ->orderBy('ngay_dat', 'desc')
             ->get();
-
         return view('AdminLTE.staff.bookings.today', compact('today_bookings'));
     }
-
     public function pendingBookings()
     {
         $pending_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereStatus('pending')
             ->orderBy('ngay_dat', 'asc')
             ->paginate(10);
-
         return view('AdminLTE.staff.bookings.pending', compact('pending_bookings'));
     }
 }
