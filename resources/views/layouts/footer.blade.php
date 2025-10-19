@@ -205,7 +205,7 @@
 </footer>
 
 <!-- FUTA Chat Widget - Clean File Version -->
-<script src="/assets/js/futa-chat.js"></script>
+<script src="/assets/js/futa-chat.js?v={{ time() }}"></script>
 <script>
     // Initialize the chat widget when DOM is ready
     document.addEventListener('DOMContentLoaded', function () {

@@ -5,7 +5,8 @@ use Inertia\Inertia;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ContactController;
-use App\Http\Controllers\HomeController;;
+use App\Http\Controllers\HomeController;
+;
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\InvoiceController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ChatController;
 
 
 // Auth Routes

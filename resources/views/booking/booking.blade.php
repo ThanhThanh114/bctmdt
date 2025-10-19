@@ -157,50 +157,52 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.tailwindcss.com?v=1760337091"></script>
-<script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    'green': '#059669',
-                    'orange': '#ea5a47',
-                    'gray': '#6b7280'
+    <script src="https://cdn.tailwindcss.com?v=1760337091"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'green': '#059669',
+                        'orange': '#ea5a47',
+                        'gray': '#6b7280'
+                    }
                 }
             }
         }
-    }
-</script>
+    </script>
 
-<!-- FUTA Chat Widget - Clean File Version -->
-<script src="{{ asset('assets/js/futa-chat.js') }}"></script>
-<script>
-    // Initialize the chat widget when DOM is ready
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log('🚀 Initializing FUTA Chat Widget...');
+    <!-- FUTA Chat Widget - Clean File Version -->
+    <script src="{{ asset('assets/js/futa-chat.js') }}?v={{ time() }}"></script>
 
-        // Create and initialize the widget
-        if (typeof FUTAChatWidget !== 'undefined') {
-            new FUTAChatWidget();
-            console.log('✅ FUTA Chat Widget loaded successfully!');
-        } else {
-            console.error('❌ FUTAChatWidget class not found!');
-        }
-    });
-</script>
-<script>
-    // Animation cho các card
-    document.addEventListener('DOMContentLoaded', function () {
-        const cards = document.querySelectorAll('.trip-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            setTimeout(() => {
-                card.style.transition = 'all 0.6s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
+    <script>
+        // Initialize the chat widget when DOM is ready
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('🚀 Initializing FUTA Chat Widget...');
+
+            // Create and initialize the widget
+            if (typeof FUTAChatWidget !== 'undefined') {
+                new FUTAChatWidget();
+                console.log('✅ FUTA Chat Widget loaded successfully!');
+            } else {
+                console.error('❌ FUTAChatWidget class not found!');
+            }
         });
-    });
-</script>
-@endsection
+    </script>
+
+    <script>
+        // Animation cho các card
+        document.addEventListener('DOMContentLoaded', function () {
+            const cards = document.querySelectorAll('.trip-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+    </script>
+@endpush

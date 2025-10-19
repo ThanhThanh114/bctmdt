@@ -17,10 +17,29 @@ class NewsController extends Controller
             $current_page = 1;
         }
 
-        // Lấy tổng số bài viết
-        $total_records = DB::table('tin_tuc')->count();
+        // Tính OFFSET để lấy dữ liệu cho trang hiện tại
+        $offset = ($current_page - 1) * $records_per_page;
 
-        // Tính tổng số trang
+        // Tối ưu: Chỉ select các cột cần thiết thay vì SELECT *
+        $select_columns = ['ma_tin', 'tieu_de', 'noi_dung', 'hinh_anh', 'ngay_dang'];
+
+        // Fetch news for the "Tin tức nổi bật" section (top 10 latest news)
+        $highlight_news = DB::table('tin_tuc')
+            ->select($select_columns)
+            ->orderBy('ngay_dang', 'desc')
+            ->limit(10)
+            ->get();
+
+        // Fetch news for the "Tất cả tin tức" section with pagination
+        $all_news = DB::table('tin_tuc')
+            ->select($select_columns)
+            ->orderBy('ngay_dang', 'desc')
+            ->offset($offset)
+            ->limit($records_per_page)
+            ->get();
+
+        // Tối ưu: Tính total_pages chỉ khi cần (có pagination)
+        $total_records = DB::table('tin_tuc')->count();
         $total_pages = ceil($total_records / $records_per_page);
 
         // Đảm bảo trang hiện tại không vượt quá tổng số trang
@@ -28,36 +47,27 @@ class NewsController extends Controller
             $current_page = $total_pages;
         }
 
-        // Tính OFFSET để lấy dữ liệu cho trang hiện tại
-        $offset = ($current_page - 1) * $records_per_page;
-
-        // Fetch news for the "Tin tức nổi bật" section (top 3 latest news)
-        $highlight_news = DB::table('tin_tuc')
-            ->orderBy('ngay_dang', 'desc')
-            ->limit(3)
-            ->get();
-
-        // Fetch news for the "Tất cả tin tức" section with pagination
-        $all_news = DB::table('tin_tuc')
-            ->orderBy('ngay_dang', 'desc')
-            ->offset($offset)
-            ->limit($records_per_page)
-            ->get();
-
         return view('news.news', compact('highlight_news', 'all_news', 'current_page', 'total_pages'));
     }
 
     public function show($id)
-{
-    // Lấy thông tin chi tiết tin tức theo ID
-    $news = DB::table('tin_tuc')->where('ma_tin', $id)->first();
+    {
+        // Lấy thông tin chi tiết tin tức theo ID
+        $news = DB::table('tin_tuc')->where('ma_tin', $id)->first();
 
-    if (!$news) {
-        abort(404); // Nếu không tìm thấy tin tức, trả về lỗi 404
+        if (!$news) {
+            abort(404); // Nếu không tìm thấy tin tức, trả về lỗi 404
+        }
+
+        // Lấy 4 tin tức liên quan (mới nhất, không bao gồm tin hiện tại)
+        $related_news = DB::table('tin_tuc')
+            ->where('ma_tin', '!=', $id)
+            ->orderBy('ngay_dang', 'desc')
+            ->limit(4)
+            ->get();
+
+        return view('news.show', compact('news', 'related_news'));
     }
-
-    return view('news.show', compact('news'));
-}
 
     public function __construct()
     {
@@ -70,3 +80,4 @@ class NewsController extends Controller
     }
 
 }
+
