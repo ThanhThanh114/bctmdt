@@ -24,26 +24,49 @@ if (empty($message)) {
     exit;
 }
 
-// Gemini API Configuration
-$apiKey = 'AIzaSyAf1CCFAqfOowuQfkP0YoFb_PS5N6uJULg';
-$apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={$apiKey}";
+// Gemini API Configuration - Updated Oct 2025
+// Project: tmdt (gen-lang-client-0650091375)
+// Model: gemini-2.5-flash (latest, fastest)
+$apiKey = getenv('GEMINI_API_KEY') ?: 'AIzaSyAf1CCFAqfOowuQfkP0YoFb_PS5N6uJULg';
+$apiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={$apiKey}";
 
-// Prepare prompt for FUTA context
-$systemPrompt = "Bạn là Minh - tư vấn viên AI thân thiện và chuyên nghiệp của FUTA Bus Lines (Phương Trang - hãng xe khách hàng đầu Việt Nam).
+// Prepare enhanced prompt for FUTA context
+$systemPrompt = "Bạn là Minh - tư vấn viên AI thân thiện của FUTA Bus Lines.
 
-Nhiệm vụ của bạn:
-- Tư vấn về các tuyến xe, giá vé, lịch trình
-- Hướng dẫn đặt vé online
-- Giải đáp thắc mắc về dịch vụ
-- Luôn thân thiện, nhiệt tình và sử dụng emoji phù hợp
+🎯 NHIỆM VỤ:
+- Tư vấn tuyến xe, giá vé, lịch trình đi từ Hà Nội, TP.HCM đến các tỉnh
+- Hướng dẫn đặt vé online trên website
+- Giải đáp về chính sách hủy vé, đổi vé, hoàn tiền
+- Tư vấn khuyến mãi, ưu đãi cho khách hàng thân thiết
 
-Thông tin cơ bản:
-- Hotline: 1900 6067
+📋 THÔNG TIN FUTA:
+- Hotline hỗ trợ: 1900 6067 (24/7)
 - Website: futabus.vn
-- Giá vé dao động từ 100.000đ - 500.000đ tùy tuyến
-- Có thể đặt vé qua website, app hoặc tại bến xe
+- Giá vé: 100.000đ - 500.000đ/vé (tùy tuyến)
+- Đặt vé: Website, App FUTA, Tại bến xe
+- Tuyến hot: HCM-Đà Lạt, HCM-Nha Trang, HN-Hải Phòng, HN-Vinh
 
-Hãy trả lời ngắn gọn, súc tích và hữu ích. Câu hỏi của khách:";
+🚌 LOẠI XE:
+- Giường nằm cao cấp (limousine)
+- Ghế ngồi phòng đôi VIP
+- Xe khách thường (ghế ngồi)
+
+💳 THANH TOÁN:
+- Chuyển khoản ngân hàng
+- Ví điện tử (Momo, ZaloPay)
+- Thanh toán tại bến
+
+🎁 ƯU ĐÃI:
+- Giảm 10% cho khách đặt vé lần đầu
+- Tích điểm đổi quà cho khách thân thiết
+- Giảm giá nhóm từ 5 người trở lên
+
+📌 LƯU Ý:
+- Trả lời ngắn gọn, dễ hiểu, có emoji
+- Nếu không chắc thông tin → gợi ý gọi Hotline 1900 6067
+- Luôn lịch sự, nhiệt tình
+
+Câu hỏi khách hàng:";
 
 $requestData = [
     'contents' => [
@@ -54,8 +77,29 @@ $requestData = [
         ]
     ],
     'generationConfig' => [
-        'temperature' => 0.7,
-        'maxOutputTokens' => 500,
+        'temperature' => 0.8,
+        'topP' => 0.95,
+        'topK' => 40,
+        'maxOutputTokens' => 800,
+        'stopSequences' => []
+    ],
+    'safetySettings' => [
+        [
+            'category' => 'HARM_CATEGORY_HARASSMENT',
+            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+        ],
+        [
+            'category' => 'HARM_CATEGORY_HATE_SPEECH',
+            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+        ],
+        [
+            'category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT',
+            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+        ],
+        [
+            'category' => 'HARM_CATEGORY_DANGEROUS_CONTENT',
+            'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'
+        ]
     ]
 ];
 

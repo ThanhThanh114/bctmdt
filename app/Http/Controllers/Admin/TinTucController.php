@@ -71,26 +71,40 @@ class TinTucController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'required|string|max:200',
             'noi_dung' => 'required|string',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_type' => 'required|in:file,url',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_url' => 'nullable|url|max:500',
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ], [
             'tieu_de.required' => 'Vui lòng nhập tiêu đề',
             'noi_dung.required' => 'Vui lòng nhập nội dung',
+            'image_type.required' => 'Vui lòng chọn loại hình ảnh',
             'hinh_anh.image' => 'File phải là hình ảnh',
-            'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif',
-            'hinh_anh.max' => 'Kích thước hình ảnh không được vượt quá 2MB',
+            'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp',
+            'hinh_anh.max' => 'Kích thước hình ảnh không được vượt quá 5MB',
+            'image_url.url' => 'URL hình ảnh không hợp lệ',
         ]);
 
-        // Xử lý upload hình ảnh
-        if ($request->hasFile('hinh_anh')) {
+        // Xử lý hình ảnh theo loại
+        if ($request->image_type === 'url' && $request->filled('image_url')) {
+            // Sử dụng URL trực tiếp
+            $validated['hinh_anh'] = $request->image_url;
+        } elseif ($request->image_type === 'file' && $request->hasFile('hinh_anh')) {
+            // Upload file từ máy
             $image = $request->file('hinh_anh');
-            $imageName = 'tin_' . Str::random(16) . '_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('assets/image'), $imageName);
-            $validated['hinh_anh'] = $imageName;
+            $imageName = 'news_' . Str::random(16) . '_' . time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('assets/images/news'), $imageName);
+            $validated['hinh_anh'] = '/assets/images/news/' . $imageName;
+        } else {
+            $validated['hinh_anh'] = null;
         }
 
         $validated['user_id'] = auth()->id();
         $validated['ngay_dang'] = now();
+
+        // Loại bỏ field không cần thiết
+        unset($validated['image_type']);
+        unset($validated['image_url']);
 
         TinTuc::create($validated);
 
@@ -126,28 +140,49 @@ class TinTucController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'required|string|max:200',
             'noi_dung' => 'required|string',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_type' => 'required|in:file,url',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_url' => 'nullable|url|max:500',
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ], [
             'tieu_de.required' => 'Vui lòng nhập tiêu đề',
             'noi_dung.required' => 'Vui lòng nhập nội dung',
+            'image_type.required' => 'Vui lòng chọn loại hình ảnh',
             'hinh_anh.image' => 'File phải là hình ảnh',
-            'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif',
-            'hinh_anh.max' => 'Kích thước hình ảnh không được vượt quá 2MB',
+            'hinh_anh.mimes' => 'Hình ảnh phải có định dạng: jpeg, png, jpg, gif, webp',
+            'hinh_anh.max' => 'Kích thước hình ảnh không được vượt quá 5MB',
+            'image_url.url' => 'URL hình ảnh không hợp lệ',
         ]);
 
-        // Xử lý upload hình ảnh mới
-        if ($request->hasFile('hinh_anh')) {
-            // Xóa hình ảnh cũ nếu có
-            if ($tintuc->hinh_anh && file_exists(public_path('assets/image/' . $tintuc->hinh_anh))) {
-                unlink(public_path('assets/image/' . $tintuc->hinh_anh));
+        // Xử lý hình ảnh theo loại
+        if ($request->image_type === 'url' && $request->filled('image_url')) {
+            // Xóa ảnh cũ nếu là file upload (không phải URL)
+            if ($tintuc->hinh_anh && !filter_var($tintuc->hinh_anh, FILTER_VALIDATE_URL)) {
+                $oldImagePath = public_path($tintuc->hinh_anh);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
             }
-
+            // Sử dụng URL mới
+            $validated['hinh_anh'] = $request->image_url;
+        } elseif ($request->image_type === 'file' && $request->hasFile('hinh_anh')) {
+            // Xóa ảnh cũ nếu là file upload (không phải URL)
+            if ($tintuc->hinh_anh && !filter_var($tintuc->hinh_anh, FILTER_VALIDATE_URL)) {
+                $oldImagePath = public_path($tintuc->hinh_anh);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
+            // Upload file mới
             $image = $request->file('hinh_anh');
-            $imageName = 'tin_' . Str::random(16) . '_' . time() . '.' . $image->getClientOriginalExtension();
-            $image->move(public_path('assets/image'), $imageName);
-            $validated['hinh_anh'] = $imageName;
+            $imageName = 'news_' . Str::random(16) . '_' . time() . '.' . $image->getClientOriginalExtension();
+            $image->move(public_path('assets/images/news'), $imageName);
+            $validated['hinh_anh'] = '/assets/images/news/' . $imageName;
         }
+
+        // Loại bỏ field không cần thiết
+        unset($validated['image_type']);
+        unset($validated['image_url']);
 
         $tintuc->update($validated);
 

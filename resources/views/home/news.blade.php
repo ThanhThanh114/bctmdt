@@ -18,10 +18,19 @@
                         <div class="swiper-slide">
                             <div class="news-card">
                                 <div class="news-image">
-                                    @if($news->hinh_anh && file_exists(public_path('assets/images/' . $news->hinh_anh)))
-                                        <img src="{{ asset('assets/images/' . $news->hinh_anh) }}" alt="{{ $news->tieu_de }}">
+                                    @if($news->hinh_anh)
+                                        @if(filter_var($news->hinh_anh, FILTER_VALIDATE_URL))
+                                            {{-- Ảnh từ URL --}}
+                                            <img src="{{ $news->hinh_anh }}" alt="{{ htmlspecialchars($news->tieu_de) }}" loading="lazy"
+                                                onerror="this.src='{{ asset('assets/images/header.jpg') }}'">
+                                        @else
+                                            {{-- Ảnh upload --}}
+                                            <img src="{{ asset($news->hinh_anh) }}" alt="{{ htmlspecialchars($news->tieu_de) }}"
+                                                loading="lazy" onerror="this.src='{{ asset('assets/images/header.jpg') }}'">
+                                        @endif
                                     @else
-                                        <img src="{{ asset('assets/images/header.jpg') }}" alt="{{ $news->tieu_de }}">
+                                        <img src="{{ asset('assets/images/header.jpg') }}"
+                                            alt="{{ htmlspecialchars($news->tieu_de) }}" loading="lazy">
                                     @endif
                                     <div class="news-overlay"></div>
                                 </div>
@@ -30,7 +39,7 @@
                                         <i class="fas fa-calendar-alt"></i>
                                         {{ date('d/m/Y', strtotime($news->ngay_dang)) }}
                                     </div>
-                                    <h3 class="news-title">{{ $news->tieu_de }}</h3>
+                                    <h3 class="news-title">{{ htmlspecialchars($news->tieu_de) }}</h3>
                                     <p class="news-excerpt">{{ Str::limit(strip_tags($news->noi_dung), 120) }}</p>
                                     <a href="{{ route('news.show', $news->ma_tin) }}" class="news-link">
                                         Đọc thêm
