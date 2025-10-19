@@ -172,11 +172,26 @@ Route::middleware(['auth'])->group(function () {
     // Staff Dashboard Routes
     Route::prefix('staff')->name('staff.')->middleware('role:staff')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Staff\DashboardController::class, 'index'])->name('dashboard');
+
+        // Quản lý đặt vé
         Route::resource('bookings', App\Http\Controllers\Staff\BookingsController::class)->except(['create', 'store', 'edit']);
         Route::patch('bookings/{booking}/status', [App\Http\Controllers\Staff\BookingsController::class, 'updateStatus'])->name('bookings.update-status');
         Route::get('bookings-today', [App\Http\Controllers\Staff\BookingsController::class, 'todayBookings'])->name('bookings.today');
         Route::get('bookings-pending', [App\Http\Controllers\Staff\BookingsController::class, 'pendingBookings'])->name('bookings.pending');
-        // Add more staff routes here as needed
+
+        // Quản lý bình luận
+        Route::resource('comments', App\Http\Controllers\Staff\CommentsController::class);
+        Route::post('comments/{comment}/reply', [App\Http\Controllers\Staff\CommentsController::class, 'reply'])->name('comments.reply');
+
+        // Quản lý tin tức
+        Route::resource('news', App\Http\Controllers\Staff\NewsController::class);
+
+        // Quản lý vé khuyến mãi
+        Route::resource('promotions', App\Http\Controllers\Staff\PromotionsController::class);
+
+        // Quản lý liên hệ
+        Route::resource('contact', App\Http\Controllers\Staff\ContactController::class)->only(['index', 'show', 'destroy']);
+        Route::post('contact/{contact}/reply', [App\Http\Controllers\Staff\ContactController::class, 'reply'])->name('contact.reply');
     });
 
     // Bus Owner Dashboard Routes

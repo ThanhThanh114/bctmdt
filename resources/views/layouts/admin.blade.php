@@ -198,6 +198,30 @@
                         @if(strtolower(Auth::user()->role) === 'staff')
                         <!-- Staff Menu -->
                         <li class="nav-item">
+                            <a href="{{ route('staff.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('staff.comments.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.comments.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-comments"></i>
+                                <p>Quản lý bình luận</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('staff.news.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.news.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-newspaper"></i>
+                                <p>Quản lý tin tức</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('staff.bookings.index') }}"
                                 class="nav-link {{ request()->routeIs('staff.bookings.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
@@ -206,18 +230,18 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.trips.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.trips.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-route"></i>
-                                <p>Quản lý chuyến xe</p>
+                            <a href="{{ route('staff.promotions.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.promotions.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-gift"></i>
+                                <p>Quản lý vé khuyến mãi</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.customers.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.customers.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Khách hàng</p>
+                            <a href="{{ route('staff.contact.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.contact.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-envelope"></i>
+                                <p>Quản lý liên hệ</p>
                             </a>
                         </li>
 

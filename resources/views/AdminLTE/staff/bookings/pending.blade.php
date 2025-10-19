@@ -36,37 +36,38 @@
                         @forelse($pending_bookings as $booking)
                         <tr>
                             <td>
-                                <strong>#{{ $booking->id }}</strong>
-                                @if($booking->payment_status == 'paid')
-                                    <i class="fas fa-check-circle text-success" title="Đã thanh toán"></i>
-                                @else
-                                    <i class="fas fa-clock text-warning" title="Chưa thanh toán"></i>
-                                @endif
+                                <strong>#{{ $booking->id }}</strong><br>
+                                <small><code>{{ $booking->ma_ve ?? 'N/A' }}</code></small>
                             </td>
                             <td>
-                                <div>{{ $booking->user->fullname ?? $booking->user->username }}</div>
-                                <small class="text-muted">{{ $booking->user->phone }}</small>
+                                <div><strong>{{ $booking->user->fullname ?? $booking->user->username }}</strong></div>
+                                <small class="text-muted">{{ $booking->user->email ?? 'N/A' }}</small>
                             </td>
                             <td>
-                                <div>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</div>
-                                <small class="text-muted">{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</small>
+                                <div>{{ $booking->chuyenXe->ten_xe ?? 'N/A' }}</div>
+                                <small class="text-muted">
+                                    {{ $booking->chuyenXe->ngay_di ? \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') : '' }}
+                                    {{ $booking->chuyenXe->gio_di ? \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') : '' }}
+                                </small>
                             </td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->seat_number }}</span>
+                                <span class="badge badge-info">{{ $booking->so_ghe ?? 'N/A' }}</span>
                             </td>
-                            <td>{{ $booking->ngay_dat ? $booking->ngay_dat->format('d/m/Y H:i') : 'N/A' }}</td>
+                            <td>{{ $booking->ngay_dat ? \Carbon\Carbon::parse($booking->ngay_dat)->format('d/m/Y H:i') : 'N/A' }}</td>
                             <td>
                                 <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
                             </td>
                             <td>
-                                @if($booking->status == 'confirmed')
-                                    <span class="badge badge-success">Đã xác nhận</span>
-                                @elseif($booking->status == 'pending')
-                                    <span class="badge badge-warning">Chờ xử lý</span>
-                                @elseif($booking->status == 'cancelled')
-                                    <span class="badge badge-danger">Đã hủy</span>
+                                @if($booking->trang_thai == 'Đã thanh toán')
+                                <span class="badge badge-success">Đã thanh toán</span>
+                                @elseif($booking->trang_thai == 'Đã xác nhận')
+                                <span class="badge badge-primary">Đã xác nhận</span>
+                                @elseif($booking->trang_thai == 'Đã đặt')
+                                <span class="badge badge-warning">Chờ xử lý</span>
+                                @elseif($booking->trang_thai == 'Đã hủy')
+                                <span class="badge badge-danger">Đã hủy</span>
                                 @else
-                                    <span class="badge badge-secondary">{{ $booking->status }}</span>
+                                <span class="badge badge-secondary">{{ $booking->trang_thai }}</span>
                                 @endif
                             </td>
                             <td>

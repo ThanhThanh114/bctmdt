@@ -21,20 +21,14 @@
             <div class="card-body">
                 <!-- Status Badge -->
                 <div class="mb-3">
-                    @if($booking->status == 'confirmed')
-                        <span class="badge badge-success fs-6">Đã xác nhận</span>
-                    @elseif($booking->status == 'pending')
-                        <span class="badge badge-warning fs-6">Chờ xử lý</span>
-                    @elseif($booking->status == 'cancelled')
-                        <span class="badge badge-danger fs-6">Đã hủy</span>
+                    @if($booking->trang_thai == 'Đã xác nhận' || $booking->trang_thai == 'Đã thanh toán')
+                    <span class="badge badge-success fs-6">{{ $booking->trang_thai }}</span>
+                    @elseif($booking->trang_thai == 'Đã đặt')
+                    <span class="badge badge-warning fs-6">{{ $booking->trang_thai }}</span>
+                    @elseif($booking->trang_thai == 'Đã hủy')
+                    <span class="badge badge-danger fs-6">{{ $booking->trang_thai }}</span>
                     @else
-                        <span class="badge badge-secondary fs-6">{{ $booking->status }}</span>
-                    @endif
-
-                    @if($booking->payment_status == 'paid')
-                        <span class="badge badge-success ml-2">Đã thanh toán</span>
-                    @else
-                        <span class="badge badge-warning ml-2">Chưa thanh toán</span>
+                    <span class="badge badge-secondary fs-6">{{ $booking->trang_thai }}</span>
                     @endif
                 </div>
 
@@ -64,19 +58,27 @@
                 <table class="table table-bordered">
                     <tr>
                         <th width="30%">Tuyến đường</th>
-                        <td>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</td>
+                        <td>
+                            @if($booking->chuyenXe)
+                            {{ $booking->chuyenXe->tramDi->ten_tram ?? 'N/A' }}
+                            <i class="fas fa-arrow-right text-primary"></i>
+                            {{ $booking->chuyenXe->tramDen->ten_tram ?? 'N/A' }}
+                            @else
+                            N/A
+                            @endif
+                        </td>
                     </tr>
                     <tr>
                         <th>Nhà xe</th>
-                        <td>{{ $booking->chuyenXe->nhaXe->name ?? 'N/A' }}</td>
+                        <td>{{ $booking->chuyenXe->nhaXe->ten_nha_xe ?? 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Ngày đi</th>
-                        <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }}</td>
+                        <td>{{ $booking->chuyenXe ? \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') : 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Giờ khởi hành</th>
-                        <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</td>
+                        <td>{{ $booking->chuyenXe ? \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') : 'N/A' }}</td>
                     </tr>
                     <tr>
                         <th>Điểm đón</th>
@@ -94,7 +96,7 @@
                     <tr>
                         <th width="30%">Số ghế</th>
                         <td>
-                            <span class="badge badge-info fs-6">{{ $booking->seat_number }}</span>
+                            <span class="badge badge-info fs-6">{{ $booking->so_ghe }}</span>
                         </td>
                     </tr>
                     <tr>
@@ -103,18 +105,10 @@
                             <strong class="text-primary">{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
                         </td>
                     </tr>
-                    @if($booking->notes)
+                    @if($booking->ghi_chu)
                     <tr>
                         <th>Ghi chú</th>
-                        <td>{{ $booking->notes }}</td>
-                    </tr>
-                    @endif
-                    @if($booking->staff_notes)
-                    <tr>
-                        <th>Ghi chú nhân viên</th>
-                        <td>
-                            <em class="text-muted">{{ $booking->staff_notes }}</em>
-                        </td>
+                        <td>{{ $booking->ghi_chu }}</td>
                     </tr>
                     @endif
                 </table>
@@ -130,7 +124,7 @@
                 <h3 class="card-title">Thao tác nhanh</h3>
             </div>
             <div class="card-body">
-                @if($booking->status !== 'confirmed')
+                @if($booking->trang_thai !== 'Đã xác nhận' && $booking->trang_thai !== 'Đã thanh toán')
                 <form method="POST" action="{{ route('staff.bookings.update-status', $booking) }}" class="mb-3">
                     @csrf
                     @method('PATCH')
@@ -141,7 +135,18 @@
                 </form>
                 @endif
 
-                @if($booking->status !== 'cancelled')
+                @if($booking->trang_thai == 'Đã đặt')
+                <form method="POST" action="{{ route('staff.bookings.update-status', $booking) }}" class="mb-3">
+                    @csrf
+                    @method('PATCH')
+                    <input type="hidden" name="status" value="Đã thanh toán">
+                    <button type="submit" class="btn btn-primary btn-block" onclick="return confirm('Xác nhận thanh toán cho vé này?')">
+                        <i class="fas fa-money-bill-wave mr-2"></i> Xác nhận thanh toán
+                    </button>
+                </form>
+                @endif
+
+                @if($booking->trang_thai !== 'Đã hủy')
                 <form method="POST" action="{{ route('staff.bookings.update-status', $booking) }}" class="mb-3">
                     @csrf
                     @method('PATCH')
@@ -187,33 +192,33 @@
             </div>
             <div class="card-body">
                 @php
-                    try {
-                        // Handle case where ngay_di might be a date only or full datetime
-                        $ngay_di = $booking->chuyenXe->ngay_di;
-                        $gio_di = $booking->chuyenXe->gio_di;
+                try {
+                // Handle case where ngay_di might be a date only or full datetime
+                $ngay_di = $booking->chuyenXe->ngay_di;
+                $gio_di = $booking->chuyenXe->gio_di;
 
-                        // If ngay_di is already a full datetime, use it directly
-                        if (strlen($ngay_di) > 10) {
-                            $departure_date = \Carbon\Carbon::parse($ngay_di);
-                        } else {
-                            // Otherwise combine date and time
-                            $departure_date = \Carbon\Carbon::parse($ngay_di . ' ' . $gio_di);
-                        }
+                // If ngay_di is already a full datetime, use it directly
+                if (strlen($ngay_di) > 10) {
+                $departure_date = \Carbon\Carbon::parse($ngay_di);
+                } else {
+                // Otherwise combine date and time
+                $departure_date = \Carbon\Carbon::parse($ngay_di . ' ' . $gio_di);
+                }
 
-                        $now = \Carbon\Carbon::now();
-                        $is_departed = $now->isAfter($departure_date);
-                    } catch (Exception $e) {
-                        $departure_date = null;
-                        $is_departed = false;
-                    }
+                $now = \Carbon\Carbon::now();
+                $is_departed = $now->isAfter($departure_date);
+                } catch (Exception $e) {
+                $departure_date = null;
+                $is_departed = false;
+                }
                 @endphp
 
                 @if($is_departed)
-                    <span class="badge badge-secondary">Đã khởi hành</span>
-                    <br><small class="text-muted">Khởi hành: {{ $departure_date->format('d/m/Y H:i') }}</small>
+                <span class="badge badge-secondary">Đã khởi hành</span>
+                <br><small class="text-muted">Khởi hành: {{ $departure_date->format('d/m/Y H:i') }}</small>
                 @else
-                    <span class="badge badge-success">Chưa khởi hành</span>
-                    <br><small class="text-muted">Còn: {{ $now->diffForHumans($departure_date, true) }}</small>
+                <span class="badge badge-success">Chưa khởi hành</span>
+                <br><small class="text-muted">Còn: {{ $now->diffForHumans($departure_date, true) }}</small>
                 @endif
             </div>
         </div>
@@ -223,8 +228,8 @@
 
 @push('styles')
 <style>
-.fs-6 {
-    font-size: 0.875rem;
-}
+    .fs-6 {
+        font-size: 0.875rem;
+    }
 </style>
 @endpush
