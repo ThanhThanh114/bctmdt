@@ -26,24 +26,40 @@ class BookingController extends Controller
 
         // Nếu có đầy đủ thông tin tìm kiếm, chuyển hướng đến trang chi tiết chuyến xe đầu tiên
         if (!empty($start) && !empty($end) && !empty($date)) {
+            // Tìm chuyến xe đầu tiên
             $firstTrip = ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
-                ->select('chuyen_xe.*', DB::raw('chuyen_xe.so_cho - COALESCE(booked_seats, 0) as available_seats'))
-                ->leftJoin(DB::raw('(SELECT chuyen_xe_id, COUNT(*) as booked_seats FROM dat_ve WHERE trang_thai IN ("Đã đặt", "Đã thanh toán") GROUP BY chuyen_xe_id) dv'), 'chuyen_xe.id', '=', 'dv.chuyen_xe_id')
                 ->whereHas('tramDi', function ($q) use ($start) {
-                    $q->where('ten_tram', 'like', "%$start%");
+                    $q->where('ten_tram', 'like', "%$start%")
+                        ->orWhere('tinh_thanh', 'like', "%$start%");
                 })
                 ->whereHas('tramDen', function ($q) use ($end) {
-                    $q->where('ten_tram', 'like', "%$end%");
+                    $q->where('ten_tram', 'like', "%$end%")
+                        ->orWhere('tinh_thanh', 'like', "%$end%");
                 })
                 ->whereDate('ngay_di', $date)
-                ->where('ngay_di', '>=', now())
-                ->having('available_seats', '>', 0)
+                // Không kiểm tra >= now() vì chatbot có thể gửi ngày cụ thể
                 ->orderBy('gio_di')
                 ->first();
 
             if ($firstTrip) {
-                return redirect()->route('booking.show', $firstTrip->id);
+                // Kiểm tra còn chỗ trống không
+                $bookedSeats = DB::table('dat_ve')
+                    ->where('chuyen_xe_id', $firstTrip->id)
+                    ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán'])
+                    ->count();
+
+                $availableSeats = $firstTrip->so_cho - $bookedSeats;
+                $firstTrip->available_seats = $availableSeats;
+
+                if ($availableSeats > 0) {
+                    // Trả về view chi tiết chuyến xe luôn
+                    $trip = $firstTrip;
+                    $cities = DB::table('tram_xe')->distinct()->pluck('ten_tram')->sort()->toArray();
+                    return view('booking.booking', compact('trip', 'cities', 'start', 'end', 'date'));
+                }
             }
+
+            // Nếu không tìm thấy chuyến nào hoặc hết chỗ, tiếp tục hiển thị danh sách
         }
 
         // Lấy danh sách thành phố

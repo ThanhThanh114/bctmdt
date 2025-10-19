@@ -3,90 +3,128 @@
 @section('title', $news->tieu_de)
 
 @section('styles')
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('assets/css/NewsDetail.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 @endsection
 
 @section('content')
 
-@php
-function formatTimestamp($timestamp)
-{
-    return date("H:i d/m/Y", strtotime($timestamp));
-}
-@endphp
-<div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); min-height: 100vh; padding: 50px 0;">
-    <div style="max-width: 800px; margin: 0 auto; padding: 0 20px;">
-        <!-- Back Button -->
-        <div style="margin-bottom: 30px;">
-            <a href="{{ route('news.news') }}" style="display: inline-flex; align-items: center; gap: 8px; color: #6c757d; text-decoration: none; font-size: 0.9rem; transition: color 0.3s ease;">
-                <i class="fas fa-arrow-left"></i>
-                Quay lại danh sách tin tức
-            </a>
-        </div>
+    @php
+        function formatTimestamp($timestamp)
+        {
+            return date("H:i d/m/Y", strtotime($timestamp));
+        }
+    @endphp
 
-        <!-- Article Card -->
-        <article style="background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.1);">
-            <!-- Article Header -->
-            <div style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); color: white; padding: 40px; text-align: center;">
-                <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 20px; line-height: 1.2;">
-                    {{ htmlspecialchars($news->tieu_de) }}
-                </h1>
-                <div style="display: flex; justify-content: center; gap: 30px; opacity: 0.9;">
-                    <span style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-calendar"></i>
-                        {{ formatTimestamp($news->ngay_dang) }}
-                    </span>
-                    <span style="display: flex; align-items: center; gap: 8px;">
-                        <i class="fas fa-tag"></i>
-                        Tin tức
-                    </span>
-                </div>
-            </div>
-
-            <!-- Article Image -->
-            <div style="width: 100%; height: 400px; overflow: hidden;">
-                <img src="{{ asset('assets/images/' . $news->hinh_anh) }}"
-                     alt="{{ htmlspecialchars($news->tieu_de) }}"
-                     style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-
+    <main class="news-detail-page">
+        <div class="news-detail-container">
             <!-- Article Content -->
-            <div style="padding: 40px;">
-                <div style="font-size: 1.1rem; line-height: 1.8; color: #333; margin-bottom: 30px;">
-                    {!! nl2br(e($news->noi_dung)) !!}
+            <div class="article-wrapper">
+                <!-- Article Title -->
+                <h3 class="article-title">{{ $news->tieu_de }}</h3>
+
+                <!-- Created Date -->
+                <div class="article-date">Created Date: {{ formatTimestamp($news->ngay_dang) }}</div>
+
+                <!-- Featured Image -->
+                @if($news->hinh_anh)
+                    <div class="article-featured-image">
+                        @if(filter_var($news->hinh_anh, FILTER_VALIDATE_URL))
+                            <img src="{{ $news->hinh_anh }}" alt="{{ htmlspecialchars($news->tieu_de) }}" loading="lazy"
+                                onerror="this.src='https://via.placeholder.com/1200x600/FF5722/ffffff?text=Tin+Tức'">
+                        @else
+                            <img src="{{ asset($news->hinh_anh) }}" alt="{{ htmlspecialchars($news->tieu_de) }}" loading="lazy"
+                                onerror="this.src='https://via.placeholder.com/1200x600/FF5722/ffffff?text=Tin+Tức'">
+                        @endif
+                    </div>
+                @endif
+
+                <!-- Article Excerpt -->
+                <div class="article-excerpt">
+                    {{ htmlspecialchars(mb_substr(strip_tags($news->noi_dung), 0, 150, 'UTF-8')) }}...
                 </div>
 
-                <!-- Article Footer -->
-                <div style="border-top: 1px solid #e9ecef; padding-top: 30px; display: flex; justify-content: space-between; align-items: center;">
-                    <div style="color: #6c757d; font-size: 0.9rem;">
-                        <strong>FUTA Bus Lines</strong> - Cùng bạn trên mọi nẻo đường
-                    </div>
-                    <div style="display: flex; gap: 15px;">
-                        <button onclick="window.print()" style="background: #6c757d; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 0.9rem;">
-                            <i class="fas fa-print"></i> In bài viết
-                        </button>
-                        <button onclick="shareArticle()" style="background: linear-gradient(45deg, #1e3c72, #2a5298); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 0.9rem;">
-                            <i class="fas fa-share"></i> Chia sẻ
-                        </button>
-                    </div>
+                <!-- Article Content -->
+                <div class="article-content">
+                    @php
+                        // Format nội dung: chuyển line break thành paragraph
+                        $content = $news->noi_dung;
+                        // Loại bỏ khoảng trắng thừa
+                        $content = trim($content);
+                        // Tách thành các đoạn bằng double line break
+                        $paragraphs = preg_split('/\r?\n\r?\n/', $content);
+                        // Lọc bỏ đoạn trống
+                        $paragraphs = array_filter($paragraphs, function ($p) {
+                            return trim($p) !== '';
+                        });
+                    @endphp
+
+                    @foreach($paragraphs as $paragraph)
+                        <p>{!! nl2br(e(trim($paragraph))) !!}</p>
+                    @endforeach
                 </div>
             </div>
-        </article>
 
-        <!-- Related News Section -->
-        <div style="margin-top: 50px; text-align: center;">
-            <h3 style="color: #1a1a1a; margin-bottom: 30px; font-size: 1.8rem;">Tin tức liên quan</h3>
-            <p style="color: #666; margin-bottom: 40px;">Khám phá thêm những thông tin hữu ích khác từ FUTA Bus Lines</p>
-            <a href="{{ route('news.news') }}" style="display: inline-flex; align-items: center; gap: 10px; background: linear-gradient(45deg, #ff6600, #ff8533); color: white; padding: 15px 30px; border-radius: 30px; text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
-                <i class="fas fa-newspaper"></i>
-                Xem tất cả tin tức
-            </a>
+            <!-- Related News Section -->
+            <div class="related-news-section">
+                <div class="related-header">
+                    <div class="related-title">Related News</div>
+                    <div class="title-divider"></div>
+                    <a href="{{ route('news.news') }}" class="see-all-link">
+                        <span>See All</span>
+                        <img src="/images/icons/ic_arrow_right.svg" alt="arrow">
+                    </a>
+                </div>
+
+                <!-- Related News Grid -->
+                <div class="related-news-grid">
+                    @if(isset($related_news) && $related_news->count() > 0)
+                        @foreach($related_news as $related)
+                            <a href="{{ route('news.show', $related->ma_tin) }}" class="related-news-card">
+                                <div class="related-image">
+                                    @if($related->hinh_anh)
+                                        @if(filter_var($related->hinh_anh, FILTER_VALIDATE_URL))
+                                            <img src="{{ $related->hinh_anh }}" alt="{{ htmlspecialchars($related->tieu_de) }}"
+                                                loading="lazy"
+                                                onerror="this.src='https://via.placeholder.com/600x400/FF5722/ffffff?text=Tin+Tức'">
+                                        @else
+                                            <img src="{{ asset($related->hinh_anh) }}" alt="{{ htmlspecialchars($related->tieu_de) }}"
+                                                loading="lazy"
+                                                onerror="this.src='https://via.placeholder.com/600x400/FF5722/ffffff?text=Tin+Tức'">
+                                        @endif
+                                    @else
+                                        <img src="{{ asset('assets/images/header.jpg') }}"
+                                            alt="{{ htmlspecialchars($related->tieu_de) }}" loading="lazy"
+                                            onerror="this.src='https://via.placeholder.com/600x400/FF5722/ffffff?text=Tin+Tức'">
+                                    @endif
+                                </div>
+                                <div class="related-content">
+                                    <div class="related-news-title">
+                                        {{ $related->tieu_de }}
+                                    </div>
+                                    <div class="related-excerpt">
+                                        {{ htmlspecialchars(mb_substr(strip_tags($related->noi_dung), 0, 150, 'UTF-8')) }}...
+                                    </div>
+                                    <span class="related-time">{{ formatTimestamp($related->ngay_dang) }}</span>
+                                </div>
+                            </a>
+                        @endforeach
+                    @else
+                        <!-- Fallback: Show placeholder cards -->
+                        <div class="no-related-news">
+                            <p>Không có tin tức liên quan</p>
+                            <a href="{{ route('news.news') }}" class="back-to-news-btn">
+                                <i class="fas fa-arrow-left"></i> Quay lại trang tin tức
+                            </a>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </main>
 
 @endsection
 
 @section('scripts')
-<script src="{{ asset('assets/js/News.js') }}"></script>
+    <script src="{{ asset('assets/js/NewsDetail.js') }}"></script>
 @endsection

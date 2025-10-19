@@ -1,12 +1,9 @@
 <?php
-
 namespace App\Http\Controllers\Staff;
-
 use App\Http\Controllers\Controller;
 use App\Models\DatVe;
 use App\Models\ChuyenXe;
 use Illuminate\Http\Request;
-
 class BookingsController extends Controller
 {
 
@@ -52,12 +49,21 @@ class BookingsController extends Controller
     }
 
     public function show(DatVe $booking)
+
+    
+        
+          
+    
+
+        
+        Expand All
+    
+    @@ -51,25 +61,37 @@ public function show(DatVe $booking)
+  
     {
         $booking->load(['user', 'chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
-
         return view('AdminLTE.staff.bookings.show', compact('booking'));
     }
-
     public function updateStatus(Request $request, DatVe $booking)
     {
         $request->validate([
@@ -95,22 +101,30 @@ class BookingsController extends Controller
     }
 
     public function todayBookings()
+
+    
+          
+            
+    
+
+          
+          Expand Down
+    
+    
+  
     {
         $today_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereDate('ngay_dat', date('Y-m-d'))
             ->orderBy('ngay_dat', 'desc')
             ->get();
-
         return view('AdminLTE.staff.bookings.today', compact('today_bookings'));
     }
-
     public function pendingBookings()
     {
         $pending_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereStatus('pending')
             ->orderBy('ngay_dat', 'asc')
             ->paginate(10);
-
         return view('AdminLTE.staff.bookings.pending', compact('pending_bookings'));
     }
 }

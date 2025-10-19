@@ -27,7 +27,7 @@
     @include('layouts.footer')
 
     <!-- FUTA Chat Widget -->
-    <script src="{{ asset('js/futa-chat.js') }}"></script>
+    <script src="{{ asset('assets/js/futa-chat.js') }}?v={{ time() }}"></script>
 
     <!-- Swiper JS (available for pages that initialize Swiper) -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>

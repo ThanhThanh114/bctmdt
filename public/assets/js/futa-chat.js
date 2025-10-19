@@ -1,4 +1,4 @@
-/**
+﻿/**
  * FUTA Chat Widget - Clean Version
  */
 
@@ -245,6 +245,72 @@ class FUTAChatWidget {
                 border: 1px dashed #dee2e6;
                 line-height: 1.5;
             }
+            .futa-booking-buttons {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                margin: 10px 0;
+                width: 100%;
+            }
+            .futa-booking-btn {
+                background: white;
+                border: 2px solid #667eea;
+                border-radius: 12px;
+                padding: 12px 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                width: 100%;
+                text-align: left;
+            }
+            .futa-booking-btn:hover {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                transform: translateX(5px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }
+            .futa-booking-btn:hover .futa-booking-btn-action {
+                color: white;
+            }
+            .futa-booking-btn-content {
+                flex: 1;
+            }
+            .futa-booking-route {
+                font-weight: 600;
+                font-size: 14px;
+                margin-bottom: 5px;
+                color: #333;
+            }
+            .futa-booking-btn:hover .futa-booking-route {
+                color: white;
+            }
+            .futa-booking-details {
+                display: flex;
+                gap: 15px;
+                font-size: 13px;
+                color: #666;
+            }
+            .futa-booking-btn:hover .futa-booking-details {
+                color: rgba(255, 255, 255, 0.9);
+            }
+            .futa-booking-nearby {
+                font-size: 11px;
+                color: #ff9800;
+                margin-top: 3px;
+                font-weight: 500;
+            }
+            .futa-booking-btn:hover .futa-booking-nearby {
+                color: #ffe0b2;
+            }
+            .futa-booking-btn-action {
+                color: #667eea;
+                font-weight: 600;
+                font-size: 14px;
+                white-space: nowrap;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -347,10 +413,12 @@ class FUTAChatWidget {
         this.showTyping();
 
         try {
-            const response = await fetch('/BC_TMDT/api/chat.php', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     message: message,
@@ -367,10 +435,17 @@ class FUTAChatWidget {
 
             this.hideTyping();
 
-            if (data.error) {
-                this.addMessage('Ôi, có lỗi gì đó rồi 😅 Bạn thử lại sau nhé!', 'bot');
+            if (data.success && data.content) {
+                this.addMessage(data.content, 'bot');
+
+                // Nếu có thông tin chuyến xe, hiển thị nút đặt vé
+                if (data.routes && data.routes.length > 0) {
+                    this.addBookingButtons(data.routes, false);
+                } else if (data.nearby_routes && data.nearby_routes.length > 0) {
+                    this.addBookingButtons(data.nearby_routes, true);
+                }
             } else {
-                this.addMessage(data.content || 'Xin lỗi, mình không hiểu lắm. Bạn có thể nói rõ hơn được không? 🤔', 'bot');
+                this.addMessage(data.error || 'Xin lỗi, mình không hiểu lắm. Bạn có thể nói rõ hơn được không? 🤔', 'bot');
             }
 
         } catch (error) {
@@ -387,6 +462,65 @@ class FUTAChatWidget {
 
         this.chatMessages.appendChild(messageDiv);
         this.scrollToBottom();
+    }
+
+    addBookingButtons(routes, isNearby = false) {
+        const buttonContainer = document.createElement('div');
+        buttonContainer.className = 'futa-booking-buttons';
+
+        routes.forEach((route, index) => {
+            const button = document.createElement('button');
+            button.className = 'futa-booking-btn';
+
+            const routeText = `${route.diem_di} → ${route.diem_den}`;
+            const priceText = new Intl.NumberFormat('vi-VN').format(route.gia_ve) + 'đ';
+            const timeText = route.gio_di ? route.gio_di.substring(0, 5) : '';
+
+            button.innerHTML = `
+                <div class="futa-booking-btn-content">
+                    <div class="futa-booking-route">${routeText}</div>
+                    <div class="futa-booking-details">
+                        <span>🕐 ${timeText}</span>
+                        <span>💰 ${priceText}</span>
+                    </div>
+                    ${isNearby ? '<div class="futa-booking-nearby">⚠️ Chuyến gần</div>' : ''}
+                </div>
+                <div class="futa-booking-btn-action">Đặt vé →</div>
+            `;
+
+            button.addEventListener('click', () => {
+                this.goToBooking(route);
+            });
+
+            buttonContainer.appendChild(button);
+        });
+
+        this.chatMessages.appendChild(buttonContainer);
+        this.scrollToBottom();
+    }
+
+    goToBooking(route) {
+        console.log('🎫 Đặt vé chuyến:', route);
+        console.log('📌 Route ID:', route.id);
+
+        // Kiểm tra xem có ID chuyến xe không
+        if (route.id) {
+            console.log('✅ Redirect đến /datve/' + route.id);
+            // Redirect trực tiếp đến trang chi tiết chuyến xe
+            window.location.href = `/datve/${route.id}`;
+        } else {
+            console.log('⚠️ Không có ID, dùng query params');
+            // Fallback: Tạo URL với query parameters (cho trường hợp cũ)
+            const params = new URLSearchParams({
+                start: route.tram_di || route.diem_di,
+                end: route.tram_den || route.diem_den,
+                date: route.ngay_di,
+                ticket: '1',
+                trip: 'oneway',
+                sort: 'time'
+            });
+            window.location.href = `/datve?${params.toString()}`;
+        }
     }
 
     showTyping() {
