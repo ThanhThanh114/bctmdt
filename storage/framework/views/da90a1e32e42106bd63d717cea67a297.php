@@ -1,1 +1,0 @@
-<!-- Chat widget sử dụng futa-chat.js --><?php /**PATH C:\Users\thanh\Documents\GitHub\bctmdt\resources\views/home/chat.blade.php ENDPATH**/ ?>
