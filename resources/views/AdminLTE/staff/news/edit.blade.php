@@ -57,18 +57,55 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="hinh_anh">Hình ảnh</label>
+                        <label>Hình ảnh đại diện</label>
+                        
                         @if($tinTuc->hinh_anh)
-                        <div class="mb-2">
-                            <img src="{{ asset($tinTuc->hinh_anh) }}" alt="Current image" style="max-width: 200px;">
+                        <div class="mb-3">
+                            <img src="{{ filter_var($tinTuc->hinh_anh, FILTER_VALIDATE_URL) ? $tinTuc->hinh_anh : asset($tinTuc->hinh_anh) }}" 
+                                 alt="Current image" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">
                         </div>
                         @endif
-                        <input type="file" class="form-control-file @error('hinh_anh') is-invalid @enderror"
-                            id="hinh_anh" name="hinh_anh" accept="image/*">
-                        <small class="form-text text-muted">Để trống nếu không muốn thay đổi hình ảnh</small>
-                        @error('hinh_anh')
-                        <span class="invalid-feedback d-block">{{ $message }}</span>
-                        @enderror
+
+                        <div class="mb-3">
+                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                <label class="btn btn-outline-primary active">
+                                    <input type="radio" name="image_type" value="file" checked id="image_type_file"> 
+                                    <i class="fas fa-upload"></i> Upload từ máy
+                                </label>
+                                <label class="btn btn-outline-primary">
+                                    <input type="radio" name="image_type" value="url" id="image_type_url"> 
+                                    <i class="fas fa-link"></i> Nhập URL
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Upload file -->
+                        <div id="file_upload_section">
+                            <div class="custom-file">
+                                <input type="file" name="hinh_anh" class="custom-file-input @error('hinh_anh') is-invalid @enderror" 
+                                    id="imageFileInput" accept="image/*" onchange="previewImage(event)">
+                                <label class="custom-file-label" for="imageFileInput">Chọn ảnh mới...</label>
+                            </div>
+                            <small class="form-text text-muted">Định dạng: JPG, PNG, GIF, WEBP. Tối đa 5MB. Để trống nếu không muốn thay đổi.</small>
+                            @error('hinh_anh')<span class="text-danger">{{ $message }}</span>@enderror
+                        </div>
+
+                        <!-- URL input -->
+                        <div id="url_input_section" style="display: none;">
+                            <input type="url" name="image_url" class="form-control @error('image_url') is-invalid @enderror" 
+                                placeholder="https://example.com/image.jpg" value="{{ old('image_url') }}"
+                                onchange="previewImageUrl(event)">
+                            <small class="form-text text-muted">Nhập URL của hình ảnh</small>
+                            @error('image_url')<span class="text-danger">{{ $message }}</span>@enderror
+                        </div>
+
+                        <!-- Preview -->
+                        <div id="image_preview_container" class="mt-3" style="display: none;">
+                            <img id="image_preview" src="" alt="Preview" class="img-thumbnail" style="max-width: 100%; max-height: 300px;">
+                            <button type="button" class="btn btn-sm btn-danger mt-2" onclick="clearImagePreview()">
+                                <i class="fas fa-times"></i> Xóa ảnh preview
+                            </button>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -93,3 +130,60 @@
     </div>
 </section>
 @endsection
+
+@push('scripts')
+<script>
+    // Toggle giữa file upload và URL input
+    $('input[name="image_type"]').change(function() {
+        if ($(this).val() === 'file') {
+            $('#file_upload_section').show();
+            $('#url_input_section').hide();
+        } else {
+            $('#file_upload_section').hide();
+            $('#url_input_section').show();
+        }
+        clearImagePreview();
+    });
+
+    // Preview ảnh từ file
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#image_preview').attr('src', e.target.result);
+                $('#image_preview_container').show();
+            };
+            reader.readAsDataURL(file);
+            
+            // Update label
+            const fileName = file.name;
+            $(event.target).next('.custom-file-label').text(fileName);
+        }
+    }
+
+    // Preview ảnh từ URL
+    function previewImageUrl(event) {
+        const url = event.target.value;
+        if (url) {
+            $('#image_preview').attr('src', url);
+            $('#image_preview_container').show();
+            
+            // Kiểm tra ảnh có load được không
+            $('#image_preview').on('error', function() {
+                alert('Không thể tải ảnh từ URL này. Vui lòng kiểm tra lại.');
+                clearImagePreview();
+            });
+        }
+    }
+
+    // Xóa preview
+    function clearImagePreview() {
+        $('#image_preview').attr('src', '');
+        $('#image_preview_container').hide();
+        $('#imageFileInput').val('');
+        $('.custom-file-label').text('Chọn ảnh mới...');
+        $('input[name="image_url"]').val('');
+    }
+</script>
+@endpush

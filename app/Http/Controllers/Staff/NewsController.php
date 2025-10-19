@@ -57,19 +57,24 @@ class NewsController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'required|string|max:200',
             'noi_dung' => 'required|string',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_url' => 'nullable|url',
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ]);
 
         $validated['user_id'] = auth()->id();
         $validated['ngay_dang'] = now();
 
-        // Handle image upload
+        // Handle image upload or URL
         if ($request->hasFile('hinh_anh')) {
+            // Upload file từ máy
             $image = $request->file('hinh_anh');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('assets/images/news'), $imageName);
             $validated['hinh_anh'] = 'assets/images/news/' . $imageName;
+        } elseif ($request->filled('image_url')) {
+            // Sử dụng URL ảnh
+            $validated['hinh_anh'] = $request->image_url;
         }
 
         TinTuc::create($validated);
@@ -106,21 +111,30 @@ class NewsController extends Controller
         $validated = $request->validate([
             'tieu_de' => 'required|string|max:200',
             'noi_dung' => 'required|string',
-            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'hinh_anh' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+            'image_url' => 'nullable|url',
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ]);
 
-        // Handle image upload
+        // Handle image upload or URL
         if ($request->hasFile('hinh_anh')) {
-            // Delete old image if exists
-            if ($tinTuc->hinh_anh && file_exists(public_path($tinTuc->hinh_anh))) {
+            // Delete old image if exists and is a local file
+            if ($tinTuc->hinh_anh && !filter_var($tinTuc->hinh_anh, FILTER_VALIDATE_URL) && file_exists(public_path($tinTuc->hinh_anh))) {
                 unlink(public_path($tinTuc->hinh_anh));
             }
 
+            // Upload file từ máy
             $image = $request->file('hinh_anh');
             $imageName = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('assets/images/news'), $imageName);
             $validated['hinh_anh'] = 'assets/images/news/' . $imageName;
+        } elseif ($request->filled('image_url')) {
+            // Delete old image if exists and is a local file
+            if ($tinTuc->hinh_anh && !filter_var($tinTuc->hinh_anh, FILTER_VALIDATE_URL) && file_exists(public_path($tinTuc->hinh_anh))) {
+                unlink(public_path($tinTuc->hinh_anh));
+            }
+            // Sử dụng URL ảnh
+            $validated['hinh_anh'] = $request->image_url;
         }
 
         $tinTuc->update($validated);

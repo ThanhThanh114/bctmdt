@@ -18,7 +18,8 @@ class TinTuc extends Model
         'noi_dung',
         'hinh_anh',
         'user_id',
-        'ma_nha_xe'
+        'ma_nha_xe',
+        'ngay_dang'
     ];
 
     protected $casts = [
