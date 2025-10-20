@@ -13,6 +13,20 @@
                     <i class="fas fa-route"></i>
                     {{ $trip->diem_di }} → {{ $trip->diem_den }}
                 </div>
+                @if (!empty($trip->tram_trung_gian_names) && count($trip->tram_trung_gian_names) > 0)
+                <div class="intermediate-stops">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span class="stops-label">Trạm trung gian:</span>
+                    <div class="stops-list">
+                        @foreach ($trip->tram_trung_gian_names as $index => $tramName)
+                            <span class="stop-badge">
+                                <i class="fas fa-map-pin"></i>
+                                {{ $tramName }}
+                            </span>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
                 <div class="datetime">
                     <div><i class="fas fa-calendar"></i> {{ \Carbon\Carbon::parse($trip->ngay_di)->format('d/m/Y') }}</div>
                     <div><i class="fas fa-clock"></i> {{ \Carbon\Carbon::parse($trip->gio_di)->format('H:i') }}</div>
