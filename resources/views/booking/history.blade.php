@@ -135,41 +135,54 @@
                                         </div>
                                         <div class="detail-item">
                                             <i class="fas fa-clock"></i>
-                                            <span>{{ $booking->chuyenXe->ngay_di ?? 'N/A' }}
-                                                {{ $booking->chuyenXe->gio_di ?? '' }}</span>
+                                            <span>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }}
+                                                {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</span>
                                         </div>
                                         <div class="detail-item">
                                             <i class="fas fa-chair"></i>
-                                            <span>Ghế {{ $booking->so_ghe }}</span>
+                                            <span>
+                                                @if(isset($booking->so_ghe_list) && count($booking->so_ghe_list) > 1)
+                                                    Ghế {{ implode(', ', $booking->so_ghe_list) }}
+                                                @else
+                                                    Ghế {{ $booking->so_ghe }}
+                                                @endif
+                                            </span>
                                         </div>
                                         <div class="detail-item">
                                             <i class="fas fa-dollar-sign"></i>
-                                            <span>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }} VNĐ</span>
+                                            <span>
+                                                @if(isset($booking->tong_tien))
+                                                    {{ number_format($booking->tong_tien, 0, ',', '.') }} VNĐ
+                                                @else
+                                                    {{ number_format($booking->chuyenXe->gia_ve ?? 0, 0, ',', '.') }} VNĐ
+                                                @endif
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
                     @endforeach
 
-                        <!-- Pagination -->
-                        @if($bookings->hasPages())
-                            <div class="pagination-wrapper">
-                                {{ $bookings->links() }}
-                            </div>
-                        @endif
-                @else
-                        <div class="empty-state">
-                            <i class="fas fa-ticket-alt"></i>
-                            <h3>Chưa có lịch sử đặt vé</h3>
-                            <p>Bạn chưa đặt vé nào. Hãy đặt vé đầu tiên của mình!</p>
-                            <a href="{{ route('home') }}" class="btn-primary">
-                                <i class="fas fa-bus"></i> Đặt vé ngay
-                            </a>
+                    <!-- Pagination -->
+                    @if($bookings->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $bookings->links('vendor.pagination.custom') }}
                         </div>
                     @endif
-                </div>
+                @else
+                    <div class="empty-state">
+                        <i class="fas fa-ticket-alt"></i>
+                        <h3>Chưa có lịch sử đặt vé</h3>
+                        <p>Bạn chưa đặt vé nào. Hãy đặt vé đầu tiên của mình!</p>
+                        <a href="{{ route('home') }}" class="btn-primary">
+                            <i class="fas fa-bus"></i> Đặt vé ngay
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
+    </div>
 </body>
 
 </html>

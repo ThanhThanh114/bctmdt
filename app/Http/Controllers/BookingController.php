@@ -107,7 +107,14 @@ class BookingController extends Controller
         $trips = $query->orderBy($sortBy === 'price' ? 'gia_ve' : 'gio_di')
             ->paginate($itemsPerPage);
 
-        return view('booking.booking', compact('trips', 'totalCount', 'totalPages', 'page', 'start', 'end', 'date', 'busType'));
+        // Kiểm tra nếu không có chuyến xe nào
+        if ($trips->isEmpty()) {
+            return view('booking.no-results', compact('cities', 'start', 'end', 'date'));
+        }
+
+        // Lấy chuyến đầu tiên làm chuyến mặc định để hiển thị
+        $trip = $trips->first();
+        return view('booking.booking', compact('trip', 'cities', 'start', 'end', 'date', 'trips'));
     }
 
     public function show($id)
@@ -199,25 +206,20 @@ class BookingController extends Controller
             $trip = ChuyenXe::findOrFail($bookingInfo['trip_id']);
             $baseAmount = $trip->gia_ve * count($selectedSeats);
 
-            // Xử lý mã giảm giá
+            // Xử lý mã giảm giá - Sửa: dùng ma_code thay vì ma_khuyen_mai
             $discountAmount = 0;
             $discountCode = $request->discount_code;
             $khuyenMaiId = null;
 
             if ($discountCode) {
-                $khuyenMai = \App\Models\KhuyenMai::where('ma_khuyen_mai', strtoupper($discountCode))
-                    ->where('trang_thai', 'Đang áp dụng')
+                $khuyenMai = \App\Models\KhuyenMai::where('ma_code', strtoupper($discountCode))
                     ->where('ngay_bat_dau', '<=', now())
                     ->where('ngay_ket_thuc', '>=', now())
-                    ->where('so_luong', '>', 0)
                     ->first();
 
                 if ($khuyenMai) {
                     $discountAmount = intval($request->discount_amount ?? 0);
-                    $khuyenMaiId = $khuyenMai->id;
-
-                    // Giảm số lượng mã khuyến mãi
-                    $khuyenMai->decrement('so_luong');
+                    $khuyenMaiId = $khuyenMai->ma_km; // Dùng ma_km thay vì id
                 }
             }
 
@@ -239,6 +241,20 @@ class BookingController extends Controller
             }
 
             DB::commit();
+
+            // Nếu tổng tiền = 0đ (do giảm giá 100%), tự động hoàn tất đặt vé
+            if ($totalAmount <= 0) {
+                // Cập nhật trạng thái thành "Đã thanh toán"
+                DatVe::where('ma_ve', $bookingCode)->update([
+                    'trang_thai' => 'Đã thanh toán'
+                ]);
+
+                Session::forget('booking_info');
+
+                // Chuyển đến trang thành công
+                return redirect()->route('booking.success', ['code' => $bookingCode])
+                    ->with('success', 'Đặt vé thành công! Vé của bạn đã được kích hoạt (miễn phí 100%)');
+            }
 
             // Lưu thông tin để thanh toán
             Session::put('payment_info', [
@@ -389,13 +405,35 @@ class BookingController extends Controller
     {
         $user = Auth::user();
 
-        // Lấy lịch sử đặt vé của user với thông tin chuyến xe
+        // Lấy lịch sử đặt vé của user, gộp theo ma_ve
         $bookings = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
             ->where('user_id', $user->id)
             ->orderBy('ngay_dat', 'desc')
-            ->paginate(10);
+            ->get()
+            ->groupBy('ma_ve')
+            ->map(function ($group) {
+                $first = $group->first();
+                $first->so_ghe_list = $group->pluck('so_ghe')->toArray();
+                $first->so_luong_ghe = $group->count();
+                $first->tong_tien = $first->chuyenXe->gia_ve * $group->count();
+                return $first;
+            })
+            ->values();
 
-        return view('booking.history', compact('bookings'));
+        // Phân trang thủ công
+        $perPage = 10;
+        $currentPage = request()->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+        
+        $paginatedBookings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $bookings->slice($offset, $perPage)->values(),
+            $bookings->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('booking.history', ['bookings' => $paginatedBookings]);
     }
 
     /**
@@ -406,9 +444,8 @@ class BookingController extends Controller
         $code = strtoupper($request->code);
         $totalAmount = $request->total_amount;
 
-        // Tìm mã khuyến mãi
-        $discount = \App\Models\KhuyenMai::where('ma_khuyen_mai', $code)
-            ->where('trang_thai', 'Đang áp dụng')
+        // Tìm mã khuyến mãi - Sửa: dùng ma_code thay vì ma_khuyen_mai
+        $discount = \App\Models\KhuyenMai::where('ma_code', $code)
             ->where('ngay_bat_dau', '<=', now())
             ->where('ngay_ket_thuc', '>=', now())
             ->first();
@@ -417,14 +454,6 @@ class BookingController extends Controller
             return response()->json([
                 'valid' => false,
                 'message' => 'Mã giảm giá không tồn tại hoặc đã hết hạn!'
-            ]);
-        }
-
-        // Kiểm tra số lượng còn lại
-        if ($discount->so_luong <= 0) {
-            return response()->json([
-                'valid' => false,
-                'message' => 'Mã giảm giá đã hết lượt sử dụng!'
             ]);
         }
 
