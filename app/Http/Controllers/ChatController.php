@@ -12,18 +12,54 @@ class ChatController extends Controller
     public function chat(Request $request)
     {
         try {
-            $request->validate(['message' => 'required|string|max:1000']);
+            $request->validate([
+                'message' => 'required|string|max:1000',
+                'user_id' => 'nullable|integer',
+                'user_role' => 'nullable|string|in:admin,staff,bus_owner,user'
+            ]);
 
             $message = $request->input('message');
             $sessionId = $request->input('session_id', 'default');
+            $userId = $request->input('user_id');
+            $userRole = $request->input('user_role');
 
-            Log::info('Chat request', ['message' => $message, 'session' => $sessionId]);
+            // Xác thực quyền admin thực sự
+            $isAdmin = $this->verifyAdminAccess($userId, $userRole);
+            $isStaff = $this->verifyStaffAccess($userId, $userRole);
+            $isBusOwner = $this->verifyBusOwnerAccess($userId, $userRole);
+
+            Log::info('Chat request', [
+                'message' => $message,
+                'session' => $sessionId,
+                'user_id' => $userId,
+                'user_role' => $userRole,
+                'is_admin' => $isAdmin,
+                'is_staff' => $isStaff,
+                'is_bus_owner' => $isBusOwner,
+                'admin_verified' => $isAdmin,
+                'staff_verified' => $isStaff,
+                'bus_owner_verified' => $isBusOwner
+            ]);
+
+            // Kiểm tra nếu user_role là admin nhưng không được xác thực
+            if ($userRole === 'admin' && !$isAdmin) {
+                Log::warning('Unauthorized admin access attempt', [
+                    'user_id' => $userId,
+                    'user_role' => $userRole,
+                    'message' => $message
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Bạn không có quyền truy cập thông tin admin. Vui lòng đăng nhập với tài khoản admin hợp lệ.'
+                ], 403);
+            }
 
             // Phân tích ý định người dùng và lấy dữ liệu từ database
-            $contextData = $this->getContextData($message);
+            $contextData = $this->getContextData($message, $isAdmin, $isStaff, $isBusOwner, $userId);
 
             // Tạo prompt với context từ database
-            $systemPrompt = $this->buildEnhancedPrompt($contextData);
+            $systemPrompt = $this->buildEnhancedPrompt($contextData, $isAdmin, $userRole);
 
             $apiKey = env('GEMINI_API_KEY', 'AIzaSyAf1CCFAqfOowuQfkP0YoFb_PS5N6uJULg');
             $apiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key={$apiKey}";
@@ -69,7 +105,7 @@ class ChatController extends Controller
 
                 // Thêm thông tin chuyến xe vào response
                 if (!empty($contextData['routes'])) {
-                    $responseData['routes'] = array_map(function($route) {
+                    $responseData['routes'] = array_map(function ($route) {
                         return [
                             'id' => $route->id ?? 0, // Thêm ID chuyến xe
                             'diem_di' => $route->diem_di ?? '',
@@ -87,7 +123,7 @@ class ChatController extends Controller
 
                 // Thêm thông tin chuyến gần nhất
                 if (!empty($contextData['nearby_routes']) && !empty($contextData['nearby_routes']['routes'])) {
-                    $responseData['nearby_routes'] = array_map(function($route) {
+                    $responseData['nearby_routes'] = array_map(function ($route) {
                         return [
                             'id' => $route->id ?? 0, // Thêm ID chuyến xe
                             'diem_di' => $route->diem_di ?? '',
@@ -121,16 +157,90 @@ class ChatController extends Controller
     }
 
     /**
+     * Xác thực quyền admin thực sự
+     */
+    private function verifyAdminAccess($userId, $userRole)
+    {
+        // Chỉ cho phép admin thực sự
+        if ($userRole !== 'admin' || !$userId) {
+            return false;
+        }
+
+        try {
+            // Kiểm tra user có tồn tại và có role admin trong database
+            $user = DB::table('users')
+                ->where('id', $userId)
+                ->where('role', 'admin')
+                ->first();
+
+            return $user !== null;
+        } catch (\Exception $e) {
+            Log::error('Admin verification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Xác thực quyền staff
+     */
+    private function verifyStaffAccess($userId, $userRole)
+    {
+        if (!in_array($userRole, ['admin', 'staff']) || !$userId) {
+            return false;
+        }
+
+        try {
+            $user = DB::table('users')
+                ->where('id', $userId)
+                ->whereIn('role', ['admin', 'staff'])
+                ->first();
+
+            return $user !== null;
+        } catch (\Exception $e) {
+            Log::error('Staff verification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Xác thực quyền bus owner
+     */
+    private function verifyBusOwnerAccess($userId, $userRole)
+    {
+        if (!in_array($userRole, ['admin', 'bus_owner']) || !$userId) {
+            return false;
+        }
+
+        try {
+            $user = DB::table('users')
+                ->where('id', $userId)
+                ->whereIn('role', ['admin', 'bus_owner'])
+                ->first();
+
+            return $user !== null;
+        } catch (\Exception $e) {
+            Log::error('Bus owner verification error: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Phân tích câu hỏi và lấy dữ liệu từ database
      */
-    private function getContextData($message)
+    private function getContextData($message, $isAdmin = false, $isStaff = false, $isBusOwner = false, $userId = null)
     {
         $context = [
             'routes' => [],
             'bookings' => [],
             'intent' => 'general',
             'locations' => [],
-            'price_range' => null
+            'price_range' => null,
+            'admin_data' => [],
+            'user_data' => [],
+            'statistics' => [],
+            'is_admin' => $isAdmin,
+            'is_staff' => $isStaff,
+            'is_bus_owner' => $isBusOwner
         ];
 
         // Danh sách địa điểm phổ biến (chuẩn hóa theo tên trong database)
@@ -236,7 +346,112 @@ class ChatController extends Controller
             $context['intent'] = 'schedule';
         }
 
+        // Phát hiện admin queries
+        if ($isAdmin) {
+            $this->detectAdminQueries($message, $context);
+        }
+
+        // Phát hiện staff queries
+        if ($isStaff) {
+            $this->detectStaffQueries($message, $context);
+        }
+
+        // Phát hiện bus owner queries
+        if ($isBusOwner) {
+            $this->detectBusOwnerQueries($message, $context, $userId);
+        }
+
         return $context;
+    }
+
+    /**
+     * Phát hiện admin queries
+     */
+    private function detectAdminQueries($message, &$context)
+    {
+        $messageLower = mb_strtolower($message, 'UTF-8');
+
+        // Thống kê tổng quan
+        if (preg_match('/(thống kê|statistics|dashboard|tổng quan|báo cáo)/i', $message)) {
+            $context['intent'] = 'admin_statistics';
+            $context['admin_data'] = $this->getAdminStatistics();
+        }
+
+        // Quản lý user
+        if (preg_match('/(user|người dùng|khách hàng|danh sách user|list user)/i', $message)) {
+            $context['intent'] = 'admin_users';
+            $context['admin_data'] = $this->getUserData();
+        }
+
+        // Quản lý booking
+        if (preg_match('/(booking|đặt vé|vé|ticket|dat ve)/i', $message)) {
+            $context['intent'] = 'admin_bookings';
+            $context['admin_data'] = $this->getBookingData();
+        }
+
+        // Quản lý chuyến xe
+        if (preg_match('/(chuyến xe|trip|route|tuyến)/i', $message)) {
+            $context['intent'] = 'admin_trips';
+            $context['admin_data'] = $this->getTripData();
+        }
+
+        // Quản lý nhà xe
+        if (preg_match('/(nhà xe|bus company|company|nha xe)/i', $message)) {
+            $context['intent'] = 'admin_companies';
+            $context['admin_data'] = $this->getCompanyData();
+        }
+
+        // Doanh thu
+        if (preg_match('/(doanh thu|revenue|income|thu nhập)/i', $message)) {
+            $context['intent'] = 'admin_revenue';
+            $context['admin_data'] = $this->getRevenueData();
+        }
+    }
+
+    /**
+     * Phát hiện staff queries
+     */
+    private function detectStaffQueries($message, &$context)
+    {
+        $messageLower = mb_strtolower($message, 'UTF-8');
+
+        // Booking management
+        if (preg_match('/(booking|đặt vé|vé|ticket|dat ve)/i', $message)) {
+            $context['intent'] = 'staff_bookings';
+            $context['admin_data'] = $this->getBookingData();
+        }
+
+        // Customer service
+        if (preg_match('/(khách hàng|customer|service|dịch vụ)/i', $message)) {
+            $context['intent'] = 'staff_customers';
+            $context['admin_data'] = $this->getCustomerData();
+        }
+    }
+
+    /**
+     * Phát hiện bus owner queries
+     */
+    private function detectBusOwnerQueries($message, &$context, $userId)
+    {
+        $messageLower = mb_strtolower($message, 'UTF-8');
+
+        // My bookings
+        if (preg_match('/(đặt vé của tôi|my booking|vé của tôi)/i', $message)) {
+            $context['intent'] = 'bus_owner_bookings';
+            $context['admin_data'] = $this->getBusOwnerBookings($userId);
+        }
+
+        // My revenue
+        if (preg_match('/(doanh thu của tôi|my revenue|thu nhập)/i', $message)) {
+            $context['intent'] = 'bus_owner_revenue';
+            $context['admin_data'] = $this->getBusOwnerRevenue($userId);
+        }
+
+        // My trips
+        if (preg_match('/(chuyến xe của tôi|my trips|tuyến của tôi)/i', $message)) {
+            $context['intent'] = 'bus_owner_trips';
+            $context['admin_data'] = $this->getBusOwnerTrips($userId);
+        }
     }
 
     /**
@@ -461,11 +676,336 @@ class ChatController extends Controller
     }
 
     /**
+     * Lấy thống kê admin
+     */
+    private function getAdminStatistics()
+    {
+        try {
+            $stats = [
+                'total_users' => DB::table('users')->count(),
+                'total_bookings' => DB::table('dat_ve')->count(),
+                'total_trips' => DB::table('chuyen_xe')->count(),
+                'total_companies' => DB::table('nha_xe')->count(),
+                'revenue_today' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->whereDate('dv.ngay_dat', today())
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->sum('cx.gia_ve'),
+                'revenue_month' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->whereMonth('dv.ngay_dat', now()->month)
+                    ->whereYear('dv.ngay_dat', now()->year)
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->sum('cx.gia_ve'),
+                'pending_bookings' => DB::table('dat_ve')
+                    ->where('trang_thai', 'Đã đặt')
+                    ->count(),
+                'confirmed_bookings' => DB::table('dat_ve')
+                    ->where('trang_thai', 'Đã thanh toán')
+                    ->count()
+            ];
+            return $stats;
+        } catch (\Exception $e) {
+            Log::error('Get admin statistics error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu user
+     */
+    private function getUserData()
+    {
+        try {
+            $users = DB::table('users')
+                ->select('id', 'name', 'email', 'phone', 'role', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+            return $users->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get user data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu booking
+     */
+    private function getBookingData()
+    {
+        try {
+            $bookings = DB::table('dat_ve as dv')
+                ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                ->join('tram_xe as di', 'cx.ma_tram_di', '=', 'di.ma_tram_xe')
+                ->join('tram_xe as den', 'cx.ma_tram_den', '=', 'den.ma_tram_xe')
+                ->select(
+                    'dv.ma_ve',
+                    'dv.ten_khach_hang',
+                    'dv.sdt_khach_hang',
+                    'dv.email_khach_hang',
+                    'dv.trang_thai',
+                    'dv.ngay_dat',
+                    'di.tinh_thanh as diem_di',
+                    'den.tinh_thanh as diem_den',
+                    'cx.ngay_di',
+                    'cx.gio_di',
+                    'dv.gia_ve'
+                )
+                ->orderBy('dv.ngay_dat', 'desc')
+                ->limit(20)
+                ->get();
+            return $bookings->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get booking data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu chuyến xe
+     */
+    private function getTripData()
+    {
+        try {
+            $trips = DB::table('chuyen_xe as cx')
+                ->join('tram_xe as di', 'cx.ma_tram_di', '=', 'di.ma_tram_xe')
+                ->join('tram_xe as den', 'cx.ma_tram_den', '=', 'den.ma_tram_xe')
+                ->join('nha_xe as nx', 'cx.ma_nha_xe', '=', 'nx.ma_nha_xe')
+                ->select(
+                    'cx.id',
+                    'cx.ten_xe',
+                    'nx.ten_nha_xe',
+                    'di.tinh_thanh as diem_di',
+                    'den.tinh_thanh as diem_den',
+                    'cx.ngay_di',
+                    'cx.gio_di',
+                    'cx.gia_ve',
+                    'cx.loai_xe',
+                    'cx.so_cho',
+                    'cx.so_ve'
+                )
+                ->orderBy('cx.ngay_di', 'desc')
+                ->limit(20)
+                ->get();
+            return $trips->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get trip data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu nhà xe
+     */
+    private function getCompanyData()
+    {
+        try {
+            $companies = DB::table('nha_xe')
+                ->select('ma_nha_xe', 'ten_nha_xe', 'dia_chi', 'sdt', 'email', 'created_at')
+                ->orderBy('created_at', 'desc')
+                ->limit(20)
+                ->get();
+            return $companies->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get company data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu doanh thu
+     */
+    private function getRevenueData()
+    {
+        try {
+            $revenue = [
+                'today' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->whereDate('dv.ngay_dat', today())
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->sum('cx.gia_ve'),
+                'this_month' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->whereMonth('dv.ngay_dat', now()->month)
+                    ->whereYear('dv.ngay_dat', now()->year)
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->sum('cx.gia_ve'),
+                'last_month' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->whereMonth('dv.ngay_dat', now()->subMonth()->month)
+                    ->whereYear('dv.ngay_dat', now()->subMonth()->year)
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->sum('cx.gia_ve'),
+                'monthly_breakdown' => DB::table('dat_ve as dv')
+                    ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                    ->select(
+                        DB::raw('MONTH(dv.ngay_dat) as month'),
+                        DB::raw('SUM(cx.gia_ve) as revenue')
+                    )
+                    ->where('dv.trang_thai', 'Đã thanh toán')
+                    ->whereYear('dv.ngay_dat', now()->year)
+                    ->groupBy('month')
+                    ->orderBy('month')
+                    ->get()
+            ];
+            return $revenue;
+        } catch (\Exception $e) {
+            Log::error('Get revenue data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu khách hàng cho staff
+     */
+    private function getCustomerData()
+    {
+        try {
+            $customers = DB::table('dat_ve as dv')
+                ->select(
+                    'dv.ten_khach_hang',
+                    'dv.sdt_khach_hang',
+                    'dv.email_khach_hang',
+                    DB::raw('COUNT(*) as total_bookings'),
+                    DB::raw('SUM(dv.gia_ve) as total_spent'),
+                    DB::raw('MAX(dv.ngay_dat) as last_booking')
+                )
+                ->groupBy('dv.ten_khach_hang', 'dv.sdt_khach_hang', 'dv.email_khach_hang')
+                ->orderBy('total_bookings', 'desc')
+                ->limit(20)
+                ->get();
+            return $customers->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get customer data error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy booking của bus owner
+     */
+    private function getBusOwnerBookings($userId)
+    {
+        try {
+            $bookings = DB::table('dat_ve as dv')
+                ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                ->join('tram_xe as di', 'cx.ma_tram_di', '=', 'di.ma_tram_xe')
+                ->join('tram_xe as den', 'cx.ma_tram_den', '=', 'den.ma_tram_xe')
+                ->where('cx.ma_nha_xe', function ($query) use ($userId) {
+                    $query->select('ma_nha_xe')
+                        ->from('users')
+                        ->where('id', $userId);
+                })
+                ->select(
+                    'dv.ma_ve',
+                    'dv.ten_khach_hang',
+                    'dv.sdt_khach_hang',
+                    'dv.trang_thai',
+                    'dv.ngay_dat',
+                    'di.tinh_thanh as diem_di',
+                    'den.tinh_thanh as diem_den',
+                    'cx.ngay_di',
+                    'cx.gio_di',
+                    'dv.gia_ve'
+                )
+                ->orderBy('dv.ngay_dat', 'desc')
+                ->limit(20)
+                ->get();
+            return $bookings->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get bus owner bookings error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy doanh thu của bus owner
+     */
+    private function getBusOwnerRevenue($userId)
+    {
+        try {
+            $revenue = DB::table('dat_ve as dv')
+                ->join('chuyen_xe as cx', 'dv.chuyen_xe_id', '=', 'cx.id')
+                ->where('cx.ma_nha_xe', function ($query) use ($userId) {
+                    $query->select('ma_nha_xe')
+                        ->from('users')
+                        ->where('id', $userId);
+                })
+                ->where('dv.trang_thai', 'Đã thanh toán')
+                ->select(
+                    DB::raw('SUM(cx.gia_ve) as total_revenue'),
+                    DB::raw('COUNT(*) as total_bookings'),
+                    DB::raw('AVG(cx.gia_ve) as avg_ticket_price')
+                )
+                ->first();
+            return $revenue;
+        } catch (\Exception $e) {
+            Log::error('Get bus owner revenue error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Lấy chuyến xe của bus owner
+     */
+    private function getBusOwnerTrips($userId)
+    {
+        try {
+            $trips = DB::table('chuyen_xe as cx')
+                ->join('tram_xe as di', 'cx.ma_tram_di', '=', 'di.ma_tram_xe')
+                ->join('tram_xe as den', 'cx.ma_tram_den', '=', 'den.ma_tram_xe')
+                ->where('cx.ma_nha_xe', function ($query) use ($userId) {
+                    $query->select('ma_nha_xe')
+                        ->from('users')
+                        ->where('id', $userId);
+                })
+                ->select(
+                    'cx.id',
+                    'cx.ten_xe',
+                    'di.tinh_thanh as diem_di',
+                    'den.tinh_thanh as diem_den',
+                    'cx.ngay_di',
+                    'cx.gio_di',
+                    'cx.gia_ve',
+                    'cx.loai_xe',
+                    'cx.so_cho',
+                    'cx.so_ve'
+                )
+                ->orderBy('cx.ngay_di', 'desc')
+                ->limit(20)
+                ->get();
+            return $trips->toArray();
+        } catch (\Exception $e) {
+            Log::error('Get bus owner trips error: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Xây dựng prompt nâng cao với context từ database
      */
-    private function buildEnhancedPrompt($contextData)
+    private function buildEnhancedPrompt($contextData, $isAdmin = false, $userRole = 'user')
     {
-        $prompt = "🤖 BẠN LÀ MINH - TƯ VẤN VIÊN AI THÔNG MINH CỦA FUTA BUS LINES
+        if ($isAdmin) {
+            $prompt = "🤖 BẠN LÀ MINH - AI ASSISTANT CHO ADMIN FUTA BUS LINES
+
+📋 VAI TRÒ & NHIỆM VỤ:
+- Tên: Minh (AI Assistant cho Admin)
+- Công ty: FUTA Bus Lines (Phương Trang)
+- Nhiệm vụ: Hỗ trợ Admin quản lý hệ thống, phân tích dữ liệu, báo cáo thống kê
+- Quyền hạn: Truy cập toàn bộ dữ liệu hệ thống, thống kê, báo cáo
+
+🎯 KHẢ NĂNG ADMIN:
+✅ Thống kê tổng quan hệ thống (users, bookings, revenue, trips)
+✅ Quản lý người dùng, đặt vé, chuyến xe, nhà xe
+✅ Phân tích doanh thu, xu hướng, báo cáo
+✅ Hỗ trợ quyết định quản lý dựa trên dữ liệu thực
+✅ Giải đáp mọi thắc mắc về hệ thống và dữ liệu
+
+";
+        } else {
+            $prompt = "🤖 BẠN LÀ MINH - TƯ VẤN VIÊN AI THÔNG MINH CỦA FUTA BUS LINES
 
 📋 VAI TRÒ & NHIỆM VỤ:
 - Tên: Minh (nam, 25 tuổi, thân thiện, nhiệt tình)
@@ -526,6 +1066,7 @@ class ChatController extends Controller
 - Cho phép mang 20kg hành lý miễn phí
 
 ";
+        }
 
         // Thêm thông tin từ database nếu có
         if (!empty($contextData['routes'])) {
@@ -673,6 +1214,11 @@ class ChatController extends Controller
             $prompt .= "📌 Hãy tóm tắt thông tin một cách rõ ràng, dễ hiểu!\n\n";
         }
 
+        // Thêm dữ liệu admin nếu có
+        if ($isAdmin && !empty($contextData['admin_data'])) {
+            $this->addAdminDataToPrompt($prompt, $contextData);
+        }
+
         $prompt .= "\n💬 CÁCH TRẢ LỜI:
 1. **Thân thiện & Tự nhiên**: Dùng emoji phù hợp (😊🚌🎫💰👍✨🔥)
 2. **Ngắn gọn**: 2-4 câu cho câu hỏi đơn giản, chi tiết hơn khi cần
@@ -764,6 +1310,116 @@ Nhưng mình có thể giới thiệu dịch vụ của FUTA - hãng xe 5 sao v�
 ";
 
         return $prompt;
+    }
+
+    /**
+     * Thêm dữ liệu admin vào prompt
+     */
+    private function addAdminDataToPrompt(&$prompt, $contextData)
+    {
+        $intent = $contextData['intent'];
+        $adminData = $contextData['admin_data'];
+
+        switch ($intent) {
+            case 'admin_statistics':
+                $prompt .= "\n📊 THỐNG KÊ TỔNG QUAN HỆ THỐNG:\n";
+                $prompt .= "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                $prompt .= "👥 Tổng người dùng: " . number_format($adminData['total_users']) . "\n";
+                $prompt .= "🎫 Tổng đặt vé: " . number_format($adminData['total_bookings']) . "\n";
+                $prompt .= "🚌 Tổng chuyến xe: " . number_format($adminData['total_trips']) . "\n";
+                $prompt .= "🏢 Tổng nhà xe: " . number_format($adminData['total_companies']) . "\n";
+                $prompt .= "💰 Doanh thu hôm nay: " . number_format($adminData['revenue_today']) . "đ\n";
+                $prompt .= "💰 Doanh thu tháng này: " . number_format($adminData['revenue_month']) . "đ\n";
+                $prompt .= "⏳ Đặt vé chờ xử lý: " . number_format($adminData['pending_bookings']) . "\n";
+                $prompt .= "✅ Đặt vé đã xác nhận: " . number_format($adminData['confirmed_bookings']) . "\n";
+                break;
+
+            case 'admin_users':
+                $prompt .= "\n👥 DANH SÁCH NGƯỜI DÙNG:\n";
+                $prompt .= "📊 Tổng cộng: " . count($adminData) . " người dùng\n";
+                foreach ($adminData as $index => $user) {
+                    $num = $index + 1;
+                    $prompt .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $prompt .= "👤 USER {$num}:\n";
+                    $prompt .= "  🆔 ID: {$user->id}\n";
+                    $prompt .= "  📝 Tên: {$user->name}\n";
+                    $prompt .= "  📧 Email: {$user->email}\n";
+                    $prompt .= "  📞 SĐT: {$user->phone}\n";
+                    $prompt .= "  🔐 Vai trò: {$user->role}\n";
+                    $prompt .= "  📅 Ngày tạo: {$user->created_at}\n";
+                }
+                break;
+
+            case 'admin_bookings':
+                $prompt .= "\n🎫 DANH SÁCH ĐẶT VÉ:\n";
+                $prompt .= "📊 Tổng cộng: " . count($adminData) . " vé\n";
+                foreach ($adminData as $index => $booking) {
+                    $num = $index + 1;
+                    $prompt .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $prompt .= "🎫 VÉ {$num}:\n";
+                    $prompt .= "  🔖 Mã vé: {$booking->ma_ve}\n";
+                    $prompt .= "  👤 Khách: {$booking->ten_khach_hang}\n";
+                    $prompt .= "  📞 SĐT: {$booking->sdt_khach_hang}\n";
+                    $prompt .= "  📍 Tuyến: {$booking->diem_di} → {$booking->diem_den}\n";
+                    $prompt .= "  📅 Ngày đi: {$booking->ngay_di}\n";
+                    $prompt .= "  🕐 Giờ đi: {$booking->gio_di}\n";
+                    $prompt .= "  💰 Giá: " . number_format($booking->gia_ve) . "đ\n";
+                    $prompt .= "  ⚡ Trạng thái: {$booking->trang_thai}\n";
+                }
+                break;
+
+            case 'admin_trips':
+                $prompt .= "\n🚌 DANH SÁCH CHUYẾN XE:\n";
+                $prompt .= "📊 Tổng cộng: " . count($adminData) . " chuyến\n";
+                foreach ($adminData as $index => $trip) {
+                    $num = $index + 1;
+                    $prompt .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $prompt .= "🚌 CHUYẾN {$num}:\n";
+                    $prompt .= "  🆔 ID: {$trip->id}\n";
+                    $prompt .= "  🚌 Tên xe: {$trip->ten_xe}\n";
+                    $prompt .= "  🏢 Nhà xe: {$trip->ten_nha_xe}\n";
+                    $prompt .= "  📍 Tuyến: {$trip->diem_di} → {$trip->diem_den}\n";
+                    $prompt .= "  📅 Ngày: {$trip->ngay_di}\n";
+                    $prompt .= "  🕐 Giờ: {$trip->gio_di}\n";
+                    $prompt .= "  💰 Giá: " . number_format($trip->gia_ve) . "đ\n";
+                    $prompt .= "  🚌 Loại: {$trip->loai_xe}\n";
+                    $prompt .= "  💺 Ghế: {$trip->so_cho}\n";
+                    $prompt .= "  ✨ Còn: {$trip->so_ve}\n";
+                }
+                break;
+
+            case 'admin_companies':
+                $prompt .= "\n🏢 DANH SÁCH NHÀ XE:\n";
+                $prompt .= "📊 Tổng cộng: " . count($adminData) . " nhà xe\n";
+                foreach ($adminData as $index => $company) {
+                    $num = $index + 1;
+                    $prompt .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                    $prompt .= "🏢 NHÀ XE {$num}:\n";
+                    $prompt .= "  🆔 Mã: {$company->ma_nha_xe}\n";
+                    $prompt .= "  📝 Tên: {$company->ten_nha_xe}\n";
+                    $prompt .= "  📍 Địa chỉ: {$company->dia_chi}\n";
+                    $prompt .= "  📞 SĐT: {$company->sdt}\n";
+                    $prompt .= "  📧 Email: {$company->email}\n";
+                    $prompt .= "  📅 Ngày tạo: {$company->created_at}\n";
+                }
+                break;
+
+            case 'admin_revenue':
+                $prompt .= "\n💰 BÁO CÁO DOANH THU:\n";
+                $prompt .= "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+                $prompt .= "💰 Hôm nay: " . number_format($adminData['today']) . "đ\n";
+                $prompt .= "💰 Tháng này: " . number_format($adminData['this_month']) . "đ\n";
+                $prompt .= "💰 Tháng trước: " . number_format($adminData['last_month']) . "đ\n";
+                $prompt .= "\n📊 PHÂN TÍCH THEO THÁNG:\n";
+                foreach ($adminData['monthly_breakdown'] as $month) {
+                    $prompt .= "  📅 Tháng {$month->month}: " . number_format($month->revenue) . "đ\n";
+                }
+                break;
+        }
+
+        $prompt .= "\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n";
+        $prompt .= "✅ Đây là dữ liệu THẬT từ hệ thống quản trị.\n";
+        $prompt .= "📌 Hãy phân tích và đưa ra insights hữu ích cho Admin!\n\n";
     }
 
     public function test()

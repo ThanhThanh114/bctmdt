@@ -198,6 +198,7 @@ body {
     transform: translateY(-50%);
     color: #666;
     font-size: 14px;
+    z-index: 5; /* Ensure icon stays above input */
 }
 
 .submit-btn {

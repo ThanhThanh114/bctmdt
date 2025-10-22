@@ -1,24 +1,24 @@
 @php
-    // Lấy danh sách tất cả trạm xe
-    $stations = \App\Models\TramXe::orderBy('ten_tram')->get();
+// Lấy danh sách tất cả trạm xe
+$stations = \App\Models\TramXe::orderBy('ten_tram')->get();
 
-    // Lấy giá trị từ GET parameters
-    $start = request('start', '');
-    $end = request('end', '');
-    $date = request('date', date('Y-m-d'));
-    $ticket = request('ticket', 1);
-    $tripType = request('trip', 'oneway');
+// Lấy giá trị từ GET parameters
+$start = request('start', '');
+$end = request('end', '');
+$date = request('date', date('Y-m-d'));
+$ticket = request('ticket', 1);
+$tripType = request('trip', 'oneway');
 
-    // Xác định action dựa trên trang hiện tại
-    $currentPage = basename(request()->path());
-    $action = '';
-    if ($currentPage == 'lichtrinh') {
-        $action = route('trips.trips');
-    } elseif ($currentPage == 'datve') {
-        $action = route('booking.booking');
-    } else {
-        $action = route('home');
-    }
+// Xác định action dựa trên trang hiện tại
+$currentPage = basename(request()->path());
+$action = '';
+if ($currentPage == 'lichtrinh') {
+$action = route('trips.trips');
+} elseif ($currentPage == 'datve') {
+$action = route('booking.booking');
+} else {
+$action = route('home');
+}
 @endphp
 
 
@@ -37,7 +37,7 @@
                 </label>
             </div>
             <span class="guide-link">
-                <a href="#" target="_blank">Hướng dẫn mua vé</a>
+                <a href="{{ route('guide') }}" target="_blank">Hướng dẫn mua vé</a>
             </span>
         </div>
 

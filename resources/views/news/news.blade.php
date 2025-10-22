@@ -131,7 +131,7 @@
                         <p>FUTA City Bus</p>
                     </div>
                     <div class="spotlight-carousel">
-                        @foreach ($highlight_news->slice(5, 5) as $news)
+                        @foreach ($highlight_news->slice(5, 4) as $news)
                             <a href="{{ route('news.show', $news->ma_tin) }}" class="spotlight-card">
                                 <div class="spotlight-image">
                                     @if($news->hinh_anh)

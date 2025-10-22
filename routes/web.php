@@ -65,6 +65,11 @@ Route::get('/hoadon/show', [InvoiceController::class, 'show'])->name('invoice.sh
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/index.php', [HomeController::class, 'index']);
 
+// Guide page route
+Route::get('/huong-dan', function () {
+    return view('guide');
+})->name('guide');
+
 // Booking routes
 Route::get('/datve', [BookingController::class, 'index'])->name('booking.booking');
 Route::get('/datve/{id}', [BookingController::class, 'show'])->name('booking.show');

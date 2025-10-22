@@ -11,9 +11,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('address', 255)->nullable()->after('phone');
-            $table->date('date_of_birth')->nullable()->after('address');
-            $table->enum('gender', ['Nam', 'Nữ', 'Khác'])->nullable()->after('date_of_birth');
+            if (!Schema::hasColumn('users', 'address')) {
+                $table->string('address', 255)->nullable()->after('phone');
+            }
+            if (!Schema::hasColumn('users', 'date_of_birth')) {
+                $table->date('date_of_birth')->nullable()->after('address');
+            }
+            if (!Schema::hasColumn('users', 'gender')) {
+                $table->enum('gender', ['Nam', 'Nữ', 'Khác'])->nullable()->after('date_of_birth');
+            }
         });
     }
 
