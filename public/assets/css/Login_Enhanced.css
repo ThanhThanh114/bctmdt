@@ -1,7 +1,24 @@
 /* =================================================================
-   ENHANCED LOGIN/REGISTER PAGE STYLES
-   Includes: Toggle Password, Password Strength Meter, Validation
-   ================================================================= */
+    ENHANCED LOGIN/REGISTER PAGE STYLES
+    Includes: Toggle Password, Password Strength Meter, Validation, Labels
+    ================================================================= */
+
+/* Input Labels */
+.input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 6px;
+    margin-left: 5px;
+}
+
+/* Adjust icon positioning for better alignment with labels */
+.input-row .input-icon {
+    top: 50%; /* Center vertically in the input area */
+    transform: translateY(-50%); /* Perfect vertical centering */
+    margin-top: 2px; /* Fine-tune alignment with text baseline */
+}
 
 /* Toggle Password Button */
 .input-wrapper {
@@ -19,12 +36,20 @@
 /* Normalize input height to prevent vertical jump when states change */
 .input-field {
     min-height: 44px;
+    height: 44px; /* Fixed height to prevent jumping */
+    line-height: 1.2; /* Better line height for consistent positioning */
 }
 
 .input-wrapper:has(.form-hint),
 .input-wrapper:has(.invalid-feedback),
 .input-wrapper:has(.valid-feedback) {
-    margin-bottom: 8px;
+    margin-bottom: 35px; /* Increased to accommodate labels and feedback */
+}
+
+/* Prevent layout shift when validation messages appear */
+.input-wrapper {
+    min-height: 44px; /* Ensure consistent height */
+    position: relative; /* For absolute positioning of feedback */
 }
 
 .toggle-password {
@@ -57,6 +82,12 @@
 .input-wrapper input[type="password"],
 .input-wrapper input.has-toggle {
     padding-right: 45px !important;
+}
+
+/* Ensure icons stay in correct position */
+.input-row .input-icon {
+    z-index: 5;
+    pointer-events: none; /* Prevent icon from interfering with input clicks */
 }
 
 /* Form Hints */
@@ -208,6 +239,10 @@
     margin-top: 4px;
     margin-bottom: 0;
     margin-left: 5px;
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
 }
 
 .invalid-feedback i {
@@ -221,6 +256,10 @@
     margin-top: 4px;
     margin-bottom: 0;
     margin-left: 5px;
+    position: absolute;
+    bottom: -25px;
+    left: 0;
+    right: 0;
 }
 
 .valid-feedback i {
