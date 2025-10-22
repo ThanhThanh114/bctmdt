@@ -14,6 +14,7 @@ use App\Models\BinhLuan;
 use App\Models\KhuyenMai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -27,8 +28,25 @@ class DashboardController extends Controller
             return 0;
         }
         // Split by comma and count non-empty items
-        $seatArray = array_filter(array_map('trim', explode(',', (string)$seatString)));
+        $seatArray = array_filter(array_map('trim', explode(',', (string) $seatString)));
         return count($seatArray);
+    }
+
+    /**
+     * Get comments count safely - check if table exists first
+     */
+    private function getCommentsCount()
+    {
+        try {
+            // Check if binh_luan table exists
+            if (Schema::hasTable('binh_luan')) {
+                return BinhLuan::count();
+            }
+            return 0;
+        } catch (\Exception $e) {
+            // If any error occurs, return 0
+            return 0;
+        }
     }
 
     public function index()
@@ -42,7 +60,7 @@ class DashboardController extends Controller
             'total_news' => TinTuc::count(),
             'total_contacts' => Contact::count(),
             'total_employees' => NhanVien::count(), // Tổng nhân viên
-            'total_comments' => BinhLuan::count(), // Tổng bình luận
+            'total_comments' => $this->getCommentsCount(), // Tổng bình luận
             'total_promotions' => KhuyenMai::count(), // Tổng khuyến mãi
             'active_promotions' => KhuyenMai::where('ngay_bat_dau', '<=', now())
                 ->where('ngay_ket_thuc', '>=', now())

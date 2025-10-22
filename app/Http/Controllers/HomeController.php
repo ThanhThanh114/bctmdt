@@ -53,9 +53,9 @@ class HomeController extends Controller
         // Lấy tuyến phổ biến
         $tuyenPhoBien = $this->getTuyenPhoBien();
 
-        // Lấy tin tức mới nhất (12 tin để hiển thị trong slider)
+        // Lấy tin tức mới nhất (4 tin để hiển thị trong slider)
         $latestNews = TinTuc::orderBy('ngay_dang', 'desc')
-            ->limit(12)
+            ->limit(4)
             ->get();
 
         // Lấy danh sách trạm (cities) để hiển thị trong select

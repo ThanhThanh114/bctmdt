@@ -49,17 +49,6 @@ class BookingsController extends Controller
     }
 
     public function show(DatVe $booking)
-
-    
-        
-          
-    
-
-        
-        Expand All
-    
-    @@ -51,25 +61,37 @@ public function show(DatVe $booking)
-  
     {
         $booking->load(['user', 'chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
         return view('AdminLTE.staff.bookings.show', compact('booking'));
@@ -101,17 +90,6 @@ class BookingsController extends Controller
     }
 
     public function todayBookings()
-
-    
-          
-            
-    
-
-          
-          Expand Down
-    
-    
-  
     {
         $today_bookings = DatVe::with(['user', 'chuyenXe'])
             ->whereDate('ngay_dat', date('Y-m-d'))

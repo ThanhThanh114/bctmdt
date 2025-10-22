@@ -130,7 +130,7 @@
                         <p>FUTA City Bus</p>
                     </div>
                     <div class="spotlight-carousel">
-                        <?php $__currentLoopData = $highlight_news->slice(5, 5); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $news): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php $__currentLoopData = $highlight_news->slice(5, 4); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $news): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <a href="<?php echo e(route('news.show', $news->ma_tin)); ?>" class="spotlight-card">
                                 <div class="spotlight-image">
                                     <?php if($news->hinh_anh): ?>
