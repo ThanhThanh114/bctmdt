@@ -4,7 +4,6 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <title><?php echo $__env->yieldContent('title', 'Admin Dashboard'); ?> - FUTA Bus</title>
 
     <!-- AdminLTE CSS -->
@@ -19,9 +18,6 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="<?php echo e(asset('css/admin-custom.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('css/bus-owner-custom.css')); ?>">
-    
-    <!-- FUTA Chat Widget CSS -->
-    <link rel="stylesheet" href="<?php echo e(asset('assets/css/futa-chat.css')); ?>">
 
     <?php echo $__env->yieldPushContent('styles'); ?>
 </head>
@@ -365,9 +361,6 @@
     <!-- Custom JS -->
     <script src="<?php echo e(asset('js/admin-custom.js')); ?>"></script>
     <script src="<?php echo e(asset('js/bus-owner-custom.js')); ?>"></script>
-    
-    <!-- FUTA Chat Widget JS -->
-    <script src="<?php echo e(asset('assets/js/futa-chat.js')); ?>"></script>
 
     <?php echo $__env->yieldPushContent('scripts'); ?>
     <?php echo $__env->yieldContent('scripts'); ?>
