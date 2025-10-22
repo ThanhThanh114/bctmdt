@@ -332,7 +332,7 @@ class BookingController extends Controller
             DatVe::where('ma_ve', $bookingCode)
                 ->update(['trang_thai' => 'Đã thanh toán']);
 
-            // Gửi email xác nhận
+            // Gửi email xác nhận cho khách hàng
             try {
                 $bookings = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
                     ->where('ma_ve', $bookingCode)
@@ -349,6 +349,22 @@ class BookingController extends Controller
                 }
             } catch (\Exception $e) {
                 \Log::error('Failed to send booking confirmation email: ' . $e->getMessage());
+                // Không báo lỗi cho user, vì thanh toán đã thành công
+            }
+
+            // Gửi email thông báo cho admin
+            try {
+                if ($bookings->isNotEmpty()) {
+                    \Mail::to('lethanhem01011975@gmail.com')
+                        ->send(new \App\Mail\AdminBookingNotification(
+                            $bookings,
+                            $bookingCode,
+                            $paymentInfo['total_amount'],
+                            $paymentInfo['discount_amount'] ?? 0
+                        ));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Failed to send admin booking notification email: ' . $e->getMessage());
                 // Không báo lỗi cho user, vì thanh toán đã thành công
             }
 
