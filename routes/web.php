@@ -117,7 +117,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Quản lý người dùng
         Route::resource('users', App\Http\Controllers\Admin\UsersController::class);
-        
+
         // Quản lý yêu cầu nâng cấp
         Route::get('upgrade-requests', [App\Http\Controllers\Admin\UsersController::class, 'upgradeRequests'])->name('users.upgrade-requests');
         Route::get('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\UsersController::class, 'showUpgradeRequest'])->name('users.upgrade-request-detail');
@@ -127,6 +127,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Quản lý nhân viên
         Route::resource('nhanvien', App\Http\Controllers\Admin\NhanVienController::class);
+        Route::get('nhanvien-export', [App\Http\Controllers\Admin\NhanVienController::class, 'export'])->name('nhanvien.export');
 
         // Quản lý đặt vé
         Route::resource('datve', App\Http\Controllers\Admin\DatVeController::class)->except(['edit']);
@@ -230,7 +231,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\User\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('bookings', App\Http\Controllers\User\BookingsController::class)->except(['edit', 'update']);
         Route::patch('bookings/{booking}/cancel', [App\Http\Controllers\User\BookingsController::class, 'cancel'])->name('bookings.cancel');
-        
+
         // Upgrade routes
         Route::get('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'index'])->name('upgrade.index');
         Route::post('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'store'])->name('upgrade.store');
