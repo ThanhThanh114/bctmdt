@@ -104,6 +104,7 @@ Route::put('/password', [AuthController::class, 'updatePassword'])->name('passwo
 
 // Booking History routes
 Route::get('/booking-history', [BookingController::class, 'history'])->name('booking.history');
+Route::get('/booking-qrcode/{id}', [BookingController::class, 'showQRCode'])->name('booking.qrcode');
 
 //Page controllers
 Route::get('/about', [PageController::class, 'index'])->name('about.about');
@@ -206,6 +207,11 @@ Route::middleware(['auth'])->group(function () {
         // Quản lý liên hệ
         Route::resource('contact', App\Http\Controllers\Staff\ContactController::class)->only(['index', 'show', 'destroy']);
         Route::post('contact/{contact}/reply', [App\Http\Controllers\Staff\ContactController::class, 'reply'])->name('contact.reply');
+
+        // Soát vé - Ticket Scanner
+        Route::get('ticket-scanner', [App\Http\Controllers\Staff\TicketScannerController::class, 'index'])->name('ticket-scanner.index');
+        Route::post('ticket-scanner/verify', [App\Http\Controllers\Staff\TicketScannerController::class, 'verify'])->name('ticket-scanner.verify');
+        Route::post('ticket-scanner/check-in', [App\Http\Controllers\Staff\TicketScannerController::class, 'checkIn'])->name('ticket-scanner.check-in');
     });
 
     // Bus Owner Dashboard Routes
@@ -230,6 +236,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\User\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('bookings', App\Http\Controllers\User\BookingsController::class)->except(['edit', 'update']);
         Route::patch('bookings/{booking}/cancel', [App\Http\Controllers\User\BookingsController::class, 'cancel'])->name('bookings.cancel');
+        Route::get('bookings/{booking}/qrcode', [App\Http\Controllers\User\BookingsController::class, 'qrcode'])->name('bookings.qrcode');
         
         // Upgrade routes
         Route::get('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'index'])->name('upgrade.index');

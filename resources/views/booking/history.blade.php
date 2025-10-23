@@ -160,6 +160,19 @@
                                         </div>
                                     </div>
                                 </div>
+
+                                <!-- Nút xem QR Code -->
+                                @php
+                                    $canShowQR = in_array($booking->trang_thai, ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
+                                @endphp
+                                
+                                @if($canShowQR)
+                                <div class="booking-actions">
+                                    <a href="{{ route('booking.qrcode', $booking->id) }}" class="btn-qr">
+                                        <i class="fas fa-qrcode"></i> Xem mã QR vé
+                                    </a>
+                                </div>
+                                @endif
                             </div>
                         </div>
                     @endforeach

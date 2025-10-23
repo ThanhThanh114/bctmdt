@@ -98,6 +98,17 @@
                                     <a href="{{ route('user.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    @php
+                                        $canShowQR = in_array($booking->trang_thai, ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
+                                    @endphp
+                                    
+                                    @if($canShowQR)
+                                    <a href="{{ route('user.bookings.qrcode', $booking) }}" class="btn btn-sm btn-success" title="Xem mã QR">
+                                        <i class="fas fa-qrcode"></i>
+                                    </a>
+                                    @endif
+                                    
                                     @if($booking->status == 'confirmed' && \Carbon\Carbon::parse($booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di) > now()->addHours(2))
                                     <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
                                         @csrf
