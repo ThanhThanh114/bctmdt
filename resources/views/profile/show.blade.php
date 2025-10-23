@@ -136,7 +136,7 @@
                             <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
                             <div class="info-box-content">
                                 <span class="info-box-text">Đặt vé hôm nay</span>
-                                <span class="info-box-number">{{ App\Models\DatVe::whereDate('created_at', date('Y-m-d'))->count() }}</span>
+                                <span class="info-box-number">{{ App\Models\DatVe::whereDate('ngay_dat', date('Y-m-d'))->count() }}</span>
                             </div>
                         </div>
                     </div>

@@ -12,7 +12,14 @@
             <div class="card-header">
                 <h3 class="card-title">Danh sách người dùng</h3>
                 <div class="card-tools">
-                    <form method="GET" class="d-flex">
+                    <a href="{{ route('admin.users.upgrade-requests') }}" class="btn btn-sm btn-primary mr-2">
+                        <i class="fas fa-star mr-1"></i>Yêu cầu nâng cấp
+                        @php $pendingCount = \App\Models\UpgradeRequest::whereIn('status', ['pending', 'payment_pending', 'paid'])->count(); @endphp
+                        @if($pendingCount > 0)
+                        <span class="badge badge-warning">{{ $pendingCount }}</span>
+                        @endif
+                    </a>
+                    <form method="GET" class="d-inline-flex">
                         <div class="input-group input-group-sm" style="width: 200px;">
                             <input type="text" name="search" class="form-control float-right" placeholder="Tìm kiếm..."
                                 value="{{ request('search') }}">
@@ -44,7 +51,7 @@
                             <th>Email</th>
                             <th>Số điện thoại</th>
                             <th>Vai trò</th>
-                            <th>Trạng thái</th>
+                            <th>Nhà xe</th>
                             <th>Ngày tạo</th>
                             <th>Thao tác</th>
                         </tr>
@@ -75,13 +82,15 @@
                                 @endif
                             </td>
                             <td>
-                                {{-- Email verification feature not yet implemented --}}
-                                {{-- @if($user->is_verified)
-                                    <span class="badge badge-success">Đã xác thực</span>
+                                @if($user->role === 'Bus_owner')
+                                    @if($user->ma_nha_xe && $user->nhaXe)
+                                        {{ $user->nhaXe->ten_nha_xe }}
+                                    @else
+                                        <span class="text-muted">Chưa gán</span>
+                                    @endif
                                 @else
-                                    <span class="badge badge-secondary">Chưa xác thực</span>
-                                @endif --}}
-                                <span class="badge badge-info">Hoạt động</span>
+                                    <span class="text-muted">-</span>
+                                @endif
                             </td>
                             <td>{{ $user->created_at ? \Carbon\Carbon::parse($user->created_at)->format('d/m/Y') : 'Chưa cập nhật' }}
                             </td>

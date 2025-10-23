@@ -198,6 +198,30 @@
                         @if(strtolower(Auth::user()->role) === 'staff')
                         <!-- Staff Menu -->
                         <li class="nav-item">
+                            <a href="{{ route('staff.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('staff.comments.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.comments.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-comments"></i>
+                                <p>Quản lý bình luận</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('staff.news.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.news.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-newspaper"></i>
+                                <p>Quản lý tin tức</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('staff.bookings.index') }}"
                                 class="nav-link {{ request()->routeIs('staff.bookings.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-ticket-alt"></i>
@@ -206,18 +230,18 @@
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.trips.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.trips.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-route"></i>
-                                <p>Quản lý chuyến xe</p>
+                            <a href="{{ route('staff.promotions.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.promotions.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-gift"></i>
+                                <p>Quản lý vé khuyến mãi</p>
                             </a>
                         </li>
 
                         <li class="nav-item">
-                            <a href="{{ route('staff.customers.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.customers.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-users"></i>
-                                <p>Khách hàng</p>
+                            <a href="{{ route('staff.contact.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.contact.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-envelope"></i>
+                                <p>Quản lý liên hệ</p>
                             </a>
                         </li>
 
@@ -228,6 +252,51 @@
                                 <i class="nav-icon fas fa-user"></i>
                                 <p>Hồ sơ cá nhân</p>
                             </a>
+                        </li>
+                        @endif
+
+                        @if(strtolower(Auth::user()->role) === 'user')
+                        <!-- User Menu -->
+                        <li class="nav-item">
+                            <a href="{{ route('user.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('user.upgrade.index') }}"
+                                class="nav-link {{ request()->routeIs('user.upgrade.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-star"></i>
+                                <p>Nâng cấp lên Nhà xe</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('profile.show') }}"
+                                class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Hồ sơ cá nhân</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('password.edit') }}"
+                                class="nav-link {{ request()->routeIs('password.edit') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-key"></i>
+                                <p>Đổi mật khẩu</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="nav-link btn btn-link text-left w-100" style="border: none;">
+                                    <i class="nav-icon fas fa-sign-out-alt"></i>
+                                    <p style="display: inline;">Đăng xuất</p>
+                                </button>
+                            </form>
                         </li>
                         @endif
 

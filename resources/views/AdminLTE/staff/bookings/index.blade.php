@@ -1,286 +1,330 @@
 @extends('layouts.admin')
 
-@section('title', 'Quản lý đặt vé')
-
-@section('page-title', 'Quản lý đặt vé')
-@section('breadcrumb', 'Đặt vé')
+@section('title', 'Quản lý Đặt vé')
 
 @section('content')
-<div class="row">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Danh sách đặt vé</h3>
-                <div class="card-tools">
-                    <div class="btn-group">
-                        <a href="{{ route('staff.bookings.today') }}" class="btn btn-sm btn-info">
-                            <i class="fas fa-calendar-day mr-1"></i> Hôm nay
-                        </a>
-                        <a href="{{ route('staff.bookings.pending') }}" class="btn btn-sm btn-warning">
-                            <i class="fas fa-clock mr-1"></i> Chờ xử lý ({{ App\Models\DatVe::whereStatus('pending')->count() }})
-                        </a>
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Quản lý Đặt vé</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="{{ route('staff.dashboard') }}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Đặt vé</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="content">
+    <div class="container-fluid">
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        @endif
+
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="fas fa-exclamation-circle mr-2"></i>{{ session('error') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        @endif
+
+        <!-- Statistics Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ $stats['total'] }}</h3>
+                        <p>Tổng đặt vé</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-ticket-alt"></i>
                     </div>
                 </div>
             </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ $stats['da_dat'] }}</h3>
+                        <p>Đã đặt</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ $stats['da_thanh_toan'] }}</h3>
+                        <p>Đã thanh toán</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ $stats['da_huy'] }}</h3>
+                        <p>Đã hủy</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <!-- Filters -->
-            <div class="card-header border-0">
-                <form method="GET" class="row">
-                    <div class="col-md-3">
-                        <input type="text" name="search" class="form-control" placeholder="Tìm mã vé hoặc tên khách..." value="{{ request('search') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <select name="status" class="form-control">
-                            <option value="">Tất cả trạng thái</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ xử lý</option>
-                            <option value="confirmed" {{ request('status') == 'confirmed' ? 'selected' : '' }}>Đã xác nhận</option>
-                            <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <input type="date" name="date" class="form-control" value="{{ request('date') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fas fa-search mr-1"></i> Lọc
-                        </button>
-                    </div>
-                    <div class="col-md-2">
-                        <a href="{{ route('staff.bookings.index') }}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-redo mr-1"></i> Reset
-                        </a>
+        <!-- Main Card -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Danh sách đặt vé</h3>
+            </div>
+            <div class="card-body">
+                <!-- Search Form -->
+                <form method="GET" action="{{ route('staff.bookings.index') }}" class="mb-3">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <input type="text" name="ma_ve" class="form-control" placeholder="Mã vé"
+                                value="{{ request('ma_ve') }}">
+                        </div>
+                        <div class="col-md-3">
+                            <select name="trang_thai" class="form-control">
+                                <option value="">-- Trạng thái --</option>
+                                <option value="Đã đặt" {{ request('trang_thai') == 'Đã đặt' ? 'selected' : '' }}>Đã đặt
+                                </option>
+                                <option value="Đã thanh toán"
+                                    {{ request('trang_thai') == 'Đã thanh toán' ? 'selected' : '' }}>Đã thanh toán
+                                </option>
+                                <option value="Đã hủy" {{ request('trang_thai') == 'Đã hủy' ? 'selected' : '' }}>Đã hủy
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <input type="date" name="ngay_dat" class="form-control" value="{{ request('ngay_dat') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <input type="text" name="user" class="form-control" placeholder="Tên người đặt"
+                                value="{{ request('user') }}">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
                     </div>
                 </form>
-            </div>
 
-            <div class="card-body table-responsive p-0">
-                <table class="table table-hover text-nowrap">
-                    <thead>
-                        <tr>
-                            <th>Mã vé</th>
-                            <th>Khách hàng</th>
-                            <th>Chuyến xe</th>
-                            <th>Số ghế</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Thao tác</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($bookings as $booking)
-                        <tr>
-                            <td>
-                                <strong>#{{ $booking->id }}</strong>
-                                @if($booking->payment_status == 'paid')
-                                    <i class="fas fa-check-circle text-success" title="Đã thanh toán"></i>
-                                @else
-                                    <i class="fas fa-clock text-warning" title="Chưa thanh toán"></i>
-                                @endif
-                            </td>
-                            <td>
-                                <div>{{ $booking->user->fullname ?? $booking->user->username }}</div>
-                                <small class="text-muted">{{ $booking->user->phone }}</small>
-                            </td>
-                            <td>
-                                <div>{{ $booking->chuyenXe->route_name ?? 'N/A' }}</div>
-                                <small class="text-muted">{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</small>
-                            </td>
-                            <td>
-                                <span class="badge badge-info">{{ $booking->seat_number }}</span>
-                            </td>
-                            <td>{{ $booking->created_at ? $booking->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
-                            <td>
-                                <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
-                            </td>
-                            <td>
-                                @if($booking->status == 'confirmed')
-                                    <span class="badge badge-success">Đã xác nhận</span>
-                                @elseif($booking->status == 'pending')
-                                    <span class="badge badge-warning">Chờ xử lý</span>
-                                @elseif($booking->status == 'cancelled')
-                                    <span class="badge badge-danger">Đã hủy</span>
-                                @else
-                                    <span class="badge badge-secondary">{{ $booking->status }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{{ route('staff.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
+                <!-- Data Table -->
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>Mã vé</th>
+                                <th>Khách hàng</th>
+                                <th>Chuyến xe</th>
+                                <th>Số ghế</th>
+                                <th>Giá vé</th>
+                                <th>Ngày đặt</th>
+                                <th>Trạng thái</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($datVe as $item)
+                            <tr>
+                                <td><strong>{{ $item->ma_ve }}</strong></td>
+                                <td>
+                                    {{ $item->user->fullname ?? 'N/A' }}<br>
+                                    <small class="text-muted">{{ $item->user->email ?? '' }}</small>
+                                </td>
+                                <td>
+                                    @if($item->chuyenXe)
+                                    <strong>
+                                        {{ $item->chuyenXe->tramDi->ten_tram ?? 'N/A' }}
+                                        →
+                                        {{ $item->chuyenXe->tramDen->ten_tram ?? 'N/A' }}
+                                    </strong>
+                                    <br>
+                                    <small class="text-muted">
+                                        {{ $item->chuyenXe->ngay_di ? \Carbon\Carbon::parse($item->chuyenXe->ngay_di)->format('d/m/Y') : 'N/A' }}
+                                        -
+                                        {{ $item->chuyenXe->gio_di ? \Carbon\Carbon::parse($item->chuyenXe->gio_di)->format('H:i') : 'N/A' }}
+                                    </small>
+                                    @else
+                                    N/A
+                                    @endif
+                                </td>
+                                <td><span class="badge badge-info">{{ $item->so_ghe }}</span></td>
+                                <td><strong>{{ $item->chuyenXe ? number_format($item->chuyenXe->gia_ve, 0, ',', '.') : '0' }}
+                                        VNĐ</strong></td>
+                                <td>{{ $item->ngay_dat ? $item->ngay_dat->format('d/m/Y H:i') : 'N/A' }}</td>
+                                <td>
+                                    @if($item->trang_thai == 'Đã đặt')
+                                    <span class="badge badge-warning">{{ $item->trang_thai }}</span>
+                                    @elseif($item->trang_thai == 'Đã thanh toán')
+                                    <span class="badge badge-success">{{ $item->trang_thai }}</span>
+                                    @else
+                                    <span class="badge badge-danger">{{ $item->trang_thai }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('staff.bookings.show', $item->id) }}" class="btn btn-sm btn-info"
+                                        title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown">
-                                            <i class="fas fa-cog"></i>
-                                        </button>
-                                        <div class="dropdown-menu">
-                                            <form method="POST" action="{{ route('staff.bookings.update-status', $booking) }}" style="display: inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="status" value="confirmed">
-                                                <button type="submit" class="dropdown-item" onclick="return confirm('Xác nhận đặt vé này?')">
-                                                    <i class="fas fa-check text-success mr-2"></i> Xác nhận
-                                                </button>
-                                            </form>
-                                            <form method="POST" action="{{ route('staff.bookings.update-status', $booking) }}" style="display: inline;">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="status" value="cancelled">
-                                                <button type="submit" class="dropdown-item" onclick="return confirm('Hủy đặt vé này?')">
-                                                    <i class="fas fa-times text-danger mr-2"></i> Hủy vé
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-4">
-                                <i class="fas fa-ticket-alt fa-2x text-muted mb-2"></i>
-                                <p class="text-muted">Không tìm thấy đặt vé nào</p>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
 
+                                    @if($item->trang_thai == 'Đã đặt')
+                                    <button type="button" class="btn btn-sm btn-success"
+                                        onclick="confirmPayment({{ $item->id }}, '{{ $item->ma_ve }}')"
+                                        title="Xác nhận thanh toán">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    @endif
+
+                                    @if($item->trang_thai !== 'Đã hủy' && $item->trang_thai !== 'Đã thanh toán')
+                                    <button type="button" class="btn btn-sm btn-danger"
+                                        onclick="cancelBooking({{ $item->id }}, '{{ $item->ma_ve }}')"
+                                        title="Hủy vé">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="8" class="text-center">Không có dữ liệu</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <p class="text-muted mb-0">
+                            Hiển thị {{ $datVe->firstItem() ?? 0 }} đến {{ $datVe->lastItem() ?? 0 }}
+                            trong tổng số {{ $datVe->total() }} kết quả
+                        </p>
+                    </div>
+                    <div>
+                        {{ $datVe->appends(request()->query())->links('pagination::bootstrap-4') }}
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+</section>
 
-<!-- Statistics Cards -->
-<div class="row">
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-warning">
-            <div class="inner">
-                <h3>{{ App\Models\DatVe::whereStatus('pending')->count() }}</h3>
-                <p>Chờ xử lý</p>
-            </div>
-            <div class="icon">
-                <i class="fas fa-clock"></i>
-            </div>
-            <a href="{{ route('staff.bookings.index', ['status' => 'pending']) }}" class="small-box-footer">
-                Xem tất cả <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
+<script>
+    function confirmPayment(bookingId, bookingCode) {
+        if (!confirm(`Xác nhận thanh toán cho mã vé ${bookingCode}?`)) {
+            return;
+        }
 
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-success">
-            <div class="inner">
-                <h3>{{ App\Models\DatVe::whereStatus('confirmed')->count() }}</h3>
-                <p>Đã xác nhận</p>
-            </div>
-            <div class="icon">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <a href="{{ route('staff.bookings.index', ['status' => 'confirmed']) }}" class="small-box-footer">
-                Xem tất cả <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
+        event.target.disabled = true;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-info">
-            <div class="inner">
-                <h3>{{ App\Models\DatVe::whereDate('ngay_dat', date('Y-m-d'))->count() }}</h3>
-                <p>Hôm nay</p>
-            </div>
-            <div class="icon">
-                <i class="fas fa-calendar-day"></i>
-            </div>
-            <a href="{{ route('staff.bookings.today') }}" class="small-box-footer">
-                Xem chi tiết <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
+        fetch(`/staff/bookings/${bookingId}/update-status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    status: 'Đã thanh toán'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>${data.message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            `;
+                    document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
 
-    <div class="col-lg-3 col-6">
-        <div class="small-box bg-danger">
-            <div class="inner">
-                <h3>{{ App\Models\DatVe::whereStatus('cancelled')->count() }}</h3>
-                <p>Đã hủy</p>
-            </div>
-            <div class="icon">
-                <i class="fas fa-times-circle"></i>
-            </div>
-            <a href="{{ route('staff.bookings.index', ['status' => 'cancelled']) }}" class="small-box-footer">
-                Xem tất cả <i class="fas fa-arrow-circle-right"></i>
-            </a>
-        </div>
-    </div>
-</div>
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Lỗi: ' + data.message);
+                    event.target.disabled = false;
+                    event.target.innerHTML = '<i class="fas fa-check"></i>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi xác nhận thanh toán');
+                event.target.disabled = false;
+                event.target.innerHTML = '<i class="fas fa-check"></i>';
+            });
+    }
+
+    function cancelBooking(bookingId, bookingCode) {
+        if (!confirm(`Bạn có chắc muốn hủy vé ${bookingCode}?`)) {
+            return;
+        }
+
+        event.target.disabled = true;
+        event.target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        fetch(`/staff/bookings/${bookingId}/update-status`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({
+                    status: 'Đã hủy'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'alert alert-success alert-dismissible fade show';
+                    alertDiv.innerHTML = `
+                <i class="fas fa-check-circle mr-2"></i>${data.message}
+                <button type="button" class="close" data-dismiss="alert">
+                    <span>&times;</span>
+                </button>
+            `;
+                    document.querySelector('.content').insertBefore(alertDiv, document.querySelector('.content').firstChild);
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Lỗi: ' + data.message);
+                    event.target.disabled = false;
+                    event.target.innerHTML = '<i class="fas fa-times"></i>';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi xảy ra khi hủy vé');
+                event.target.disabled = false;
+                event.target.innerHTML = '<i class="fas fa-times"></i>';
+            });
+    }
+</script>
 @endsection
-
-@push('styles')
-<style>
-.small-box {
-    border-radius: 0.375rem;
-    margin-bottom: 1.5rem;
-    position: relative;
-    display: block;
-    background-color: #fff;
-    border: 1px solid rgba(0,0,0,.125);
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-}
-
-.small-box .icon {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    font-size: 3rem;
-    color: rgba(255,255,255,.15);
-}
-
-.small-box .inner {
-    padding: 10px;
-}
-
-.small-box h3 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    margin: 0 0 10px 0;
-    white-space: nowrap;
-    padding: 0;
-}
-
-.small-box p {
-    font-size: 1rem;
-    margin: 0;
-}
-
-.small-box-footer {
-    background-color: rgba(0,0,0,.1);
-    color: rgba(255,255,255,.8);
-    display: block;
-    padding: 3px 10px;
-    position: relative;
-    text-decoration: none;
-    transition: all .15s linear;
-}
-
-.small-box-footer:hover {
-    text-decoration: none;
-    color: #fff;
-}
-
-.bg-info {
-    background-color: #17a2b8 !important;
-}
-
-.bg-warning {
-    background-color: #ffc107 !important;
-}
-
-.bg-success {
-    background-color: #28a745 !important;
-}
-
-.bg-danger {
-    background-color: #dc3545 !important;
-}
-</style>
-@endpush

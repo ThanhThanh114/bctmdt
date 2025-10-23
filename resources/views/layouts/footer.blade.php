@@ -148,11 +148,11 @@
                         </div>
                         <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
                             <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
-                            <a href="#" target="_self" rel="noreferrer">Hướng dẫn đặt vé trên Web</a>
+                            <a href="{{ route('guide') }}" target="_self" rel="noreferrer">Hướng dẫn đặt vé trên Web</a>
                         </div>
                         <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
                             <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
-                            <a href="#" target="_self" rel="noreferrer">Hướng dẫn nạp tiền trên App</a>
+                            <a href="{{ route('guide') }}" target="_self" rel="noreferrer">Hướng dẫn nạp tiền trên App</a>
                         </div>
                     </div>
                 </div>

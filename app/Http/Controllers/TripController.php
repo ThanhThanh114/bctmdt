@@ -115,6 +115,20 @@ class TripController extends Controller
         })
         ->slice($offset, $perPage);
 
+    // Lấy tên các trạm trung gian cho mỗi chuyến xe
+    foreach ($trips as $trip) {
+        if (!empty($trip->tram_trung_gian)) {
+            $tramIds = explode(',', $trip->tram_trung_gian);
+            $tramNames = DB::table('tram_xe')
+                ->whereIn('ma_tram_xe', $tramIds)
+                ->pluck('ten_tram')
+                ->toArray();
+            $trip->tram_trung_gian_names = $tramNames;
+        } else {
+            $trip->tram_trung_gian_names = [];
+        }
+    }
+
     return view('trips.trips', compact('trips', 'totalCount', 'totalPages', 'params', 'cities'));
 }
 }

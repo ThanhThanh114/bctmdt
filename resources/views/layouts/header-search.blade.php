@@ -652,6 +652,11 @@ $current_page = basename(request()->path());
                         <a href="{{ route('booking.history') }}" class="user-menu-item">
                             <i class="fas fa-history"></i> Lịch sử đặt vé
                         </a>
+                        @if(strtolower(Auth::user()->role) === 'user')
+                        <a href="{{ route('user.upgrade.index') }}" class="user-menu-item">
+                            <i class="fas fa-star"></i> Nâng cấp lên Nhà xe
+                        </a>
+                        @endif
                         <hr style="margin: 8px 0; border: none; border-top: 1px solid #e5e7eb;">
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf
@@ -740,6 +745,11 @@ $current_page = basename(request()->path());
             <a href="{{ route('booking.history') }}">
                 <i class="fas fa-history"></i> Lịch sử mua vé
             </a>
+            @if(strtolower(Auth::user()->role) === 'user')
+            <a href="{{ route('user.upgrade.index') }}">
+                <i class="fas fa-star"></i> Nâng cấp lên Nhà xe
+            </a>
+            @endif
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
@@ -766,7 +776,7 @@ $current_page = basename(request()->path());
                     </label>
                 </div>
                 <span class="guide-link">
-                    <a href="#" target="_blank">Hướng dẫn mua vé</a>
+                    <a href="{{ route('guide') }}" target="_blank">Hướng dẫn mua vé</a>
                 </span>
             </div>
 
