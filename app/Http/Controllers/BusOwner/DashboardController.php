@@ -42,7 +42,7 @@ class DashboardController extends Controller
                     ],
                     'recent_bookings' => collect(),
                     'today_trips' => collect(),
-                    'monthly_revenue' => collect(),
+                    'monthly_revenue' => [], // Fixed: array for chart
                     'monthly_revenue_data' => collect(),
                     'trip_performance' => collect(),
                     'bus_company' => null,
@@ -206,6 +206,12 @@ class DashboardController extends Controller
                 ->get()
                 ->keyBy('month');
 
+            // Format for chart (array indexed by month)
+            $monthly_revenue = [];
+            foreach ($monthly_revenue_data as $month => $data) {
+                $monthly_revenue[$month] = $data->revenue;
+            }
+
             // Trip performance with enhanced metrics
             $trip_performance = ChuyenXe::select('chuyen_xe.id', 'chuyen_xe.ten_xe', 'chuyen_xe.so_cho')
                 ->withCount(['datVe as bookings_count' => function ($q) {
@@ -298,6 +304,7 @@ class DashboardController extends Controller
                 'stats',
                 'recent_bookings',
                 'today_trips',
+                'monthly_revenue',
                 'monthly_revenue_data',
                 'trip_performance',
                 'bus_company',
@@ -331,8 +338,8 @@ class DashboardController extends Controller
                 ],
                 'recent_bookings' => collect(),
                 'today_trips' => collect(),
-                'monthly_revenue' => collect(),
-                'monthly_revenue_data' => collect(), // Added missing variable
+                'monthly_revenue' => [], // Fixed: array for chart data
+                'monthly_revenue_data' => collect(),
                 'trip_performance' => collect(),
                 'bus_company' => null,
                 'weekly_trend' => collect(),
