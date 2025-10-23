@@ -109,4 +109,69 @@ class DashboardController extends Controller
             'user'
         ));
     }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'fullname' => 'required|string|max:100',
+            'phone' => 'required|string|max:15|unique:users,phone,' . $user->id,
+            'email' => 'required|string|email|max:100|unique:users,email,' . $user->id,
+            'address' => 'nullable|string|max:255',
+            'date_of_birth' => 'nullable|date|before:today',
+            'gender' => 'nullable|in:Nam,Nữ,Khác'
+        ]);
+
+        $user->update([
+            'fullname' => $request->fullname,
+            'phone' => $request->phone,
+            'email' => $request->email,
+            'address' => $request->address,
+            'date_of_birth' => $request->date_of_birth,
+            'gender' => $request->gender,
+        ]);
+
+        return redirect()->route('user.dashboard')->with('success', 'Thông tin tài khoản đã được cập nhật thành công!');
+    }
+
+    public function upgradeToDriver(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if already upgraded
+        if ($user->role !== 'user') {
+            return back()->withErrors(['upgrade' => 'Bạn đã nâng cấp tài khoản rồi.']);
+        }
+
+        // Validate request
+        $request->validate([
+            'vehicle_type' => 'required|string',
+            'license_number' => 'required|string|max:50',
+            'license_expiry' => 'required|date|after:today',
+            'experience_years' => 'required|integer|min:1',
+            'company_name' => 'nullable|string|max:100',
+            'terms' => 'required|accepted'
+        ]);
+
+        // Update role to bus_owner (assuming driver means bus_owner)
+        $user->update([
+            'role' => 'bus_owner',
+            'vehicle_type' => $request->vehicle_type,
+            'license_number' => $request->license_number,
+            'license_expiry' => $request->license_expiry,
+            'experience_years' => $request->experience_years,
+            'company_name' => $request->company_name
+        ]);
+
+        // Send confirmation email (optional)
+        try {
+            // Assuming mail setup
+            // Mail::to($user->email)->send(new UpgradeConfirmation($user));
+        } catch (\Exception $e) {
+            // Log error but don't fail
+        }
+
+        return redirect()->route('user.dashboard')->with('success', 'Tài khoản đã được nâng cấp thành công! Bạn có thể quản lý nhà xe ngay bây giờ.');
+    }
 }
