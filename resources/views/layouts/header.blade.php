@@ -139,6 +139,11 @@
                         <a href="{{ route('booking.history') }}" class="user-menu-item">
                             <i class="fas fa-history"></i> Lịch sử đặt vé
                         </a>
+                        @if(strtolower(Auth::user()->role) === 'user')
+                        <a href="{{ route('user.upgrade.index') }}" class="user-menu-item">
+                            <i class="fas fa-star"></i> Nâng cấp lên Nhà xe
+                        </a>
+                        @endif
                         <hr style="margin: 8px 0; border: none; border-top: 1px solid #e5e7eb;">
                         <form method="POST" action="{{ route('logout') }}" style="display: inline;">
                             @csrf

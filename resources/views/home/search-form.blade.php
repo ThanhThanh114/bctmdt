@@ -12,7 +12,7 @@
                 </label>
             </div>
             <span class="guide-link">
-                <a href="#" target="_blank">Hướng dẫn mua vé</a>
+                <a href="{{ route('guide') }}" target="_blank">Hướng dẫn mua vé</a>
             </span>
         </div>
 

@@ -255,6 +255,51 @@
                         </li>
                         @endif
 
+                        @if(strtolower(Auth::user()->role) === 'user')
+                        <!-- User Menu -->
+                        <li class="nav-item">
+                            <a href="{{ route('user.dashboard') }}"
+                                class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-tachometer-alt"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('user.upgrade.index') }}"
+                                class="nav-link {{ request()->routeIs('user.upgrade.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-star"></i>
+                                <p>Nâng cấp lên Nhà xe</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('profile.show') }}"
+                                class="nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user"></i>
+                                <p>Hồ sơ cá nhân</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('password.edit') }}"
+                                class="nav-link {{ request()->routeIs('password.edit') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-key"></i>
+                                <p>Đổi mật khẩu</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit" class="nav-link btn btn-link text-left w-100" style="border: none;">
+                                    <i class="nav-icon fas fa-sign-out-alt"></i>
+                                    <p style="display: inline;">Đăng xuất</p>
+                                </button>
+                            </form>
+                        </li>
+                        @endif
+
                         @if(strtolower(Auth::user()->role) === 'bus_owner')
                         <!-- Bus Owner Menu -->
                         <li class="nav-header">QUẢN LÝ</li>

@@ -46,6 +46,7 @@ class User extends Authenticatable
         'is_verified' => 'boolean',
         'otp_expires_at' => 'datetime',
         'reset_token_expires_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     // Relationships
@@ -67,5 +68,51 @@ class User extends Authenticatable
     public function nhaXe()
     {
         return $this->belongsTo(NhaXe::class, 'ma_nha_xe', 'ma_nha_xe');
+    }
+
+    public function upgradeRequests()
+    {
+        return $this->hasMany(UpgradeRequest::class, 'user_id');
+    }
+
+    public function approvedRequests()
+    {
+        return $this->hasMany(UpgradeRequest::class, 'approved_by');
+    }
+
+    // Helper methods
+    public function isUser()
+    {
+        return strtolower($this->role) === 'user';
+    }
+
+    public function isBusOwner()
+    {
+        return strtolower($this->role) === 'bus_owner';
+    }
+
+    public function isAdmin()
+    {
+        return strtolower($this->role) === 'admin';
+    }
+
+    public function canUpgrade()
+    {
+        return $this->isUser() && !$this->hasPendingUpgradeRequest();
+    }
+
+    public function hasPendingUpgradeRequest()
+    {
+        return $this->upgradeRequests()
+            ->whereIn('status', ['pending', 'payment_pending', 'paid'])
+            ->exists();
+    }
+
+    public function getActiveUpgradeRequest()
+    {
+        return $this->upgradeRequests()
+            ->whereIn('status', ['pending', 'payment_pending', 'paid'])
+            ->latest()
+            ->first();
     }
 }

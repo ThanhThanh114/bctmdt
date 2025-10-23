@@ -117,6 +117,13 @@ Route::middleware(['auth'])->group(function () {
 
         // Quản lý người dùng
         Route::resource('users', App\Http\Controllers\Admin\UsersController::class);
+        
+        // Quản lý yêu cầu nâng cấp
+        Route::get('upgrade-requests', [App\Http\Controllers\Admin\UsersController::class, 'upgradeRequests'])->name('users.upgrade-requests');
+        Route::get('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\UsersController::class, 'showUpgradeRequest'])->name('users.upgrade-request-detail');
+        Route::patch('upgrade-requests/{upgradeRequest}/approve', [App\Http\Controllers\Admin\UsersController::class, 'approveUpgrade'])->name('users.approve-upgrade');
+        Route::patch('upgrade-requests/{upgradeRequest}/reject', [App\Http\Controllers\Admin\UsersController::class, 'rejectUpgrade'])->name('users.reject-upgrade');
+        Route::post('users/{user}/assign-bus-company', [App\Http\Controllers\Admin\UsersController::class, 'assignBusCompany'])->name('users.assign-bus-company');
 
         // Quản lý nhân viên
         Route::resource('nhanvien', App\Http\Controllers\Admin\NhanVienController::class);
@@ -223,7 +230,15 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\User\DashboardController::class, 'index'])->name('dashboard');
         Route::resource('bookings', App\Http\Controllers\User\BookingsController::class)->except(['edit', 'update']);
         Route::patch('bookings/{booking}/cancel', [App\Http\Controllers\User\BookingsController::class, 'cancel'])->name('bookings.cancel');
-        // Add more user routes here as needed
+        
+        // Upgrade routes
+        Route::get('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'index'])->name('upgrade.index');
+        Route::post('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'store'])->name('upgrade.store');
+        Route::get('/upgrade/{upgradeRequest}', [App\Http\Controllers\User\UpgradeController::class, 'show'])->name('upgrade.show');
+        Route::get('/upgrade/{upgradeRequest}/payment', [App\Http\Controllers\User\UpgradeController::class, 'payment'])->name('upgrade.payment');
+        Route::post('/upgrade/{upgradeRequest}/upload-proof', [App\Http\Controllers\User\UpgradeController::class, 'uploadProof'])->name('upgrade.upload-proof');
+        Route::post('/upgrade/{upgradeRequest}/confirm-payment', [App\Http\Controllers\User\UpgradeController::class, 'confirmPayment'])->name('upgrade.confirm-payment');
+        Route::delete('/upgrade/{upgradeRequest}/cancel', [App\Http\Controllers\User\UpgradeController::class, 'cancel'])->name('upgrade.cancel');
     });
 });
 

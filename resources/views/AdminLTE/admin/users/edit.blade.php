@@ -157,23 +157,29 @@
                             </div>
                         </div>
 
-                        {{-- Removed is_verified field as it doesn't exist in database --}}
-                        {{-- <div class="col-md-6">
+                        <div class="col-md-6">
                             <div class="form-group">
-                                <label class="form-label">Trạng thái xác thực</label>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="is_verified" name="is_verified"
-                                        value="1" {{ old('is_verified', $user->is_verified) ? 'checked' : '' }}>
-                        <label class="form-check-label" for="is_verified">
-                            <i class="fas fa-check-circle text-success mr-1"></i> Đã xác thực email
-                        </label>
+                                <label for="ma_nha_xe">Nhà xe (nếu là Bus_owner)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-bus"></i></span>
+                                    </div>
+                                    <select class="form-control @error('ma_nha_xe') is-invalid @enderror" id="ma_nha_xe" name="ma_nha_xe">
+                                        <option value="">-- Chưa gán nhà xe --</option>
+                                        @foreach(\App\Models\NhaXe::orderBy('ten_nha_xe')->get() as $nhaXe)
+                                        <option value="{{ $nhaXe->ma_nha_xe }}" {{ old('ma_nha_xe', $user->ma_nha_xe) == $nhaXe->ma_nha_xe ? 'selected' : '' }}>
+                                            {{ $nhaXe->ten_nha_xe }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+                                    @error('ma_nha_xe')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <small class="form-text text-muted">Chỉ áp dụng cho vai trò Nhà xe</small>
+                            </div>
+                        </div>
                     </div>
-                    @error('is_verified')
-                    <div class="text-danger mt-1">{{ $message }}</div>
-                    @enderror
-            </div>
-        </div> --}}
-    </div>
 
     <div class="form-group">
         <button type="submit" class="btn btn-primary">
