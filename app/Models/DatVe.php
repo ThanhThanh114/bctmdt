@@ -28,6 +28,25 @@ class DatVe extends Model
     // Accessor to get status in English
     protected $appends = ['status'];
 
+    // Tạo mã QR cho vé
+    public function getQrCodeDataAttribute()
+    {
+        return encrypt([
+            'booking_id' => $this->id,
+            'ticket_code' => $this->ma_ve,
+            'user_id' => $this->user_id,
+            'trip_id' => $this->chuyen_xe_id,
+            'seats' => $this->so_ghe,
+            'timestamp' => now()->timestamp,
+        ]);
+    }
+
+    // Kiểm tra vé có thể soát không
+    public function canBeScanned()
+    {
+        return in_array($this->trang_thai, ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
+    }
+
     public function getStatusAttribute()
     {
         return match ($this->trang_thai) {

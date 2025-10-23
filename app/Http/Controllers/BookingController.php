@@ -452,6 +452,26 @@ class BookingController extends Controller
         return view('booking.history', ['bookings' => $paginatedBookings]);
     }
 
+    // Hiển thị mã QR của vé
+    public function showQRCode($id)
+    {
+        $booking = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
+            ->findOrFail($id);
+
+        // Kiểm tra quyền sở hữu vé
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền xem mã QR vé này.');
+        }
+
+        // Kiểm tra vé có thể hiển thị QR không
+        if (!$booking->canBeScanned()) {
+            return redirect()->route('booking.history')
+                ->with('error', 'Vé này không thể hiển thị mã QR. Trạng thái: ' . $booking->trang_thai);
+        }
+
+        return view('booking.qrcode', compact('booking'));
+    }
+
     /**
      * Kiểm tra mã giảm giá
      */

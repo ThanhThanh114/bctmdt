@@ -230,6 +230,14 @@
                         </li>
 
                         <li class="nav-item">
+                            <a href="{{ route('staff.ticket-scanner.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.ticket-scanner.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-qrcode"></i>
+                                <p>Soát vé (QR Scanner)</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('staff.promotions.index') }}"
                                 class="nav-link {{ request()->routeIs('staff.promotions.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-gift"></i>

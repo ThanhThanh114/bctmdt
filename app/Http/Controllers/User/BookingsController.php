@@ -122,4 +122,22 @@ class BookingsController extends Controller
 
         return back()->with('success', 'Đặt vé đã được hủy thành công.');
     }
+
+    // Hiển thị mã QR của vé
+    public function qrcode(DatVe $booking)
+    {
+        // Ensure the booking belongs to the current user
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền xem mã QR vé này.');
+        }
+
+        // Kiểm tra vé có thể hiển thị QR không
+        if (!$booking->canBeScanned()) {
+            return back()->with('error', 'Vé này không thể hiển thị mã QR. Trạng thái: ' . $booking->trang_thai);
+        }
+
+        $booking->load(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
+
+        return view('AdminLTE.user.bookings.qrcode', compact('booking'));
+    }
 }
