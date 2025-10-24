@@ -63,36 +63,43 @@
                         @forelse($bookings as $booking)
                         <tr>
                             <td>
-                                <strong>#{{ $booking->id }}</strong>
-                                @if($booking->payment_status == 'paid')
+                                <strong>#{{ $booking->ma_ve ?? $booking->id }}</strong>
+                                @if($booking->trang_thai == 'Đã thanh toán')
                                     <i class="fas fa-check-circle text-success" title="Đã thanh toán"></i>
                                 @else
                                     <i class="fas fa-clock text-warning" title="Chưa thanh toán"></i>
                                 @endif
                             </td>
                             <td>
-                                <div>{{ $booking->chuyenXe->route_name }}</div>
-                                <small class="text-muted">{{ $booking->chuyenXe->nhaXe->name ?? 'N/A' }}</small>
+                                <div>
+                                    <i class="fas fa-map-marker-alt text-success"></i> {{ $booking->chuyenXe->tramDi->ten_tram ?? 'N/A' }}
+                                    <i class="fas fa-arrow-right mx-1"></i>
+                                    <i class="fas fa-map-marker-alt text-danger"></i> {{ $booking->chuyenXe->tramDen->ten_tram ?? 'N/A' }}
+                                </div>
+                                <small class="text-muted">{{ $booking->chuyenXe->nhaXe->ten_nha_xe ?? 'N/A' }}</small>
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->seat_number }}</span>
+                                {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} 
+                                {{ date('H:i', strtotime($booking->chuyenXe->gio_di)) }}
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ $booking->so_ghe ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
                             </td>
                             <td>
-                                @if($booking->status == 'confirmed')
-                                    <span class="badge badge-success">Đã xác nhận</span>
-                                @elseif($booking->status == 'pending')
-                                    <span class="badge badge-warning">Chờ xử lý</span>
-                                @elseif($booking->status == 'cancelled')
-                                    <span class="badge badge-danger">Đã hủy</span>
+                                @if($booking->trang_thai == 'Đã xác nhận' || $booking->trang_thai == 'Đã thanh toán')
+                                    <span class="badge badge-success">{{ $booking->trang_thai }}</span>
+                                @elseif($booking->trang_thai == 'Đã đặt')
+                                    <span class="badge badge-warning">{{ $booking->trang_thai }}</span>
+                                @elseif($booking->trang_thai == 'Đã hủy')
+                                    <span class="badge badge-danger">{{ $booking->trang_thai }}</span>
                                 @else
-                                    <span class="badge badge-secondary">{{ $booking->status }}</span>
+                                    <span class="badge badge-secondary">{{ $booking->trang_thai ?? 'N/A' }}</span>
                                 @endif
                             </td>
-                            <td>{{ $booking->created_at ? $booking->created_at->format('d/m/Y H:i') : 'N/A' }}</td>
+                            <td>{{ $booking->ngay_dat ? \Carbon\Carbon::parse($booking->ngay_dat)->format('d/m/Y H:i') : 'N/A' }}</td>
                             <td>
                                 <div class="btn-group">
                                     <a href="{{ route('user.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
@@ -107,16 +114,34 @@
                                     <a href="{{ route('user.bookings.qrcode', $booking) }}" class="btn btn-sm btn-success" title="Xem mã QR">
                                         <i class="fas fa-qrcode"></i>
                                     </a>
+                                    
+                                    <a href="{{ route('user.binh-luan.index', ['chuyen_xe_id' => $booking->chuyen_xe_id]) }}" 
+                                       class="btn btn-sm btn-primary" title="Đánh giá chuyến xe">
+                                        <i class="fas fa-comment-dots"></i>
+                                    </a>
                                     @endif
                                     
-                                    @if($booking->status == 'confirmed' && \Carbon\Carbon::parse($booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di) > now()->addHours(2))
-                                    <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
-                                        @csrf
-                                        @method('PATCH')
-                                        <button type="submit" class="btn btn-sm btn-danger" title="Hủy vé">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </form>
+                                    @if($booking->status == 'confirmed')
+                                        @php
+                                            try {
+                                                $departureDate = \Carbon\Carbon::parse($booking->chuyenXe->ngay_di);
+                                                $departureTime = date('H:i:s', strtotime($booking->chuyenXe->gio_di));
+                                                $departureDateTime = \Carbon\Carbon::parse($departureDate->format('Y-m-d') . ' ' . $departureTime);
+                                                $canCancel = $departureDateTime->gt(now()->addHours(2));
+                                            } catch (\Exception $e) {
+                                                $canCancel = false;
+                                            }
+                                        @endphp
+                                        
+                                        @if($canCancel)
+                                        <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Hủy vé">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                        @endif
                                     @endif
                                 </div>
                             </td>

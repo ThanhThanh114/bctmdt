@@ -229,12 +229,30 @@
                             </a>
                         </li>
 
-                        <li class="nav-item">
-                            <a href="{{ route('staff.ticket-scanner.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.ticket-scanner.*') ? 'active' : '' }}">
+                        <li class="nav-item {{ request()->routeIs('staff.ticket-scanner.*') ? 'menu-open' : '' }}">
+                            <a href="#" class="nav-link {{ request()->routeIs('staff.ticket-scanner.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-qrcode"></i>
-                                <p>Soát vé (QR Scanner)</p>
+                                <p>
+                                    Soát vé QR
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
                             </a>
+                            <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('staff.ticket-scanner.index') }}" 
+                                       class="nav-link {{ request()->routeIs('staff.ticket-scanner.index') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Quét mã QR</p>
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="{{ route('staff.ticket-scanner.today-trips') }}" 
+                                       class="nav-link {{ request()->routeIs('staff.ticket-scanner.today-trips') ? 'active' : '' }}">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Chuyến xe hôm nay</p>
+                                    </a>
+                                </li>
+                            </ul>
                         </li>
 
                         <li class="nav-item">
@@ -250,6 +268,15 @@
                                 class="nav-link {{ request()->routeIs('staff.contact.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-envelope"></i>
                                 <p>Quản lý liên hệ</p>
+                            </a>
+                        </li>
+
+                        <!-- Bình luận Management -->
+                        <li class="nav-item">
+                            <a href="{{ route('staff.binh-luan.index') }}"
+                                class="nav-link {{ request()->routeIs('staff.binh-luan.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-comments"></i>
+                                <p>Quản lý bình luận</p>
                             </a>
                         </li>
 
@@ -270,6 +297,14 @@
                                 class="nav-link {{ request()->routeIs('user.dashboard') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-tachometer-alt"></i>
                                 <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a href="{{ route('user.bookings.index') }}"
+                                class="nav-link {{ request()->routeIs('user.bookings.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Vé của tôi</p>
                             </a>
                         </li>
 

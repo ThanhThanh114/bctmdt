@@ -212,6 +212,16 @@ Route::middleware(['auth'])->group(function () {
         Route::get('ticket-scanner', [App\Http\Controllers\Staff\TicketScannerController::class, 'index'])->name('ticket-scanner.index');
         Route::post('ticket-scanner/verify', [App\Http\Controllers\Staff\TicketScannerController::class, 'verify'])->name('ticket-scanner.verify');
         Route::post('ticket-scanner/check-in', [App\Http\Controllers\Staff\TicketScannerController::class, 'checkIn'])->name('ticket-scanner.check-in');
+        Route::get('ticket-scanner/today-trips', [App\Http\Controllers\Staff\TicketScannerController::class, 'todayTrips'])->name('ticket-scanner.today-trips');
+        Route::get('ticket-scanner/trip/{tripId}', [App\Http\Controllers\Staff\TicketScannerController::class, 'tripPassengers'])->name('ticket-scanner.trip');
+
+        // Quản lý bình luận - Staff có thể xem và trả lời bình luận
+        Route::get('binh-luan', [App\Http\Controllers\Staff\BinhLuanController::class, 'index'])->name('binh-luan.index');
+        Route::get('binh-luan/{binhLuan}', [App\Http\Controllers\Staff\BinhLuanController::class, 'show'])->name('binh-luan.show');
+        Route::post('binh-luan/{binhLuan}/reply', [App\Http\Controllers\Staff\BinhLuanController::class, 'reply'])->name('binh-luan.reply');
+        Route::post('binh-luan/{binhLuan}/approve', [App\Http\Controllers\Staff\BinhLuanController::class, 'approve'])->name('binh-luan.approve');
+        Route::post('binh-luan/{binhLuan}/reject', [App\Http\Controllers\Staff\BinhLuanController::class, 'reject'])->name('binh-luan.reject');
+        Route::delete('binh-luan/{binhLuan}', [App\Http\Controllers\Staff\BinhLuanController::class, 'destroy'])->name('binh-luan.destroy');
     });
 
     // Bus Owner Dashboard Routes
@@ -237,6 +247,13 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('bookings', App\Http\Controllers\User\BookingsController::class)->except(['edit', 'update']);
         Route::patch('bookings/{booking}/cancel', [App\Http\Controllers\User\BookingsController::class, 'cancel'])->name('bookings.cancel');
         Route::get('bookings/{booking}/qrcode', [App\Http\Controllers\User\BookingsController::class, 'qrcode'])->name('bookings.qrcode');
+        
+        // Bình luận routes - User có thể xem và viết bình luận
+        Route::get('/binh-luan', [App\Http\Controllers\User\BinhLuanController::class, 'index'])->name('binh-luan.index');
+        Route::post('/binh-luan', [App\Http\Controllers\User\BinhLuanController::class, 'store'])->name('binh-luan.store');
+        Route::post('/binh-luan/{binhLuan}/reply', [App\Http\Controllers\User\BinhLuanController::class, 'reply'])->name('binh-luan.reply');
+        Route::put('/binh-luan/{binhLuan}', [App\Http\Controllers\User\BinhLuanController::class, 'update'])->name('binh-luan.update');
+        Route::delete('/binh-luan/{binhLuan}', [App\Http\Controllers\User\BinhLuanController::class, 'destroy'])->name('binh-luan.destroy');
         
         // Upgrade routes
         Route::get('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'index'])->name('upgrade.index');
