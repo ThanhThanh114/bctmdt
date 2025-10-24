@@ -1,0 +1,160 @@
+.badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.route-info {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.driver-info {
+    background: #e3f2fd;
+    padding: 1rem;
+    border-radius: 8px;
+    border-left: 4px solid #2196f3;
+}
+
+.progress-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.progress-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.progress-item {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+}
+
+.progress-item.completed .progress-marker {
+    color: #28a745;
+    background: #fff;
+    border: 2px solid #28a745;
+}
+
+.progress-item.current .progress-marker {
+    color: #007bff;
+    background: #fff;
+    border: 2px solid #007bff;
+    animation: pulse 2s infinite;
+}
+
+.progress-item .progress-marker {
+    position: absolute;
+    left: -2.5rem;
+    top: 0;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 2px solid #6c757d;
+    color: #6c757d;
+}
+
+.progress-content h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.progress-content p {
+    margin-bottom: 0.25rem;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(0, 123, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+#map {
+    border: 1px solid #ddd;
+}
+
+/* Booking History Styles */
+.booking-actions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.btn-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-track:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ba085 100%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-track i {
+    font-size: 1rem;
+}
+
+.booking-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.booking-card:hover .btn-track {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .progress-timeline {
+        padding-left: 1rem;
+    }
+
+    .progress-item .progress-marker {
+        left: -1.5rem;
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.8rem;
+    }
+
+    .progress-content h6 {
+        font-size: 0.9rem;
+    }
+
+    .btn-track {
+        width: 100%;
+        justify-content: center;
+        margin-bottom: 0.5rem;
+    }
+}

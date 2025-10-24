@@ -276,6 +276,14 @@
                         </li>
 
                         <li class="nav-item">
+                            <a href="{{ route('user.bookings.index') }}"
+                                class="nav-link {{ request()->routeIs('user.bookings.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-ticket-alt"></i>
+                                <p>Vé của tôi</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
                             <a href="{{ route('user.upgrade.index') }}"
                                 class="nav-link {{ request()->routeIs('user.upgrade.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-star"></i>

@@ -18,7 +18,9 @@ class TramXe extends Model
         'dia_chi',
         'dia_chi_tram',
         'tinh_thanh',
-        'ma_nha_xe'
+        'ma_nha_xe',
+        'latitude',
+        'longitude'
     ];
 
     // Relationships

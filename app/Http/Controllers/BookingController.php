@@ -440,7 +440,7 @@ class BookingController extends Controller
         $perPage = 10;
         $currentPage = request()->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
-        
+
         $paginatedBookings = new \Illuminate\Pagination\LengthAwarePaginator(
             $bookings->slice($offset, $perPage)->values(),
             $bookings->count(),
@@ -450,6 +450,92 @@ class BookingController extends Controller
         );
 
         return view('booking.history', ['bookings' => $paginatedBookings]);
+    }
+
+    /**
+     * Show detailed trip tracking information with map
+     */
+    public function track($maVe)
+    {
+        // Check if user is authenticated
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Vui lòng đăng nhập để theo dõi chuyến đi.');
+        }
+
+        $user = Auth::user();
+
+        // Find the first booking with this ma_ve for the current user
+        $booking = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->where('user_id', $user->id)
+            ->where('ma_ve', $maVe)
+            ->first();
+
+        if (!$booking) {
+            abort(404, 'Không tìm thấy thông tin đặt vé.');
+        }
+
+        // Check if booking is confirmed (only confirmed bookings can be tracked)
+        if (!str_contains($booking->trang_thai, 'thanh toán')) {
+            return redirect()->route('booking.history')->with('error', 'Chỉ có thể theo dõi các vé đã được thanh toán.');
+        }
+
+        // Get intermediate stops if any
+        $intermediateStops = [];
+        if ($booking->chuyenXe->tram_trung_gian) {
+            $stopIds = explode(',', $booking->chuyenXe->tram_trung_gian);
+            $intermediateStops = \App\Models\TramXe::whereIn('ma_tram_xe', $stopIds)->get();
+        }
+
+        // Calculate trip status
+        try {
+            // Clean and format the time data
+            $gio_di = trim($booking->chuyenXe->gio_di);
+            $ngay_di = trim($booking->chuyenXe->ngay_di);
+
+            // Ensure time format is H:i:s
+            if (strlen($gio_di) === 5) {
+                $gio_di .= ':00'; // Add seconds if missing
+            }
+
+            $departure_datetime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $ngay_di . ' ' . $gio_di);
+        } catch (\Exception $e) {
+            // If date parsing fails, assume upcoming
+            $departure_datetime = now()->addHour();
+        }
+
+        $now = now();
+        $tripStatus = 'upcoming';
+
+        if ($departure_datetime <= $now) {
+            $tripStatus = 'in_progress';
+        }
+
+        // Check if trip is completed (1 hour after departure)
+        $completion_time = clone $departure_datetime;
+        $completion_time->addHours(1);
+
+        if ($completion_time <= $now) {
+            $tripStatus = 'completed';
+        }
+
+        // Get all stations for the map (departure, intermediate, arrival)
+        $mapStations = collect([$booking->chuyenXe->tramDi]);
+        if ($intermediateStops->count() > 0) {
+            $mapStations = $mapStations->merge($intermediateStops);
+        }
+        $mapStations = $mapStations->merge([$booking->chuyenXe->tramDen]);
+
+        // Filter stations with coordinates for the map
+        $mapStations = $mapStations->filter(function($station) {
+            return $station->latitude && $station->longitude;
+        });
+
+        return view('booking.track', compact(
+            'booking',
+            'intermediateStops',
+            'tripStatus',
+            'mapStations'
+        ));
     }
 
     /**

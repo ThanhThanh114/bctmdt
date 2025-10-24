@@ -98,6 +98,11 @@
                                     <a href="{{ route('user.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    @if($booking->status == 'confirmed')
+                                    <a href="{{ route('user.bookings.track', $booking) }}" class="btn btn-sm btn-success" title="Theo dõi chuyến đi">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                    </a>
+                                    @endif
                                     @if($booking->status == 'confirmed' && \Carbon\Carbon::parse($booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di) > now()->addHours(2))
                                     <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
                                         @csrf

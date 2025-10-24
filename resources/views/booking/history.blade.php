@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/Profile.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/BookingHistory.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/user-trip-tracking.css') }}">
 </head>
 
 <body>
@@ -159,6 +160,16 @@
                                             </span>
                                         </div>
                                     </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="booking-actions">
+                                    @if(str_contains($booking->trang_thai, 'thanh toán'))
+                                    <a href="{{ route('bookings.track', $booking->ma_ve) }}" class="btn-track">
+                                        <i class="fas fa-map-marked-alt"></i>
+                                        Theo dõi chuyến đi
+                                    </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>

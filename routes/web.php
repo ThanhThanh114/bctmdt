@@ -105,6 +105,9 @@ Route::put('/password', [AuthController::class, 'updatePassword'])->name('passwo
 // Booking History routes
 Route::get('/booking-history', [BookingController::class, 'history'])->name('booking.history');
 
+// Trip Tracking routes (public access for booking history)
+Route::get('/bookings/track/{maVe}', [BookingController::class, 'track'])->name('bookings.track');
+
 //Page controllers
 Route::get('/about', [PageController::class, 'index'])->name('about.about');
 

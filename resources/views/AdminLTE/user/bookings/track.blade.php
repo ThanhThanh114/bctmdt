@@ -1,0 +1,247 @@
+@extends('layouts.admin')
+
+@section('title', 'Theo dõi chuyến đi')
+@section('page-title', 'Theo dõi chuyến đi')
+@section('breadcrumb')
+<li class="breadcrumb-item"><a href="{{ route('user.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{{ route('user.bookings.index') }}">Vé của tôi</a></li>
+<li class="breadcrumb-item active">Theo dõi chuyến đi</li>
+@endsection
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/user-trip-tracking.css') }}">
+@endpush
+
+@section('content')
+<div class="row">
+    <!-- Trip Information Card -->
+    <div class="col-md-4">
+        <div class="card card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-info-circle mr-2"></i>
+                    Thông tin chuyến đi
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Trip Status -->
+                <div class="mb-3">
+                    <span class="badge badge-lg
+                        @if($tripStatus == 'upcoming') badge-warning
+                        @elseif($tripStatus == 'in_progress') badge-info
+                        @else badge-success
+                        @endif">
+                        @if($tripStatus == 'upcoming')
+                            <i class="fas fa-clock mr-1"></i> Sắp khởi hành
+                        @elseif($tripStatus == 'in_progress')
+                            <i class="fas fa-bus mr-1"></i> Đang di chuyển
+                        @else
+                            <i class="fas fa-check-circle mr-1"></i> Đã hoàn thành
+                        @endif
+                    </span>
+                </div>
+
+                <!-- Route Information -->
+                <div class="mb-3">
+                    <h6><i class="fas fa-route text-primary mr-2"></i>Tuyến đường</h6>
+                    <div class="route-info">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-map-marker-alt text-success mr-2"></i>
+                            <div>
+                                <strong>{{ $booking->chuyenXe->tramDi->ten_tram }}</strong><br>
+                                <small class="text-muted">{{ $booking->chuyenXe->tramDi->tinh_thanh }}</small>
+                            </div>
+                        </div>
+
+                        @if($intermediateStops->count() > 0)
+                            @foreach($intermediateStops as $stop)
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-dot-circle text-warning mr-2"></i>
+                                <div>
+                                    <strong>{{ $stop->ten_tram }}</strong><br>
+                                    <small class="text-muted">{{ $stop->tinh_thanh }}</small>
+                                </div>
+                            </div>
+                            @endforeach
+                        @endif
+
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-flag-checkered text-danger mr-2"></i>
+                            <div>
+                                <strong>{{ $booking->chuyenXe->tramDen->ten_tram }}</strong><br>
+                                <small class="text-muted">{{ $booking->chuyenXe->tramDen->tinh_thanh }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Driver Information -->
+                <div class="mb-3">
+                    <h6><i class="fas fa-user-tie text-info mr-2"></i>Thông tin tài xế</h6>
+                    <div class="driver-info">
+                        <p><strong>Tên:</strong> {{ $booking->chuyenXe->ten_tai_xe }}</p>
+                        <p><strong>SĐT:</strong>
+                            <a href="tel:{{ $booking->chuyenXe->sdt_tai_xe }}" class="text-primary">
+                                {{ $booking->chuyenXe->sdt_tai_xe }}
+                            </a>
+                        </p>
+                        <p><strong>Xe:</strong> {{ $booking->chuyenXe->ten_xe }} ({{ $booking->chuyenXe->loai_xe }})</p>
+                    </div>
+                </div>
+
+                <!-- Trip Details -->
+                <div class="mb-3">
+                    <h6><i class="fas fa-calendar-alt text-secondary mr-2"></i>Chi tiết chuyến</h6>
+                    <p><strong>Ngày đi:</strong> {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }}</p>
+                    <p><strong>Giờ đi:</strong> {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</p>
+                    <p><strong>Ghế:</strong> <span class="badge badge-primary">{{ $booking->seat_number }}</span></p>
+                    <p><strong>Giá vé:</strong> <span class="text-success font-weight-bold">{{ number_format($booking->chuyenXe->gia_ve) }}đ</span></p>
+                </div>
+
+                <!-- Bus Company -->
+                <div class="mb-3">
+                    <h6><i class="fas fa-building text-secondary mr-2"></i>Nhà xe</h6>
+                    <p><strong>{{ $booking->chuyenXe->nhaXe->ten_nha_xe }}</strong></p>
+                    @if($booking->chuyenXe->nhaXe->email)
+                    <p><strong>Email:</strong> {{ $booking->chuyenXe->nhaXe->email }}</p>
+                    @endif
+                    @if($booking->chuyenXe->nhaXe->so_dien_thoai)
+                    <p><strong>SĐT:</strong> {{ $booking->chuyenXe->nhaXe->so_dien_thoai }}</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card card-warning">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-bolt mr-2"></i>
+                    Thao tác nhanh
+                </h3>
+            </div>
+            <div class="card-body">
+                <a href="{{ route('user.bookings.index') }}" class="btn btn-secondary btn-block mb-2">
+                    <i class="fas fa-arrow-left mr-2"></i>
+                    Quay lại danh sách
+                </a>
+                <a href="tel:{{ $booking->chuyenXe->sdt_tai_xe }}" class="btn btn-success btn-block mb-2">
+                    <i class="fas fa-phone mr-2"></i>
+                    Gọi tài xế
+                </a>
+                @if($booking->chuyenXe->nhaXe->so_dien_thoai)
+                <a href="tel:{{ $booking->chuyenXe->nhaXe->so_dien_thoai }}" class="btn btn-info btn-block">
+                    <i class="fas fa-building mr-2"></i>
+                    Gọi nhà xe
+                </a>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <!-- Google Map -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-map-marked-alt mr-2"></i>
+                    Bản đồ hành trình
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" onclick="refreshMap()">
+                        <i class="fas fa-sync-alt"></i> Làm mới
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                @if($mapStations->count() >= 2)
+                <div id="map" style="height: 500px; width: 100%; border-radius: 8px;"></div>
+
+                <!-- Pass data to JavaScript -->
+                <script>
+                    window.departureStationId = '{{ $booking->chuyenXe->ma_tram_di }}';
+                    window.arrivalStationId = '{{ $booking->chuyenXe->ma_tram_den }}';
+                    window.mapStations = @json($mapStations->map(function($station) {
+                        return [
+                            'id' => $station->ma_tram_xe,
+                            'name' => $station->ten_tram,
+                            'address' => $station->dia_chi,
+                            'province' => $station->tinh_thanh,
+                            'lat' => $station->latitude,
+                            'lng' => $station->longitude,
+                            'type' => $station->ma_tram_xe == window.departureStationId ? 'departure' :
+                                     ($station->ma_tram_xe == window.arrivalStationId ? 'arrival' : 'intermediate')
+                        ];
+                    }));
+                </script>
+                @else
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                    Không đủ thông tin tọa độ để hiển thị bản đồ. Vui lòng liên hệ nhà xe để cập nhật thông tin trạm.
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Trip Progress -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-road mr-2"></i>
+                    Tiến trình hành trình
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="progress-timeline">
+                    <!-- Departure -->
+                    <div class="progress-item {{ $tripStatus != 'upcoming' ? 'completed' : 'current' }}">
+                        <div class="progress-marker">
+                            <i class="fas fa-play-circle text-success"></i>
+                        </div>
+                        <div class="progress-content">
+                            <h6>Khởi hành</h6>
+                            <p>{{ $booking->chuyenXe->tramDi->ten_tram }}</p>
+                            <small class="text-muted">{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di)->format('d/m/Y H:i') }}</small>
+                        </div>
+                    </div>
+
+                    <!-- Intermediate Stops -->
+                    @foreach($intermediateStops as $index => $stop)
+                    <div class="progress-item {{ $tripStatus == 'completed' ? 'completed' : ($tripStatus == 'in_progress' && $index == 0 ? 'current' : '') }}">
+                        <div class="progress-marker">
+                            <i class="fas fa-dot-circle text-warning"></i>
+                        </div>
+                        <div class="progress-content">
+                            <h6>Dừng chân</h6>
+                            <p>{{ $stop->ten_tram }}</p>
+                            <small class="text-muted">Trạm trung chuyển</small>
+                        </div>
+                    </div>
+                    @endforeach
+
+                    <!-- Arrival -->
+                    <div class="progress-item {{ $tripStatus == 'completed' ? 'completed' : '' }}">
+                        <div class="progress-marker">
+                            <i class="fas fa-flag-checkered text-danger"></i>
+                        </div>
+                        <div class="progress-content">
+                            <h6>Đến nơi</h6>
+                            <p>{{ $booking->chuyenXe->tramDen->ten_tram }}</p>
+                            <small class="text-muted">{{ \Carbon\Carbon::parse($booking->chuyenXe->gio_den)->format('H:i') }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/user-trip-tracking.css') }}">
+@endpush
+
+@push('scripts')
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry&callback=initMap" async defer></script>
+<script src="{{ asset('assets/js/user-trip-tracking.js') }}"></script>
+@endpush

@@ -122,4 +122,60 @@ class BookingsController extends Controller
 
         return back()->with('success', 'Đặt vé đã được hủy thành công.');
     }
+
+    /**
+     * Show detailed trip tracking information with map
+     */
+    public function track(DatVe $booking)
+    {
+        // Ensure the booking belongs to the current user
+        if ($booking->user_id !== Auth::id()) {
+            abort(403, 'Bạn không có quyền xem thông tin chuyến đi này.');
+        }
+
+        // Load trip with all related data
+        $booking->load([
+            'chuyenXe.nhaXe',
+            'chuyenXe.tramDi',
+            'chuyenXe.tramDen'
+        ]);
+
+        // Get intermediate stops if any
+        $intermediateStops = [];
+        if ($booking->chuyenXe->tram_trung_gian) {
+            $stopIds = explode(',', $booking->chuyenXe->tram_trung_gian);
+            $intermediateStops = \App\Models\TramXe::whereIn('ma_tram_xe', $stopIds)->get();
+        }
+
+        // Calculate trip status
+        $departure_datetime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $booking->chuyenXe->ngay_di . ' ' . $booking->chuyenXe->gio_di);
+        $now = now();
+
+        $tripStatus = 'upcoming';
+        if ($departure_datetime <= $now) {
+            $tripStatus = 'in_progress';
+        }
+        if ($departure_datetime->addHours(1) <= $now) {
+            $tripStatus = 'completed';
+        }
+
+        // Get all stations for the map (departure, intermediate, arrival)
+        $mapStations = collect([$booking->chuyenXe->tramDi]);
+        if ($intermediateStops->count() > 0) {
+            $mapStations = $mapStations->merge($intermediateStops);
+        }
+        $mapStations = $mapStations->merge([$booking->chuyenXe->tramDen]);
+
+        // Filter stations with coordinates for the map
+        $mapStations = $mapStations->filter(function($station) {
+            return $station->latitude && $station->longitude;
+        });
+
+        return view('AdminLTE.user.bookings.track', compact(
+            'booking',
+            'intermediateStops',
+            'tripStatus',
+            'mapStations'
+        ));
+    }
 }
