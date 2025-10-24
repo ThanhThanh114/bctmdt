@@ -89,4 +89,25 @@
             </div>
         </div>
     </div>
+
+    <!-- Quản lý Nhà xe -->
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="card text-white h-100 shadow-lg"
+            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h2 class="mb-0 font-weight-bold text-white">{{ $stats['total_bus_companies'] ?? 0 }}</h2>
+                        <p class="mb-0 text-white">Tổng nhà xe</p>
+                    </div>
+                    <div class="display-4 opacity-75 text-white"><i class="fas fa-building"></i></div>
+                </div>
+            </div>
+            <div class="card-footer bg-transparent border-0 text-right">
+                <a href="{{ route('admin.nha-xe.index') }}" class="text-white text-decoration-none font-weight-bold">
+                    Xem chi tiết <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>

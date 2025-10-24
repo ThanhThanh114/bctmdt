@@ -172,6 +172,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('contact/bulk-delete', [App\Http\Controllers\Admin\ContactController::class, 'bulkDelete'])->name('contact.bulk-delete');
         Route::get('contact-export', [App\Http\Controllers\Admin\ContactController::class, 'export'])->name('contact.export');
 
+        // Quản lý nhà xe
+        Route::resource('nha-xe', App\Http\Controllers\Admin\NhaXeController::class);
+
         // Quản lý báo cáo
         Route::get('report', [App\Http\Controllers\Admin\ReportController::class, 'index'])->name('report.index');
         Route::get('report/bookings', [App\Http\Controllers\Admin\ReportController::class, 'bookings'])->name('report.bookings');

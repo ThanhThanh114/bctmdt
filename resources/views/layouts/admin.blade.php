@@ -122,6 +122,15 @@
                             </a>
                         </li>
 
+                        <!-- Bus Company Management -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.nha-xe.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.nha-xe.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-building"></i>
+                                <p>Quản lý nhà xe</p>
+                            </a>
+                        </li>
+
                         <!-- Booking Management -->
                         <li class="nav-item">
                             <a href="{{ route('admin.datve.index') }}"
@@ -166,6 +175,7 @@
                                 <p>Quản lý tin tức</p>
                             </a>
                         </li>
+
 
                         <!-- Contact Management -->
                         <li class="nav-item">
