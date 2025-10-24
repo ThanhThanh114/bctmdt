@@ -134,7 +134,7 @@
                 <a href="mailto:{{ $nhanVien->email }}" class="btn btn-primary btn-block">
                     <i class="fas fa-envelope mr-2"></i> Gửi email
                 </a>
-                <button type="button" class="btn btn-danger btn-block" id="deleteBtn">
+                <button type="button" class="btn btn-danger btn-block" id="deleteBtn" data-name="{{ $nhanVien->ten_nv }}">
                     <i class="fas fa-trash mr-2"></i> Xóa nhân viên
                 </button>
                 <a href="{{ route('bus-owner.nhan-vien.index') }}" class="btn btn-secondary btn-block">
@@ -177,86 +177,31 @@
 @endsection
 
 @push('scripts')
-<script>
-    $(document).ready(function() {
-        // Delete button
-        $('#deleteBtn').on('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-
-            Swal.fire({
-                title: 'Xác nhận xóa?',
-                html: `Bạn có chắc chắn muốn xóa nhân viên:<br><strong>{{ $nhanVien->ten_nv }}</strong>?<br><br><span class="text-danger">Hành động này không thể hoàn tác!</span>`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: '<i class="fas fa-trash mr-1"></i> Xóa',
-                cancelButtonText: '<i class="fas fa-times mr-1"></i> Hủy',
-                reverseButtons: true
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $('#delete-form').submit();
-                }
-            });
-        });
-
-        // Show success message if any
-        @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Thành công!',
-            text: '{{ session('
-            success ') }}',
-            timer: 3000,
-            showConfirmButton: false
-        });
-        @endif
-
-        @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Lỗi!',
-            text: '{{ session('
-            error ') }}',
-        });
-        @endif
-    });
-</script>
+<script src="{{ asset('assets/js/bus-owner-nhan-vien-show.js') }}"></script>
 @endpush
 
 @push('styles')
-<style>
-    .badge-lg {
-        font-size: 1rem;
-        padding: 0.5rem 1rem;
-    }
-
-    .info-box {
-        box-shadow: 0 0 1px rgba(0, 0, 0, .125), 0 1px 3px rgba(0, 0, 0, .2);
-        border-radius: .25rem;
-        margin-bottom: 1rem;
-    }
-
-    .info-box-icon {
-        border-radius: .25rem 0 0 .25rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 90px;
-    }
-
-    .info-box-content {
-        padding: .5rem;
-    }
-
-    .progress-group {
-        margin-bottom: 1rem;
-    }
-
-    /* Ensure links work properly */
-    a {
-        pointer-events: auto !important;
-    }
-</style>
+<link rel="stylesheet" href="{{ asset('assets/css/bus-owner-nhan-vien-show.css') }}">
 @endpush
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: '{{ session('success') }}',
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Lỗi!',
+        text: '{{ session('error') }}',
+    });
+</script>
+@endif
