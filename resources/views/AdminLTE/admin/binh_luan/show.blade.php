@@ -109,13 +109,14 @@
 
                             <!-- Các phản hồi -->
                             @foreach($binhluan->replies as $reply)
-                            @if($reply->user_id == auth()->id() || $reply->nv_id)
-                            <!-- Tin nhắn từ Admin (bên phải) -->
+                            @if($reply->user->role === 'admin' || ($reply->user_id == auth()->id() && auth()->user()->role === 'admin'))
+                            <!-- Tin nhắn từ Admin (bên phải - màu xanh) -->
                             <div class="direct-chat-msg right">
                                 <div class="direct-chat-infos clearfix">
                                     <span class="direct-chat-name float-right">
                                         <i class="fas fa-user-shield text-success"></i>
                                         {{ $reply->user->fullname ?? 'Admin' }}
+                                        <span class="badge badge-success ml-1">ADMIN</span>
                                     </span>
                                     <span class="direct-chat-timestamp float-left">
                                         {{ \Carbon\Carbon::parse($reply->ngay_bl)->format('d/m/Y H:i') }}
@@ -127,6 +128,25 @@
                                     {{ $reply->noi_dung }}
                                 </div>
                             </div>
+                            @elseif($reply->user->role === 'staff' || $reply->user->role === 'nhanvien' || $reply->nv_id)
+                            <!-- Tin nhắn từ Staff (bên phải - màu cam) -->
+                            <div class="direct-chat-msg right">
+                                <div class="direct-chat-infos clearfix">
+                                    <span class="direct-chat-name float-right">
+                                        <i class="fas fa-user-tie text-warning"></i>
+                                        {{ $reply->user->fullname ?? 'Nhân viên' }}
+                                        <span class="badge badge-warning ml-1">NHÂN VIÊN</span>
+                                    </span>
+                                    <span class="direct-chat-timestamp float-left">
+                                        {{ \Carbon\Carbon::parse($reply->ngay_bl)->format('d/m/Y H:i') }}
+                                    </span>
+                                </div>
+                                <img class="direct-chat-img" src="{{ asset('assets/img/admin-avatar.png') }}"
+                                    alt="Staff Image">
+                                <div class="direct-chat-text bg-warning">
+                                    {{ $reply->noi_dung }}
+                                </div>
+                            </div>
                             @else
                             <!-- Tin nhắn từ khách hàng (bên trái) -->
                             <div class="direct-chat-msg">
@@ -134,6 +154,7 @@
                                     <span class="direct-chat-name float-left">
                                         <i class="fas fa-user text-primary"></i>
                                         {{ $reply->user->fullname ?? 'N/A' }}
+                                        <span class="badge badge-info ml-1">KHÁCH HÀNG</span>
                                     </span>
                                     <span class="direct-chat-timestamp float-right">
                                         {{ \Carbon\Carbon::parse($reply->ngay_bl)->format('d/m/Y H:i') }}

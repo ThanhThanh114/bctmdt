@@ -9,6 +9,14 @@
 @endsection
 
 @section('content')
+<div class="row mb-3">
+    <div class="col-md-12">
+        <a href="{{ route('staff.ticket-scanner.today-trips') }}" class="btn btn-info">
+            <i class="fas fa-list mr-1"></i>Xem Chuyến Xe Hôm Nay
+        </a>
+    </div>
+</div>
+
 <div class="row">
     <!-- Thống kê -->
     <div class="col-md-6">
@@ -280,6 +288,18 @@
     }
 
     function displayTicketInfo(ticket, qrData) {
+        // Hiển thị thông báo quét thành công
+        Swal.fire({
+            icon: 'success',
+            title: 'Quét QR Thành Công!',
+            html: `<strong>Mã vé:</strong> ${ticket.ticket_code}<br>` +
+                  `<strong>Hành khách:</strong> ${ticket.passenger.name}<br>` +
+                  `<strong>Số ghế:</strong> ${ticket.seats}`,
+            timer: 2000,
+            showConfirmButton: false,
+            timerProgressBar: true
+        });
+
         document.getElementById('instructionCard').style.display = 'none';
         document.getElementById('resultCard').style.display = 'block';
 
@@ -343,12 +363,32 @@
             <h5 class="mb-3 mt-4"><i class="fas fa-bus mr-2"></i>Thông tin chuyến xe</h5>
             <table class="table table-sm table-bordered">
                 <tr>
-                    <th width="40%">Tên xe</th>
-                    <td>${ticket.trip.name}</td>
+                    <th width="40%">Mã chuyến</th>
+                    <td><strong class="text-primary">${ticket.trip.trip_code}</strong></td>
+                </tr>
+                <tr>
+                    <th>Tên xe</th>
+                    <td><strong>${ticket.trip.name}</strong></td>
                 </tr>
                 <tr>
                     <th>Nhà xe</th>
                     <td>${ticket.trip.company}</td>
+                </tr>
+                <tr>
+                    <th>Loại xe</th>
+                    <td><span class="badge badge-info">${ticket.trip.vehicle_type}</span></td>
+                </tr>
+                <tr>
+                    <th>Tổng số ghế</th>
+                    <td>${ticket.trip.total_seats} ghế</td>
+                </tr>
+                <tr>
+                    <th>Tài xế</th>
+                    <td>${ticket.trip.driver}</td>
+                </tr>
+                <tr>
+                    <th>SĐT tài xế</th>
+                    <td><a href="tel:${ticket.trip.driver_phone}">${ticket.trip.driver_phone}</a></td>
                 </tr>
                 <tr>
                     <th>Điểm đi</th>
@@ -372,12 +412,23 @@
                 </tr>
             </table>
 
+            <div class="mt-3 text-center">
+                <a href="{{ url('/staff/ticket-scanner/trip') }}/${ticket.trip.trip_id}" class="btn btn-info btn-sm" target="_blank">
+                    <i class="fas fa-users mr-1"></i>Xem danh sách hành khách
+                </a>
+            </div>
+
             <div class="mt-4">
                 ${!ticket.already_scanned ? `
-                    <button onclick="checkInTicket('${ticket.booking_id}', '${qrData}')" class="btn btn-primary btn-lg btn-block">
-                        <i class="fas fa-check mr-2"></i>CHECK-IN VÉ
+                    <button onclick="checkInTicket('${ticket.booking_id}', '${qrData}')" class="btn btn-success btn-lg btn-block">
+                        <i class="fas fa-check-circle mr-2"></i>CHECK-IN - KHÁCH ĐÃ LÊN XE
                     </button>
-                ` : ''}
+                ` : `
+                    <div class="alert alert-success text-center mb-3">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i><br>
+                        <strong>KHÁCH ĐÃ LÊN XE</strong>
+                    </div>
+                `}
                 <button onclick="resetScanner()" class="btn btn-secondary btn-block">
                     <i class="fas fa-redo mr-2"></i>Quét vé tiếp theo
                 </button>

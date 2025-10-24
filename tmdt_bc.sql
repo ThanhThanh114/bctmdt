@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 20, 2025 lúc 12:40 PM
+-- Thời gian đã tạo: Th10 23, 2025 lúc 11:03 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.2.12
 
@@ -111,24 +111,27 @@ CREATE TABLE `chuyen_xe` (
 --
 
 INSERT INTO `chuyen_xe` (`id`, `ma_xe`, `ten_xe`, `ma_nha_xe`, `ten_tai_xe`, `sdt_tai_xe`, `ma_tram_di`, `ma_tram_den`, `tram_trung_gian`, `ngay_di`, `gio_di`, `loai_xe`, `so_cho`, `so_ve`, `gia_ve`, `loai_chuyen`, `gio_den`) VALUES
-(1, 'XE001', 'Xe Giường Nằm 1', 1, 'Nguyen Van A', '0911111112', 1, 6, NULL, '2025-10-01', '07:30:00', 'Giường nằm', 45, 10, 5000.00, 'Một chiều', NULL),
-(2, 'XE002', 'Xe Limousine 2', 2, 'Tran Van B', '0912222222', 1, 6, NULL, '2025-10-02', '08:00:00', 'Giường nằm', 30, 5, 400000.00, 'Khứ hồi', NULL),
-(3, 'XE003', 'Xe Ghế Ngồi 311', 3, 'Le Van Van1', '0901000003', 3, 6, NULL, '2025-10-01', '10:00:00', 'Giường nằm', 40, 8, 200000.00, 'Một chiều', NULL),
-(4, 'XE004', 'Xe Giường Nằm 4', 4, 'Pham Van D', '0914444444', 4, 5, NULL, '2025-10-04', '10:30:00', 'Giường nằm', 42, 7, 250000.00, 'Một chiều', NULL),
-(5, 'XE005', 'Xe Limousine 5', 5, 'Nguyen Van E', '0915555555', 8, 4, NULL, '2025-10-05', '12:00:00', 'Limousine', 20, 6, 450000.00, 'Khứ hồi', NULL),
-(6, 'XE006', 'Xe Ghế Ngồi 6', 6, 'Le Van F', '0916666666', 1, 3, NULL, '2025-10-06', '14:00:00', 'Ghế ngồi', 44, 9, 150000.00, 'Một chiều', NULL),
-(7, 'XE007', 'Xe Giường Nằm 7', 7, 'Tran Van G', '0917777777', 6, 7, NULL, '2025-10-07', '15:00:00', 'Giường nằm', 45, 10, 300000.00, 'Khứ hồi', NULL),
-(8, 'XE008', 'Xe Limousine 8', 8, 'Pham Van H', '0918888888', 5, 4, NULL, '2025-10-08', '16:30:00', 'Limousine', 16, 4, 500000.00, 'Một chiều', NULL),
-(9, 'XE009', 'Xe Ghế Ngồi 9', 9, 'Nguyen Van I', '0919999999', 9, 2, NULL, '2025-10-09', '18:00:00', 'Ghế ngồi', 38, 6, 180000.00, 'Một chiều', NULL),
-(10, 'XE010', 'Xe Giường Nằm 10', 10, 'Le Van J', '0910000000', 10, 6, NULL, '2025-10-10', '19:30:00', 'Giường nằm', 45, 8, 600000.00, 'Khứ hồi', NULL),
-(11, 'XE011', 'Xe Giường Nằm 11', 11, 'Nguyen Van K', '0921111111', 11, 7, NULL, '2025-10-11', '07:00:00', 'Giường nằm', 40, 10, 370000.00, 'Một chiều', NULL),
-(12, 'XE012', 'Xe Limousine 12', 12, 'Tran Van L', '0922222222', 12, 8, NULL, '2025-10-12', '09:15:00', 'Limousine', 18, 6, 420000.00, 'Khứ hồi', NULL),
-(13, 'XE013', 'Xe Ghế Ngồi 13', 13, 'Le Van M', '0923333333', 13, 3, NULL, '2025-10-13', '10:45:00', 'Ghế ngồi', 35, 9, 190000.00, 'Một chiều', NULL),
-(14, 'XE014', 'Xe Giường Nằm 14', 14, 'Pham Van N', '0924444444', 14, 10, NULL, '2025-10-14', '12:30:00', 'Giường nằm', 45, 7, 310000.00, 'Một chiều', NULL),
-(15, 'XE015', 'Xe Limousine 15', 15, 'Hoang Van Tai', '0925555555', 15, 5, NULL, '2025-10-15', '13:00:00', 'Limousine', 20, 8, 480000.00, 'Khứ hồi', NULL),
-(17, 'CX1759212724', 'ADMIN', 15, 'Hoang Huy', '0939206174', 61, 61, NULL, '2025-10-01', '19:00:00', 'Giường nằm', 30, 10, 200000.00, 'Một chiều', NULL),
+(1, 'XE001', 'Xe Giường Nằm 1', 1, 'Nguyen Van A', '0911111112', 1, 6, NULL, '2025-10-01', '07:30:00', 'Giường nằm', 45, 0, 200000.00, 'Một chiều', NULL),
+(2, 'XE002', 'Xe Limousine 2', 2, 'Tran Van B', '0912222222', 1, 6, NULL, '2025-10-02', '08:00:00', 'Giường nằm', 30, 0, 400000.00, 'Khứ hồi', NULL),
+(3, 'XE003', 'Xe Ghế Ngồi 311', 3, 'Le Van Van1', '0901000003', 3, 6, NULL, '2025-10-01', '10:00:00', 'Giường nằm', 40, 0, 200000.00, 'Một chiều', NULL),
+(4, 'XE004', 'Xe Giường Nằm 4', 4, 'Pham Van D', '0914444444', 4, 5, NULL, '2025-10-04', '10:30:00', 'Giường nằm', 42, 0, 250000.00, 'Một chiều', NULL),
+(5, 'XE005', 'Xe Limousine 5', 5, 'Nguyen Van E', '0915555555', 8, 4, NULL, '2025-10-05', '12:00:00', 'Limousine', 20, 0, 450000.00, 'Khứ hồi', NULL),
+(6, 'XE006', 'Xe Ghế Ngồi 6', 6, 'Le Van F', '0916666666', 1, 3, NULL, '2025-10-06', '14:00:00', 'Ghế ngồi', 44, 0, 150000.00, 'Một chiều', NULL),
+(7, 'XE007', 'Xe Giường Nằm 7', 7, 'Tran Van G', '0917777777', 6, 7, NULL, '2025-10-07', '15:00:00', 'Giường nằm', 45, 0, 300000.00, 'Khứ hồi', NULL),
+(8, 'XE008', 'Xe Limousine 8', 8, 'Pham Van H', '0918888888', 5, 4, NULL, '2025-10-08', '16:30:00', 'Limousine', 16, 0, 500000.00, 'Một chiều', NULL),
+(9, 'XE009', 'Xe Ghế Ngồi 9', 9, 'Nguyen Van I', '0919999999', 9, 2, NULL, '2025-10-09', '18:00:00', 'Ghế ngồi', 38, 0, 180000.00, 'Một chiều', NULL),
+(10, 'XE010', 'Xe Giường Nằm 10', 10, 'Le Van J', '0910000000', 10, 6, NULL, '2025-10-10', '19:30:00', 'Giường nằm', 45, 0, 600000.00, 'Khứ hồi', NULL),
+(11, 'XE011', 'Xe Giường Nằm 11', 11, 'Nguyen Van K', '0921111111', 11, 7, NULL, '2025-10-11', '07:00:00', 'Giường nằm', 40, 0, 370000.00, 'Một chiều', NULL),
+(12, 'XE012', 'Xe Limousine 12', 12, 'Tran Van L', '0922222222', 12, 8, NULL, '2025-10-12', '09:15:00', 'Limousine', 18, 0, 420000.00, 'Khứ hồi', NULL),
+(13, 'XE013', 'Xe Ghế Ngồi 13', 13, 'Le Van M', '0923333333', 13, 3, NULL, '2025-10-13', '10:45:00', 'Ghế ngồi', 35, 0, 190000.00, 'Một chiều', NULL),
+(14, 'XE014', 'Xe Giường Nằm 14', 14, 'Pham Van N', '0924444444', 14, 10, NULL, '2025-10-14', '12:30:00', 'Giường nằm', 45, 0, 310000.00, 'Một chiều', NULL),
+(15, 'XE015', 'Xe Limousine 15', 15, 'Hoang Van Tai', '0925555555', 15, 5, NULL, '2025-10-15', '13:00:00', 'Limousine', 20, 0, 480000.00, 'Khứ hồi', NULL),
+(17, 'CX1759212724', 'ADMIN', 15, 'Hoang Huy', '0939206174', 61, 61, NULL, '2025-10-01', '19:00:00', 'Giường nằm', 30, 0, 200000.00, 'Một chiều', NULL),
 (19, 'XE0004', 'huy', 3, 'Le Van Van1', '0901000003', 69, 70, NULL, '2025-10-17', '22:29:00', 'Giường nằm', 30, 0, 100000.00, 'Một chiều', '11:29:00'),
-(20, 'XE0020', 'Test_Trung Gian1', 3, 'Le Van Van1', '0901000003', 69, 70, '3,6,69', '2025-10-17', '17:44:00', 'Ghế ngồi', 30, 0, 100000.00, 'Một chiều', NULL);
+(20, 'XE0020', 'Test_Trung Gian1', 3, 'Le Van Van1', '0901000003', 69, 70, '3,6,69', '2025-10-17', '17:44:00', 'Ghế ngồi', 30, 0, 100000.00, 'Một chiều', NULL),
+(21, 'XE0021', 'Test1', 3, 'Le Van Van1', '0901000003', 69, 70, '71', '2025-10-21', '11:04:00', 'Giường nằm', 30, 0, 200000.00, 'Một chiều', '11:05:00'),
+(22, 'XE0022', 'Cà Mau - Cà Mau', 3, 'Le Van Van1', '0901000003', 72, 72, '72', '2025-10-23', '13:21:00', 'Giường nằm', 30, 0, 1000000.00, 'Một chiều', '20:21:00'),
+(23, 'XE0023', 'Cà Mau - Cà Mau', 3, 'Le Van Van1', '0901000003', 72, 72, '72', '2025-10-23', '13:21:00', 'Giường nằm', 30, 0, 1000000.00, 'Một chiều', '20:21:00');
 
 -- --------------------------------------------------------
 
@@ -192,7 +195,40 @@ INSERT INTO `dat_ve` (`id`, `user_id`, `chuyen_xe_id`, `ma_ve`, `so_ghe`, `ngay_
 (100, 34, 1, 'BK20251015040856902', 'A03', '2025-10-15 04:08:56', 'Đã thanh toán'),
 (101, 34, 1, 'BK20251015041346263', 'B16', '2025-10-15 04:13:46', 'Đã thanh toán'),
 (102, 15, 3, 'BK20251015074539353', 'A08', '2025-10-15 07:45:39', 'Đã thanh toán'),
-(103, 15, 17, 'BK20251015190202336', 'B17', '2025-10-15 19:02:02', 'Đã đặt');
+(103, 15, 17, 'BK20251015190202336', 'B17', '2025-10-15 19:02:02', 'Đã đặt'),
+(104, 32, 19, 'BK2025102100000018', 'A20,A30', '2025-10-21 01:25:25', 'Đã thanh toán'),
+(105, 31, 3, 'BK20251021045843109', 'A05', '2025-10-21 04:58:43', 'Đã đặt'),
+(106, 31, 1, 'BK20251021050318789', 'B13', '2025-10-21 05:03:18', 'Đã đặt'),
+(107, 31, 1, 'BK20251021050506425', 'B15', '2025-10-21 05:05:06', 'Đã đặt'),
+(108, 34, 21, 'BK20251021050841446', 'B16', '2025-10-21 05:08:41', 'Đã thanh toán'),
+(109, 34, 21, 'BK20251021050936398', 'A01', '2025-10-21 05:09:36', 'Đã thanh toán'),
+(110, 34, 21, 'BK20251021050936398', 'A03', '2025-10-21 05:09:36', 'Đã thanh toán'),
+(111, 34, 21, 'BK20251021050936398', 'A09', '2025-10-21 05:09:36', 'Đã thanh toán'),
+(112, 34, 21, 'BK20251021050936398', 'A06', '2025-10-21 05:09:36', 'Đã thanh toán'),
+(113, 34, 21, 'BK20251021050936398', 'A12', '2025-10-21 05:09:36', 'Đã thanh toán'),
+(114, 34, 21, 'BK20251021051124307', 'A15', '2025-10-21 05:11:24', 'Đã thanh toán'),
+(115, 34, 21, 'BK20251021051124307', 'A16', '2025-10-21 05:11:24', 'Đã thanh toán'),
+(116, 34, 21, 'BK20251021051124307', 'A13', '2025-10-21 05:11:24', 'Đã thanh toán'),
+(117, 34, 21, 'BK20251021051124307', 'A10', '2025-10-21 05:11:24', 'Đã thanh toán'),
+(118, 34, 21, 'BK20251021051124307', 'A07', '2025-10-21 05:11:24', 'Đã thanh toán'),
+(119, 34, 21, 'BK20251021051219160', 'A04', '2025-10-21 05:12:19', 'Đã thanh toán'),
+(120, 34, 21, 'BK20251021051219160', 'A17', '2025-10-21 05:12:19', 'Đã thanh toán'),
+(121, 34, 21, 'BK20251021051219160', 'A11', '2025-10-21 05:12:19', 'Đã thanh toán'),
+(122, 34, 21, 'BK20251021051219160', 'A08', '2025-10-21 05:12:19', 'Đã thanh toán'),
+(123, 34, 21, 'BK20251021051219160', 'A05', '2025-10-21 05:12:19', 'Đã thanh toán'),
+(124, 34, 1, 'BK20251021051414593', 'A06', '2025-10-21 05:14:14', 'Đã thanh toán'),
+(125, 34, 1, 'BK20251021051414593', 'A09', '2025-10-21 05:14:14', 'Đã thanh toán'),
+(126, 34, 1, 'BK20251021051414593', 'A15', '2025-10-21 05:14:14', 'Đã thanh toán'),
+(127, 34, 1, 'BK20251021051414593', 'A12', '2025-10-21 05:14:14', 'Đã thanh toán'),
+(128, 34, 1, 'BK20251021051414593', 'A13', '2025-10-21 05:14:14', 'Đã thanh toán'),
+(129, 34, 21, 'BK20251021051850295', 'B15', '2025-10-21 05:18:50', 'Đã thanh toán'),
+(130, 34, 21, 'BK20251021051850295', 'B12', '2025-10-21 05:18:50', 'Đã thanh toán'),
+(131, 34, 21, 'BK20251021051850295', 'B06', '2025-10-21 05:18:50', 'Đã thanh toán'),
+(132, 34, 21, 'BK20251021051850295', 'B09', '2025-10-21 05:18:50', 'Đã thanh toán'),
+(133, 34, 21, 'BK20251021051850295', 'A02', '2025-10-21 05:18:50', 'Đã thanh toán'),
+(134, 42, 3, 'BK20251023083640643', 'B10', '2025-10-23 08:36:40', 'Đã thanh toán'),
+(135, 34, 1, 'BK20251023085008627', 'B14', '2025-10-23 08:50:08', 'Đã thanh toán'),
+(136, 40, 23, 'BK20251023085504285', 'B17', '2025-10-23 08:55:04', 'Đã thanh toán');
 
 -- --------------------------------------------------------
 
@@ -284,7 +320,10 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (7, '2025_10_16_075221_add_reset_token_to_users_table', 4),
 (9, '2025_10_16_083259_add_customer_info_to_dat_ve_table', 5),
 (10, '2025_10_17_103835_add_tram_trung_gian_to_chuyen_xe_table', 6),
-(11, '2025_10_19_082932_fix_tin_tuc_charset_for_emoji_support', 7);
+(11, '2025_10_19_082932_fix_tin_tuc_charset_for_emoji_support', 7),
+(13, '2025_10_23_000001_create_upgrade_requests_table', 8),
+(14, '2025_10_23_000002_create_payments_table', 9),
+(15, '2025_10_23_080405_create_ticket_scans_table', 10);
 
 -- --------------------------------------------------------
 
@@ -318,7 +357,8 @@ INSERT INTO `nhan_vien` (`ma_nv`, `ten_nv`, `chuc_vu`, `so_dien_thoai`, `email`,
 (10, 'Vo Thi Mai', 'phụ xe', '0901000010', 'phuxe10@bus.vn', 10),
 (11, 'HuyTest1', 'tài xế', '0939206174', 'ontapttnt@gmail.com', 3),
 (12, 'huy1', 'phụ xe', '1234567890', 'huy@gmail.com', 3),
-(13, 'huy2', 'quản lý', '1234567891', 'huy2@gmail.com', 3);
+(13, 'huy2', 'quản lý', '1234567891', 'huy2@gmail.com', 3),
+(14, 'TestThemGDAdmin', 'tài xế', '09390120331', 'TestThemGDAdmin@gmail.com', 3);
 
 -- --------------------------------------------------------
 
@@ -331,31 +371,73 @@ CREATE TABLE `nha_xe` (
   `ten_nha_xe` varchar(100) NOT NULL,
   `dia_chi` varchar(255) NOT NULL,
   `so_dien_thoai` varchar(15) NOT NULL,
-  `email` varchar(100) DEFAULT NULL
+  `email` varchar(100) DEFAULT NULL,
+  `created_by` int(10) UNSIGNED DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `nha_xe`
 --
 
-INSERT INTO `nha_xe` (`ma_nha_xe`, `ten_nha_xe`, `dia_chi`, `so_dien_thoai`, `email`) VALUES
-(1, 'FUTA Bus', 'Cần Thơ', '02923888888', 'futa@bus.vn'),
-(2, 'Phương Trang', 'TPHCM', '02838383838', 'pt@bus.vn'),
-(3, 'Mai Linh12', 'Hà Nội', '02439393939', 'ml@bus.vn'),
-(4, 'Thành Bưởi', 'Đà Lạt', '02633888888', 'tb@bus.vn'),
-(5, 'Hoàng Long', 'Hải Phòng', '02253888888', 'hl@bus.vn'),
-(6, 'Xe Việt', 'Hà Nội', '02437778888', 'xeviet@bus.vn'),
-(7, 'An Phú Bus', 'Cần Thơ', '02923882222', 'ap@bus.vn'),
-(8, 'OpenTour', 'Đà Nẵng', '02363881111', 'opentour@bus.vn'),
-(9, 'Kumho Samco', 'TPHCM', '02837776666', 'kumho@bus.vn'),
-(10, 'Hà Lan', 'Ninh Bình', '02293889999', 'halan@bus.vn'),
-(11, 'Tây Đô', 'Cần Thơ', '02923887777', 'taydo@bus.vn'),
-(12, 'Cúc Tùng', 'Nha Trang', '02583889999', 'cuctung@bus.vn'),
-(13, 'Thanh Buoi Express', 'TPHCM', '02822223333', 'tbexpress@bus.vn'),
-(14, 'HTX Vận Tải Sài Gòn', 'TPHCM', '02844556677', 'htxsg@bus.vn'),
-(15, 'Hoang Huy', 'Vũng Tàu', '02543887766', 'hoamai@bus.vn'),
-(17, 'huy', 'huy', '0939206174', 'huy@gmail.com'),
-(18, 'huy', 'huy@gmail.com', '1234567890', 'huy@gmail.com');
+INSERT INTO `nha_xe` (`ma_nha_xe`, `ten_nha_xe`, `dia_chi`, `so_dien_thoai`, `email`, `created_by`, `created_at`, `updated_at`) VALUES
+(1, 'FUTA Bus', 'Cần Thơ', '02923888888', 'futa@bus.vn', NULL, NULL, NULL),
+(2, 'Phương Trang', 'TPHCM', '02838383838', 'pt@bus.vn', NULL, NULL, NULL),
+(3, 'Mai Linh12', 'Hà Nội', '02439393939', 'ml@bus.vn', NULL, NULL, NULL),
+(4, 'Thành Bưởi', 'Đà Lạt', '02633888888', 'tb@bus.vn', NULL, NULL, NULL),
+(5, 'Hoàng Long', 'Hải Phòng', '02253888888', 'hl@bus.vn', NULL, NULL, NULL),
+(6, 'Xe Việt', 'Hà Nội', '02437778888', 'xeviet@bus.vn', NULL, NULL, NULL),
+(7, 'An Phú Bus', 'Cần Thơ', '02923882222', 'ap@bus.vn', NULL, NULL, NULL),
+(8, 'OpenTour', 'Đà Nẵng', '02363881111', 'opentour@bus.vn', NULL, NULL, NULL),
+(9, 'Kumho Samco', 'TPHCM', '02837776666', 'kumho@bus.vn', NULL, NULL, NULL),
+(10, 'Hà Lan', 'Ninh Bình', '02293889999', 'halan@bus.vn', NULL, NULL, NULL),
+(11, 'Tây Đô', 'Cần Thơ', '02923887777', 'taydo@bus.vn', NULL, NULL, NULL),
+(12, 'Cúc Tùng', 'Nha Trang', '02583889999', 'cuctung@bus.vn', NULL, NULL, NULL),
+(13, 'Thanh Buoi Express', 'TPHCM', '02822223333', 'tbexpress@bus.vn', NULL, NULL, NULL),
+(14, 'HTX Vận Tải Sài Gòn', 'TPHCM', '02844556677', 'htxsg@bus.vn', NULL, NULL, NULL),
+(15, 'Hoang Huy', 'Vũng Tàu', '02543887766', 'hoamai@bus.vn', NULL, NULL, NULL),
+(17, 'huy', 'huy', '0939206174', 'huy@gmail.com', NULL, NULL, NULL),
+(18, 'huy', 'huy@gmail.com', '1234567890', 'huy@gmail.com', NULL, NULL, NULL),
+(20, 'TestThemNhaXe_MaiLinh', 'TestThemNhaXe_MaiLinh@gmail.com', '09390120331', 'TestThemNhaXe_MaiLinh@gmail.com', NULL, NULL, NULL),
+(21, 'TestThemNhaXe_MaiLinh', 'TestThemNhaXe_MaiLinh@gmail.com', '09390120331', 'TestThemNhaXe_MaiLinh@gmail.com', 38, '2025-10-20 19:00:37', '2025-10-20 19:00:37'),
+(22, 'Mai Linh', 'MaiLinh@gmail.com', '09390120331', 'MaiLinh@gmail.com', 38, '2025-10-20 19:01:53', '2025-10-20 19:01:53'),
+(23, 'OKOKOKOKOKOKOK', 'OKOKOKOKOKOKOK', '0966421557', 'admin100@gmail.com', NULL, NULL, NULL),
+(24, 'thanhdat@gmail.com', 'thanhdat@gmail.com', '0939102311', 'thanhdat@gmail.com', NULL, NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `payments`
+--
+
+CREATE TABLE `payments` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `upgrade_request_id` bigint(20) UNSIGNED NOT NULL,
+  `transaction_id` varchar(255) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `payment_method` enum('bank_transfer','qr_code','cash') NOT NULL DEFAULT 'qr_code',
+  `status` enum('pending','completed','failed','refunded') NOT NULL DEFAULT 'pending',
+  `bank_name` varchar(255) DEFAULT NULL,
+  `account_number` varchar(255) DEFAULT NULL,
+  `account_name` varchar(255) DEFAULT NULL,
+  `qr_code_url` text DEFAULT NULL,
+  `payment_proof` text DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `paid_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `payments`
+--
+
+INSERT INTO `payments` (`id`, `upgrade_request_id`, `transaction_id`, `amount`, `payment_method`, `status`, `bank_name`, `account_number`, `account_name`, `qr_code_url`, `payment_proof`, `notes`, `paid_at`, `created_at`, `updated_at`) VALUES
+(1, 1, 'UPG20251023409528', 0.00, 'qr_code', 'completed', 'Vietcombank', '1234567890', 'CONG TY TMDT BUS CITY', 'https://img.vietqr.io/image/970436-1234567890-compact2.png?amount=500000&addInfo=UPG+UPG20251023409528&accountName=CONG+TY+TMDT+BUS+CITY', NULL, 'Thanh toán phí nâng cấp tài khoản lên Nhà xe', '2025-10-23 00:19:34', '2025-10-23 00:14:42', '2025-10-23 00:19:34'),
+(2, 2, 'UPG20251023341003', 0.00, 'qr_code', 'refunded', 'Vietcombank', '1234567890', 'CONG TY TMDT BUS CITY', 'https://img.vietqr.io/image/970436-1234567890-compact2.png?amount=0.00&addInfo=UPG+UPG20251023341003&accountName=CONG+TY+TMDT+BUS+CITY', NULL, 'Nâng cấp tài khoản lên Nhà xe - MIỄN PHÍ', '2025-10-23 00:27:46', '2025-10-23 00:27:46', '2025-10-23 00:34:05'),
+(3, 3, 'UPG20251023343213', 0.00, 'qr_code', 'completed', 'Vietcombank', '1234567890', 'CONG TY TMDT BUS CITY', 'https://img.vietqr.io/image/970436-1234567890-compact2.png?amount=0.00&addInfo=UPG+UPG20251023343213&accountName=CONG+TY+TMDT+BUS+CITY', NULL, 'Nâng cấp tài khoản lên Nhà xe - MIỄN PHÍ', '2025-10-23 00:35:12', '2025-10-23 00:35:12', '2025-10-23 00:35:12'),
+(4, 4, 'UPG20251023412649', 0.00, 'qr_code', 'completed', 'Vietcombank', '1234567890', 'CONG TY TMDT BUS CITY', 'https://img.vietqr.io/image/970436-1234567890-compact2.png?amount=0.00&addInfo=UPG+UPG20251023412649&accountName=CONG+TY+TMDT+BUS+CITY', NULL, 'Nâng cấp tài khoản lên Nhà xe - MIỄN PHÍ', '2025-10-23 00:44:10', '2025-10-23 00:44:10', '2025-10-23 00:44:10');
 
 -- --------------------------------------------------------
 
@@ -378,6 +460,22 @@ CREATE TABLE `sessions` (
 
 INSERT INTO `sessions` (`id`, `user_id`, `ip_address`, `user_agent`, `payload`, `last_activity`) VALUES
 ('iIN0uVJXiBqMSgKD3m3BIGePWyGHE5S2ZamxBS31', 31, '127.0.0.1', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36', 'YTo0OntzOjY6Il90b2tlbiI7czo0MDoiTlpocFZJVG5EUXFrRDFZb3pWMjZrNnFPSEsxODlmaFFlQmR5Y092eSI7czo5OiJfcHJldmlvdXMiO2E6MTp7czozOiJ1cmwiO3M6MjE6Imh0dHA6Ly8xMjcuMC4wLjE6ODAwMCI7fXM6NjoiX2ZsYXNoIjthOjI6e3M6Mzoib2xkIjthOjA6e31zOjM6Im5ldyI7YTowOnt9fXM6NTA6ImxvZ2luX3dlYl81OWJhMzZhZGRjMmIyZjk0MDE1ODBmMDE0YzdmNThlYTRlMzA5ODlkIjtpOjMxO30=', 1760496601);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `ticket_scans`
+--
+
+CREATE TABLE `ticket_scans` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `booking_id` bigint(20) UNSIGNED NOT NULL,
+  `ticket_code` varchar(50) NOT NULL,
+  `staff_id` int(11) NOT NULL,
+  `staff_name` varchar(100) NOT NULL,
+  `scanned_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `scan_location` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -492,7 +590,9 @@ INSERT INTO `tram_xe` (`ma_tram_xe`, `ten_tram`, `dia_chi`, `tinh_thanh`, `ma_nh
 (66, 'TEST1', 'TEST', 'TEST', 15),
 (67, 'test_tram1', 'test_tram', 'Vĩnh Long', 3),
 (69, 'Tram_di', 'Tram_di', 'Hà Nội', 3),
-(70, 'tram_den', 'tram_den', 'Hồ Chí Minh', 3);
+(70, 'tram_den', 'tram_den', 'Hồ Chí Minh', 3),
+(71, 'TestThemNhaXe_MaiLinh@gmail.com', 'TestThemNhaXe_MaiLinh@gmail.com', 'Vĩnh Long', 3),
+(72, 'Cà Mau', 'Cà Mau', 'Cà Mau', 3);
 
 -- --------------------------------------------------------
 
@@ -568,6 +668,38 @@ INSERT INTO `tu_ngu_nhay_cam` (`id`, `tu_khoa`, `mo_ta`, `ngay_tao`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `upgrade_requests`
+--
+
+CREATE TABLE `upgrade_requests` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `request_type` enum('Bus_owner') NOT NULL DEFAULT 'Bus_owner',
+  `amount` decimal(10,2) NOT NULL DEFAULT 500000.00,
+  `status` enum('pending','payment_pending','paid','approved','rejected','cancelled') NOT NULL DEFAULT 'pending',
+  `reason` text DEFAULT NULL,
+  `business_info` text DEFAULT NULL,
+  `admin_note` text DEFAULT NULL,
+  `approved_by` int(11) DEFAULT NULL,
+  `approved_at` timestamp NULL DEFAULT NULL,
+  `rejected_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `upgrade_requests`
+--
+
+INSERT INTO `upgrade_requests` (`id`, `user_id`, `request_type`, `amount`, `status`, `reason`, `business_info`, `admin_note`, `approved_by`, `approved_at`, `rejected_at`, `created_at`, `updated_at`) VALUES
+(1, 40, 'Bus_owner', 0.00, 'approved', 'Cần tiền rất nhiều Cần tiền rất nhiều Cần tiền rất nhiều Cần tiền rất nhiều Cần tiền rất nhiều Cần tiền rất nhiều', '{\"company_name\":\"TEST DOANH NGHIEP\",\"tax_code\":\"123456789\",\"business_address\":\"Vinh Long\",\"contact_phone\":\"0939206171\",\"contact_email\":\"ontapttnt@gmail.com\"}', 'ok', 31, '2025-10-23 00:20:44', NULL, '2025-10-23 00:14:42', '2025-10-23 00:20:44'),
+(2, 34, 'Bus_owner', 0.00, 'rejected', 'thanh loithanh loithanh loithanh loithanh loithanh loithanh loithanh loithanh loi', '{\"company_name\":\"thanh loi\",\"tax_code\":\"156412311\",\"business_address\":\"thanh loi\",\"contact_phone\":\"0966421557\",\"contact_email\":\"admin100@gmail.com\"}', 'adasdadadadsadsadsadsadadadas', NULL, NULL, '2025-10-23 00:34:05', '2025-10-23 00:27:46', '2025-10-23 00:34:05'),
+(3, 34, 'Bus_owner', 0.00, 'approved', 'OKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOKOK', '{\"company_name\":\"OKOKOKOKOKOKOK\",\"tax_code\":\"0939207164\",\"business_address\":\"OKOKOKOKOKOKOK\",\"contact_phone\":\"0966421557\",\"contact_email\":\"admin100@gmail.com\",\"ma_nha_xe\":23}', 'ok', 31, '2025-10-23 00:35:35', NULL, '2025-10-23 00:35:12', '2025-10-23 00:35:35'),
+(4, 41, 'Bus_owner', 0.00, 'approved', 'thanhdat@gmail.comthanhdat@gmail.comthanhdat@gmail.comthanhdat@gmail.comthanhdat@gmail.comthanhdat@gmail.com', '{\"company_name\":\"thanhdat@gmail.com\",\"tax_code\":\"1457821542\",\"business_address\":\"thanhdat@gmail.com\",\"contact_phone\":\"0939102311\",\"contact_email\":\"thanhdat@gmail.com\",\"ma_nha_xe\":24}', NULL, 31, '2025-10-23 00:44:36', NULL, '2025-10-23 00:44:10', '2025-10-23 00:44:36');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `users`
 --
 
@@ -594,17 +726,20 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `phone`, `address`, `date_of_birth`, `gender`, `email`, `password`, `fullname`, `role`, `ma_nha_xe`, `reset_token`, `reset_token_expires_at`, `reset_expiry`, `created_at`) VALUES
-(2, 'user2', '0902222222', NULL, NULL, NULL, 'user2@mail.com', 'pass2', 'Tran Thi BC', 'user', NULL, NULL, NULL, NULL, '2025-09-23 06:24:29'),
+(2, 'user2', '0902222222', NULL, NULL, NULL, 'user2@mail.com', '$2y$12$M/nzO55c3al3gXEKW4g2kOExILexg0vteAV.flY3nVIoee4O39may', 'Tran Thi BC', 'bus_owner', NULL, NULL, NULL, NULL, '2025-09-23 06:24:29'),
 (15, 'admin', '0915555555', NULL, NULL, NULL, 'admin@gmail.com', 'admin@gmail.com', 'Admin System', 'admin', NULL, NULL, NULL, NULL, '2025-09-23 06:24:29'),
-(20, '09390120331', '09390120331', NULL, NULL, NULL, 'vofanh1710@gmail.com', '$2y$10$Yqldr0xo1aprTsWbkNYcMOj1YQMpPeQd2njCv1tTbslMfAMs7mbDy', 'ADMIN1000', 'admin', NULL, NULL, NULL, NULL, '2025-09-30 05:57:37'),
+(20, '09390120331', '09390120331', NULL, NULL, NULL, 'vofanh1710@gmail.com', '$2y$12$NSNz1fc7iLXlBrlgDpk/WOXyLQNmdArzQlnaOpGBgO3KNQzb.94AO', 'ADMIN1000', 'user', NULL, NULL, NULL, NULL, '2025-09-30 05:57:37'),
 (31, 'ADMIN2', '1234567890', NULL, NULL, NULL, 'ADMIN2@gmail.com', '$2y$10$pH12MGthFRwmb2H3iqyHle.ebb1Le31D35qz3c5g8b.ddYEXIXH6q', 'ADMIN2', 'admin', NULL, NULL, NULL, NULL, '2025-10-04 00:05:43'),
 (32, '0939206179', '0939206179', NULL, NULL, NULL, 'huy@gmail.com', '$2y$10$xUOgvW4BAku4sU1YSO7luOSXsYKkUzicNH7C0o8BVnCIKgC7Yw5FO', 'hoang huy', 'user', NULL, NULL, NULL, NULL, '2025-10-07 00:44:51'),
-(34, 'thanhloine', '0966421557', NULL, NULL, NULL, 'admin100@gmail.com', '$2y$12$kQQbSvBpZHMOuwBKzLeBkeCa/U9r8fFgReqfd8g6qXbGJxds48Uhq', 'Lê Thành Lợi', 'user', NULL, NULL, NULL, NULL, '2025-10-15 03:08:46'),
+(34, 'thanhloine', '0966421557', NULL, NULL, NULL, 'admin100@gmail.com', '$2y$12$OTr/1/08EYaqeudM4.Rz9uazicl1keUKq.d.GJI7XulO7vAJwAm0m', 'Lê Thành Lợi', 'bus_owner', '23', NULL, NULL, NULL, '2025-10-15 03:08:46'),
 (35, 'teststaff', '0123456789', NULL, NULL, NULL, 'teststaff@test.com', '$2y$12$f4vG1TblrDoYZtLH8wBgH.2eqs3mK3pGxkCBbwW/0xdnivXBMfWiW', 'Test Staff', 'staff', NULL, NULL, NULL, NULL, '2025-10-15 11:39:47'),
 (36, 'testbusowner', '0987654322', NULL, NULL, NULL, 'testbusowner@test.com', '$2y$12$LuWoJs.nMEc.6JLj9AUcxuan0rOiD7gQ4FGkYmUJHRL91t33ACqyS', 'Test Bus Owner', 'bus_owner', '1', NULL, NULL, NULL, '2025-10-15 11:39:47'),
 (37, 'staff', '0123456789', NULL, NULL, NULL, 'staff@busbooking.com', 'staff@busbooking.com', 'Staff User', 'staff', NULL, NULL, NULL, NULL, '2025-10-15 11:41:10'),
 (38, 'busowner', '0987654321', NULL, NULL, NULL, 'busower@gmail.com', '$2y$12$JKnitiVOJGFQWDKmoNj.1ubRXXvJixfmrCaQYbdhMGluLoFCzZARi', 'Bus Owner', 'bus_owner', '3', NULL, NULL, NULL, '2025-10-15 11:41:24'),
-(39, 'nhanvien', '0939206174', NULL, NULL, NULL, 'nhnavien@gmail.com', '$2y$12$7y0ljkbIcL7lNEeJbJ3Ws.ASdC6Wn7cZbz3Ew9k3qNXsy5ff.YCyK', 'nhanvien', 'staff', NULL, NULL, NULL, NULL, '2025-10-18 01:21:22');
+(39, 'nhanvien', '0939206174', NULL, NULL, NULL, 'nhanvien@gmail.com', '$2y$12$fV9Y7EQvLOX7YXdgqIplw.9lc/4lEN9MiFK52Ca7JAFIAYPy9P/3a', 'nhanvien', 'staff', NULL, NULL, NULL, NULL, '2025-10-18 01:21:22'),
+(40, 'tienkhoa', '0939206171', NULL, NULL, NULL, 'ontapttnt@gmail.com', '$2y$12$EgNVGaqXQhNgRN89kpCJeuuWmbPqEmKFr.jzMbp0LNCeU5/9Lvj3S', 'tienkhoa', 'bus_owner', '7', NULL, NULL, NULL, '2025-10-23 07:10:02'),
+(41, 'thanhdat', '0939102311', NULL, NULL, NULL, 'thanhdat@gmail.com', '$2y$12$VSCiJMjVK5vVFU2RRowaHO3bedVa0bgKad8zj8XlBPsBaJZEo3zuy', 'thanhdat', 'bus_owner', '24', NULL, NULL, NULL, '2025-10-23 07:43:51'),
+(42, 'adadasdaasda', '01203456987', NULL, NULL, NULL, 'test@gmail.com', '$2y$12$sgXRHAH6S.Y5/Dh2Y7t/i.bFDpzPKKgN6VjSgNAoV4gAiPrcccN2K', 'asdadsadasadas', 'user', NULL, NULL, NULL, NULL, '2025-10-23 07:55:44');
 
 -- --------------------------------------------------------
 
@@ -624,7 +759,39 @@ CREATE TABLE `ve_khuyenmai` (
 
 INSERT INTO `ve_khuyenmai` (`id`, `dat_ve_id`, `ma_km`) VALUES
 (14, 47, 13),
-(15, 47, 13);
+(15, 47, 13),
+(16, 105, 10),
+(17, 106, 9),
+(18, 107, 10),
+(19, 108, 10),
+(20, 109, 10),
+(21, 110, 10),
+(22, 111, 10),
+(23, 112, 10),
+(24, 113, 10),
+(25, 114, 10),
+(26, 115, 10),
+(27, 116, 10),
+(28, 117, 10),
+(29, 118, 10),
+(30, 119, 10),
+(31, 120, 10),
+(32, 121, 10),
+(33, 122, 10),
+(34, 123, 10),
+(35, 124, 10),
+(36, 125, 10),
+(37, 126, 10),
+(38, 127, 10),
+(39, 128, 10),
+(40, 129, 10),
+(41, 130, 10),
+(42, 131, 10),
+(43, 132, 10),
+(44, 133, 10),
+(45, 134, 10),
+(46, 135, 10),
+(47, 136, 10);
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -707,12 +874,27 @@ ALTER TABLE `nha_xe`
   ADD UNIQUE KEY `uq_ma_nha_xe` (`ma_nha_xe`);
 
 --
+-- Chỉ mục cho bảng `payments`
+--
+ALTER TABLE `payments`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `payments_transaction_id_unique` (`transaction_id`),
+  ADD KEY `payments_upgrade_request_id_foreign` (`upgrade_request_id`);
+
+--
 -- Chỉ mục cho bảng `sessions`
 --
 ALTER TABLE `sessions`
   ADD PRIMARY KEY (`id`),
   ADD KEY `sessions_user_id_index` (`user_id`),
   ADD KEY `sessions_last_activity_index` (`last_activity`);
+
+--
+-- Chỉ mục cho bảng `ticket_scans`
+--
+ALTER TABLE `ticket_scans`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `ticket_scans_booking_id_scanned_at_index` (`booking_id`,`scanned_at`);
 
 --
 -- Chỉ mục cho bảng `tin_tuc`
@@ -744,6 +926,14 @@ ALTER TABLE `tuyenphobien`
 ALTER TABLE `tu_ngu_nhay_cam`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `tu_khoa` (`tu_khoa`);
+
+--
+-- Chỉ mục cho bảng `upgrade_requests`
+--
+ALTER TABLE `upgrade_requests`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `upgrade_requests_user_id_foreign` (`user_id`),
+  ADD KEY `upgrade_requests_approved_by_foreign` (`approved_by`);
 
 --
 -- Chỉ mục cho bảng `users`
@@ -783,7 +973,7 @@ ALTER TABLE `booking_sessions`
 -- AUTO_INCREMENT cho bảng `chuyen_xe`
 --
 ALTER TABLE `chuyen_xe`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT cho bảng `contact`
@@ -795,7 +985,7 @@ ALTER TABLE `contact`
 -- AUTO_INCREMENT cho bảng `dat_ve`
 --
 ALTER TABLE `dat_ve`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=104;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=137;
 
 --
 -- AUTO_INCREMENT cho bảng `doanh_thu`
@@ -813,19 +1003,31 @@ ALTER TABLE `khuyen_mai`
 -- AUTO_INCREMENT cho bảng `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `nhan_vien`
 --
 ALTER TABLE `nhan_vien`
-  MODIFY `ma_nv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `ma_nv` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `nha_xe`
 --
 ALTER TABLE `nha_xe`
-  MODIFY `ma_nha_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `ma_nha_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+
+--
+-- AUTO_INCREMENT cho bảng `payments`
+--
+ALTER TABLE `payments`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT cho bảng `ticket_scans`
+--
+ALTER TABLE `ticket_scans`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT cho bảng `tin_tuc`
@@ -837,7 +1039,7 @@ ALTER TABLE `tin_tuc`
 -- AUTO_INCREMENT cho bảng `tram_xe`
 --
 ALTER TABLE `tram_xe`
-  MODIFY `ma_tram_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=71;
+  MODIFY `ma_tram_xe` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=73;
 
 --
 -- AUTO_INCREMENT cho bảng `tuyenphobien`
@@ -852,16 +1054,22 @@ ALTER TABLE `tu_ngu_nhay_cam`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
+-- AUTO_INCREMENT cho bảng `upgrade_requests`
+--
+ALTER TABLE `upgrade_requests`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
 -- AUTO_INCREMENT cho bảng `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=43;
 
 --
 -- AUTO_INCREMENT cho bảng `ve_khuyenmai`
 --
 ALTER TABLE `ve_khuyenmai`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -911,6 +1119,12 @@ ALTER TABLE `nhan_vien`
   ADD CONSTRAINT `fk_nv_nhaxe` FOREIGN KEY (`ma_nha_xe`) REFERENCES `nha_xe` (`ma_nha_xe`) ON DELETE CASCADE;
 
 --
+-- Các ràng buộc cho bảng `payments`
+--
+ALTER TABLE `payments`
+  ADD CONSTRAINT `payments_upgrade_request_id_foreign` FOREIGN KEY (`upgrade_request_id`) REFERENCES `upgrade_requests` (`id`) ON DELETE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `tin_tuc`
 --
 ALTER TABLE `tin_tuc`
@@ -928,6 +1142,13 @@ ALTER TABLE `tram_xe`
 --
 ALTER TABLE `tuyenphobien`
   ADD CONSTRAINT `fk_tpb_chuyen` FOREIGN KEY (`ma_xe`) REFERENCES `chuyen_xe` (`id`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `upgrade_requests`
+--
+ALTER TABLE `upgrade_requests`
+  ADD CONSTRAINT `upgrade_requests_approved_by_foreign` FOREIGN KEY (`approved_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `upgrade_requests_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `ve_khuyenmai`

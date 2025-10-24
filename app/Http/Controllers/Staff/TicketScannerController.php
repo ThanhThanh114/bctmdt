@@ -81,12 +81,18 @@ class TicketScannerController extends Controller
                     'email' => $booking->user->email ?? 'N/A',
                 ],
                 'trip' => [
-                    'name' => $booking->chuyenXe->ten_xe ?? 'N/A',
+                    'trip_id' => $booking->chuyenXe->id,
+                    'trip_code' => $booking->chuyenXe->ma_xe ?? 'N/A',
+                    'name' => $booking->chuyenXe->ten_xe ?? ($booking->chuyenXe->ma_xe ?? 'Không có tên'),
+                    'driver' => $booking->chuyenXe->ten_tai_xe ?? 'N/A',
+                    'driver_phone' => $booking->chuyenXe->sdt_tai_xe ?? 'N/A',
                     'from' => $booking->chuyenXe->tramDi->ten_tram ?? $booking->chuyenXe->diem_di,
                     'to' => $booking->chuyenXe->tramDen->ten_tram ?? $booking->chuyenXe->diem_den,
                     'departure_date' => $booking->chuyenXe->ngay_di,
                     'departure_time' => $booking->chuyenXe->gio_di,
                     'arrival_time' => $booking->chuyenXe->gio_den ?? 'N/A',
+                    'vehicle_type' => $booking->chuyenXe->loai_xe ?? 'N/A',
+                    'total_seats' => $booking->chuyenXe->so_cho ?? 'N/A',
                     'price' => number_format($booking->chuyenXe->gia_ve) . 'đ',
                     'company' => $booking->chuyenXe->nhaXe->ten_nha_xe ?? 'N/A',
                 ],
@@ -168,7 +174,7 @@ class TicketScannerController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Check-in thành công! Vé đã được xác nhận.',
+                'message' => 'Check-in thành công! Khách đã lên xe.',
                 'scanned_at' => now()->format('d/m/Y H:i:s')
             ]);
 
@@ -179,5 +185,87 @@ class TicketScannerController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    // Xem danh sách hành khách theo chuyến xe
+    public function tripPassengers($tripId)
+    {
+        try {
+            $trip = \App\Models\ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
+                ->findOrFail($tripId);
+
+            // Lấy tất cả vé của chuyến này
+            $bookings = DatVe::with('user')
+                ->where('chuyen_xe_id', $tripId)
+                ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận'])
+                ->orderBy('ngay_dat', 'desc')
+                ->get();
+
+            // Kiểm tra vé nào đã check-in
+            $scannedBookingIds = DB::table('ticket_scans')
+                ->whereIn('booking_id', $bookings->pluck('id'))
+                ->pluck('booking_id')
+                ->toArray();
+
+            $passengers = $bookings->map(function($booking) use ($scannedBookingIds) {
+                return [
+                    'booking_id' => $booking->id,
+                    'ticket_code' => $booking->ma_ve,
+                    'passenger_name' => $booking->user->fullname ?? $booking->user->username,
+                    'passenger_phone' => $booking->user->phone ?? 'N/A',
+                    'seats' => $booking->so_ghe,
+                    'status' => $booking->trang_thai,
+                    'checked_in' => in_array($booking->id, $scannedBookingIds),
+                    'booking_date' => $booking->ngay_dat->format('d/m/Y H:i'),
+                ];
+            });
+
+            $stats = [
+                'total_bookings' => $bookings->count(),
+                'checked_in' => count($scannedBookingIds),
+                'not_checked_in' => $bookings->count() - count($scannedBookingIds),
+            ];
+
+            return view('AdminLTE.staff.ticket_scanner.trip_passengers', compact('trip', 'passengers', 'stats'));
+
+        } catch (\Exception $e) {
+            Log::error('Trip Passengers Error: ' . $e->getMessage());
+            return back()->with('error', 'Không tìm thấy chuyến xe!');
+        }
+    }
+
+    // Xem danh sách các chuyến xe hôm nay
+    public function todayTrips()
+    {
+        $trips = \App\Models\ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
+            ->whereDate('ngay_di', today())
+            ->orderBy('gio_di', 'asc')
+            ->paginate(10);
+
+        $tripsWithStats = $trips->getCollection()->map(function($trip) {
+            $totalBookings = DatVe::where('chuyen_xe_id', $trip->id)
+                ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận'])
+                ->count();
+
+            $checkedIn = DB::table('ticket_scans')
+                ->whereIn('booking_id', function($query) use ($trip) {
+                    $query->select('id')
+                        ->from('dat_ve')
+                        ->where('chuyen_xe_id', $trip->id);
+                })
+                ->whereDate('scanned_at', today())
+                ->count();
+
+            return [
+                'trip' => $trip,
+                'total_bookings' => $totalBookings,
+                'checked_in' => $checkedIn,
+                'not_checked_in' => $totalBookings - $checkedIn,
+            ];
+        });
+
+        $trips->setCollection($tripsWithStats);
+
+        return view('AdminLTE.staff.ticket_scanner.today_trips', ['tripsWithStats' => $trips]);
     }
 }
