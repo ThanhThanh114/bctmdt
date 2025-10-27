@@ -13,14 +13,37 @@ class TicketScannerController extends Controller
     // Trang soát vé với camera QR scanner
     public function index()
     {
-        // Thống kê soát vé hôm nay
-        $todayScanned = DB::table('ticket_scans')
-            ->whereDate('scanned_at', today())
-            ->count();
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        // Thống kê soát vé hôm nay - chỉ tính vé của nhà xe mình
+        $todayScannedQuery = DB::table('ticket_scans')
+            ->whereDate('scanned_at', today());
+        
+        if ($maNhaXe) {
+            $todayScannedQuery->whereIn('booking_id', function($query) use ($maNhaXe) {
+                $query->select('id')
+                    ->from('dat_ve')
+                    ->whereIn('chuyen_xe_id', function($q) use ($maNhaXe) {
+                        $q->select('id')
+                            ->from('chuyen_xe')
+                            ->where('ma_nha_xe', $maNhaXe);
+                    });
+            });
+        }
+        
+        $todayScanned = $todayScannedQuery->count();
 
-        $todayBookings = DatVe::whereDate('ngay_dat', today())
-            ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận'])
-            ->count();
+        $todayBookingsQuery = DatVe::whereDate('ngay_dat', today())
+            ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
+        
+        if ($maNhaXe) {
+            $todayBookingsQuery->whereHas('chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+        }
+        
+        $todayBookings = $todayBookingsQuery->count();
 
         return view('AdminLTE.staff.ticket_scanner.index', compact('todayScanned', 'todayBookings'));
     }
@@ -29,30 +52,75 @@ class TicketScannerController extends Controller
     public function verify(Request $request)
     {
         try {
-            $request->validate([
-                'qr_data' => 'required|string'
-            ]);
+            $booking = null;
+            
+            // Kiểm tra xem là tìm kiếm thủ công hay quét QR
+            if ($request->filled('ticket_code') || ($request->has('manual') && $request->manual)) {
+                // Tìm kiếm theo mã vé thủ công
+                $ticketCode = $request->input('ticket_code');
+                
+                if (!$ticketCode) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Vui lòng nhập mã vé'
+                    ], 400);
+                }
 
-            // Giải mã dữ liệu QR
-            $qrData = decrypt($request->qr_data);
+                $booking = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
+                    ->where('ma_ve', $ticketCode)
+                    ->first();
 
-            // Tìm vé
-            $booking = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
-                ->find($qrData['booking_id']);
+                if (!$booking) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy vé với mã: ' . $ticketCode
+                    ], 404);
+                }
+            } else {
+                // Quét QR code
+                $request->validate([
+                    'qr_data' => 'required|string'
+                ]);
 
-            if (!$booking) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không tìm thấy vé này trong hệ thống!'
-                ], 404);
+                // Giải mã dữ liệu QR
+                try {
+                    $qrData = decrypt($request->qr_data);
+                } catch (\Exception $e) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Mã QR không hợp lệ! Không thể giải mã.'
+                    ], 400);
+                }
+
+                // Tìm vé
+                $booking = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
+                    ->find($qrData['booking_id']);
+
+                if (!$booking) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Không tìm thấy vé này trong hệ thống!'
+                    ], 404);
+                }
+
+                // Kiểm tra mã vé khớp
+                if ($booking->ma_ve !== $qrData['ticket_code']) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Mã vé không khớp! Vé có thể đã bị giả mạo.'
+                    ], 400);
+                }
             }
 
-            // Kiểm tra mã vé khớp
-            if ($booking->ma_ve !== $qrData['ticket_code']) {
+            // Kiểm tra nhân viên có quyền soát vé này không (cùng nhà xe)
+            $user = auth()->user();
+            $maNhaXe = $user->ma_nha_xe;
+            
+            if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Mã vé không khớp! Vé có thể đã bị giả mạo.'
-                ], 400);
+                    'message' => 'Bạn không có quyền soát vé của nhà xe khác!'
+                ], 403);
             }
 
             // Kiểm tra trạng thái vé
@@ -135,13 +203,24 @@ class TicketScannerController extends Controller
             // Giải mã lại để chắc chắn
             $qrData = decrypt($request->qr_data);
 
-            $booking = DatVe::find($request->booking_id);
+            $booking = DatVe::with('chuyenXe')->find($request->booking_id);
 
             if (!$booking || !$booking->canBeScanned()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Không thể check-in vé này!'
                 ], 400);
+            }
+
+            // Kiểm tra nhân viên có quyền check-in vé này không (cùng nhà xe)
+            $user = auth()->user();
+            $maNhaXe = $user->ma_nha_xe;
+            
+            if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền check-in vé của nhà xe khác!'
+                ], 403);
             }
 
             // Kiểm tra đã soát chưa
@@ -237,10 +316,19 @@ class TicketScannerController extends Controller
     // Xem danh sách các chuyến xe hôm nay
     public function todayTrips()
     {
-        $trips = \App\Models\ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        $tripsQuery = \App\Models\ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
             ->whereDate('ngay_di', today())
-            ->orderBy('gio_di', 'asc')
-            ->paginate(10);
+            ->orderBy('gio_di', 'asc');
+        
+        // Lọc theo nhà xe của nhân viên
+        if ($maNhaXe) {
+            $tripsQuery->where('ma_nha_xe', $maNhaXe);
+        }
+        
+        $trips = $tripsQuery->paginate(10);
 
         $tripsWithStats = $trips->getCollection()->map(function($trip) {
             $totalBookings = DatVe::where('chuyen_xe_id', $trip->id)

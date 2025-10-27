@@ -18,7 +18,8 @@ class KhuyenMai extends Model
         'ma_code',
         'giam_gia',
         'ngay_bat_dau',
-        'ngay_ket_thuc'
+        'ngay_ket_thuc',
+        'ma_nha_xe'
     ];
 
     protected $casts = [
@@ -35,6 +36,11 @@ class KhuyenMai extends Model
     }
 
     // Relationships
+    public function nhaXe()
+    {
+        return $this->belongsTo(NhaXe::class, 'ma_nha_xe', 'ma_nha_xe');
+    }
+
     public function veKhuyenMai()
     {
         return $this->hasMany(VeKhuyenMai::class, 'ma_km', 'ma_km');

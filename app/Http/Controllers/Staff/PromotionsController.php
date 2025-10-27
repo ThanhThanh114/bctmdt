@@ -13,7 +13,19 @@ class PromotionsController extends Controller
      */
     public function index(Request $request)
     {
-        $query = VeKhuyenMai::with(['khuyenMai', 'datVe.user', 'datVe.chuyenXe']);
+        $user = auth()->user();
+        
+        // Lấy mã nhà xe của nhân viên
+        $maNhaXe = $user->ma_nha_xe;
+        
+        $query = VeKhuyenMai::with(['khuyenMai', 'datVe.user', 'datVe.chuyenXe.nhaXe']);
+
+        // Nếu nhân viên có mã nhà xe, chỉ hiển thị vé của nhà xe đó
+        if ($maNhaXe) {
+            $query->whereHas('datVe.chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+        }
 
         // Lọc theo mã khuyến mãi
         if ($request->filled('ma_km')) {
@@ -21,21 +33,39 @@ class PromotionsController extends Controller
         }
 
         $veKhuyenMai = $query->orderBy('id', 'desc')->paginate(15);
-        $khuyenMai = \App\Models\KhuyenMai::all();
-        $khuyenMaiList = \App\Models\KhuyenMai::active()->get();
+        
+        // Chỉ lấy khuyến mãi của nhà xe mình hoặc khuyến mãi chung (ma_nha_xe = null)
+        $khuyenMaiQuery = \App\Models\KhuyenMai::query();
+        if ($maNhaXe) {
+            $khuyenMaiQuery->where(function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe)
+                  ->orWhereNull('ma_nha_xe');
+            });
+        }
+        $khuyenMai = $khuyenMaiQuery->get();
+        $khuyenMaiList = $khuyenMaiQuery->where('ngay_bat_dau', '<=', now())
+                                        ->where('ngay_ket_thuc', '>=', now())
+                                        ->get();
 
-        // Thống kê
+        // Thống kê - chỉ tính vé của nhà xe mình
+        $statsQuery = VeKhuyenMai::query();
+        if ($maNhaXe) {
+            $statsQuery->whereHas('datVe.chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+        }
+        
         $stats = [
-            'total' => VeKhuyenMai::count(),
-            'today' => VeKhuyenMai::whereHas('datVe', function ($q) {
+            'total' => (clone $statsQuery)->count(),
+            'today' => (clone $statsQuery)->whereHas('datVe', function ($q) {
                 $q->whereDate('ngay_dat', today());
             })->count(),
-            'this_month' => VeKhuyenMai::whereHas('datVe', function ($q) {
+            'this_month' => (clone $statsQuery)->whereHas('datVe', function ($q) {
                 $q->whereMonth('ngay_dat', date('m'))->whereYear('ngay_dat', date('Y'));
             })->count(),
         ];
 
-        return view('AdminLTE.staff.promotions.index', compact('veKhuyenMai', 'khuyenMai', 'khuyenMaiList', 'stats'));
+        return view('AdminLTE.staff.promotions.index', compact('veKhuyenMai', 'khuyenMai', 'khuyenMaiList', 'stats', 'maNhaXe'));
     }
 
     /**
@@ -75,11 +105,25 @@ class PromotionsController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
         $request->validate([
             'ma_km' => 'required|exists:khuyen_mai,ma_km',
         ]);
 
         $veKhuyenMai = VeKhuyenMai::findOrFail($id);
+        
+        // Kiểm tra vé khuyến mãi có thuộc nhà xe của staff không
+        if ($maNhaXe && $veKhuyenMai->datVe && $veKhuyenMai->datVe->chuyenXe) {
+            if ($veKhuyenMai->datVe->chuyenXe->ma_nha_xe !== $maNhaXe) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền cập nhật vé khuyến mãi này'
+                ], 403);
+            }
+        }
+        
         $veKhuyenMai->update([
             'ma_km' => $request->ma_km,
         ]);

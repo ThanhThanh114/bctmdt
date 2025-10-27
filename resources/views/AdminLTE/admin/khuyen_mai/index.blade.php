@@ -83,11 +83,22 @@
                 <!-- Search Form -->
                 <form method="GET" action="{{ route('admin.khuyenmai.index') }}" class="mb-3">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <input type="text" name="search" class="form-control" placeholder="Tên hoặc mã khuyến mãi"
                                 value="{{ request('search') }}">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
+                            <select name="ma_nha_xe" class="form-control">
+                                <option value="all">-- Nhà xe --</option>
+                                <option value="null" {{ request('ma_nha_xe') == 'null' ? 'selected' : '' }}>Tất cả nhà xe</option>
+                                @foreach($nhaXes as $nhaXe)
+                                    <option value="{{ $nhaXe->ma_nha_xe }}" {{ request('ma_nha_xe') == $nhaXe->ma_nha_xe ? 'selected' : '' }}>
+                                        {{ $nhaXe->ten_nha_xe }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-2">
                             <select name="status" class="form-control">
                                 <option value="">-- Trạng thái --</option>
                                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Đang áp
@@ -98,14 +109,17 @@
                                     hạn</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <input type="number" name="giam_gia" class="form-control" placeholder="% giảm giá"
                                 value="{{ request('giam_gia') }}">
                         </div>
-                        <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary btn-block">
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search"></i> Tìm
                             </button>
+                            <a href="{{ route('admin.khuyenmai.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-redo"></i> Reset
+                            </a>
                         </div>
                     </div>
                 </form>
@@ -118,6 +132,7 @@
                                 <th>Mã KM</th>
                                 <th>Tên KM</th>
                                 <th>Mã Code</th>
+                                <th>Nhà xe</th>
                                 <th>Giảm giá</th>
                                 <th>Ngày bắt đầu</th>
                                 <th>Ngày kết thúc</th>
@@ -136,6 +151,13 @@
                                 <td><strong>{{ $item->ma_km }}</strong></td>
                                 <td>{{ $item->ten_km }}</td>
                                 <td><code>{{ $item->ma_code }}</code></td>
+                                <td>
+                                    @if($item->ma_nha_xe)
+                                        {{ $item->nhaXe->ten_nha_xe ?? 'N/A' }}
+                                    @else
+                                        <span class="badge badge-info">Tất cả nhà xe</span>
+                                    @endif
+                                </td>
                                 <td><span class="badge badge-success">{{ $item->giam_gia }}%</span></td>
                                 <td>{{ $start->format('d/m/Y') }}</td>
                                 <td>{{ $end->format('d/m/Y') }}</td>

@@ -140,6 +140,24 @@
                             </a>
                         </li>
 
+                        <!-- Bus Company Management -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.nha-xe.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.nha-xe.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-building"></i>
+                                <p>Quản lý nhà xe</p>
+                            </a>
+                        </li>
+
+                        <!-- Bus Company Account Management -->
+                        <li class="nav-item">
+                            <a href="{{ route('admin.tai-khoan-nha-xe.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.tai-khoan-nha-xe.*') ? 'active' : '' }}">
+                                <i class="nav-icon fas fa-user-tie"></i>
+                                <p>TK Nhà xe</p>
+                            </a>
+                        </li>
+
                         <!-- Revenue Management -->
                         <li class="nav-item">
                             <a href="{{ route('admin.doanhthu.index') }}"

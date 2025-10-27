@@ -14,7 +14,7 @@ class KhuyenMaiController extends Controller
      */
     public function index(Request $request)
     {
-        $query = KhuyenMai::query();
+        $query = KhuyenMai::with('nhaXe');
 
         // Tìm kiếm theo tên hoặc mã code
         if ($request->filled('search')) {
@@ -23,6 +23,16 @@ class KhuyenMaiController extends Controller
                 $q->where('ten_km', 'like', "%{$search}%")
                     ->orWhere('ma_code', 'like', "%{$search}%");
             });
+        }
+
+        // Lọc theo nhà xe
+        if ($request->filled('ma_nha_xe') && $request->ma_nha_xe !== 'all') {
+            if ($request->ma_nha_xe === 'null') {
+                // Khuyến mãi cho tất cả nhà xe
+                $query->whereNull('ma_nha_xe');
+            } else {
+                $query->where('ma_nha_xe', $request->ma_nha_xe);
+            }
         }
 
         // Lọc theo trạng thái
@@ -55,7 +65,10 @@ class KhuyenMaiController extends Controller
             'expired' => KhuyenMai::where('ngay_ket_thuc', '<', $today)->count(),
         ];
 
-        return view('AdminLTE.admin.khuyen_mai.index', compact('khuyenMai', 'stats'));
+        // Danh sách nhà xe cho filter
+        $nhaXes = \App\Models\NhaXe::orderBy('ten_nha_xe')->get();
+
+        return view('AdminLTE.admin.khuyen_mai.index', compact('khuyenMai', 'stats', 'nhaXes'));
     }
 
     /**
@@ -63,7 +76,8 @@ class KhuyenMaiController extends Controller
      */
     public function create()
     {
-        return view('AdminLTE.admin.khuyen_mai.create');
+        $nhaXes = \App\Models\NhaXe::orderBy('ten_nha_xe')->get();
+        return view('AdminLTE.admin.khuyen_mai.create', compact('nhaXes'));
     }
 
     /**
@@ -77,6 +91,7 @@ class KhuyenMaiController extends Controller
             'giam_gia' => 'required|numeric|min:0|max:100',
             'ngay_bat_dau' => 'required|date',
             'ngay_ket_thuc' => 'required|date|after:ngay_bat_dau',
+            'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ], [
             'ten_km.required' => 'Vui lòng nhập tên khuyến mãi',
             'ma_code.required' => 'Vui lòng nhập mã khuyến mãi',
@@ -87,6 +102,7 @@ class KhuyenMaiController extends Controller
             'ngay_bat_dau.required' => 'Vui lòng chọn ngày bắt đầu',
             'ngay_ket_thuc.required' => 'Vui lòng chọn ngày kết thúc',
             'ngay_ket_thuc.after' => 'Ngày kết thúc phải sau ngày bắt đầu',
+            'ma_nha_xe.exists' => 'Nhà xe không tồn tại',
         ]);
 
         KhuyenMai::create($validated);
@@ -168,7 +184,8 @@ class KhuyenMaiController extends Controller
      */
     public function edit(KhuyenMai $khuyenmai)
     {
-        return view('AdminLTE.admin.khuyen_mai.edit', compact('khuyenmai'));
+        $nhaXes = \App\Models\NhaXe::orderBy('ten_nha_xe')->get();
+        return view('AdminLTE.admin.khuyen_mai.edit', compact('khuyenmai', 'nhaXes'));
     }
 
     /**
@@ -182,6 +199,7 @@ class KhuyenMaiController extends Controller
             'giam_gia' => 'required|numeric|min:0|max:100',
             'ngay_bat_dau' => 'required|date',
             'ngay_ket_thuc' => 'required|date|after:ngay_bat_dau',
+            'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ], [
             'ten_km.required' => 'Vui lòng nhập tên khuyến mãi',
             'ma_code.required' => 'Vui lòng nhập mã khuyến mãi',
@@ -192,6 +210,7 @@ class KhuyenMaiController extends Controller
             'ngay_bat_dau.required' => 'Vui lòng chọn ngày bắt đầu',
             'ngay_ket_thuc.required' => 'Vui lòng chọn ngày kết thúc',
             'ngay_ket_thuc.after' => 'Ngày kết thúc phải sau ngày bắt đầu',
+            'ma_nha_xe.exists' => 'Nhà xe không tồn tại',
         ]);
 
         $khuyenmai->update($validated);

@@ -148,6 +148,21 @@ Route::middleware(['auth'])->group(function () {
         Route::post('binhluan/bulk-delete', [App\Http\Controllers\Admin\BinhLuanController::class, 'bulkDelete'])->name('binhluan.bulk-delete');
         Route::get('binhluan-statistics', [App\Http\Controllers\Admin\BinhLuanController::class, 'statistics'])->name('binhluan.statistics');
 
+        // Quản lý nhà xe
+        Route::get('nha-xe', [App\Http\Controllers\Admin\NhaXeController::class, 'index'])->name('nha-xe.index');
+        Route::get('nha-xe/{nhaxe}', [App\Http\Controllers\Admin\NhaXeController::class, 'show'])->name('nha-xe.show');
+        Route::post('nha-xe/{nhaxe}/lock', [App\Http\Controllers\Admin\NhaXeController::class, 'lock'])->name('nha-xe.lock');
+        Route::post('nha-xe/{nhaxe}/unlock', [App\Http\Controllers\Admin\NhaXeController::class, 'unlock'])->name('nha-xe.unlock');
+        Route::delete('nha-xe/{nhaxe}', [App\Http\Controllers\Admin\NhaXeController::class, 'destroy'])->name('nha-xe.destroy');
+
+        // Quản lý tài khoản nhà xe
+        Route::get('tai-khoan-nha-xe', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'index'])->name('tai-khoan-nha-xe.index');
+        Route::get('tai-khoan-nha-xe/{taikhoan}', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'show'])->name('tai-khoan-nha-xe.show');
+        Route::post('tai-khoan-nha-xe/{taikhoan}/lock', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'lock'])->name('tai-khoan-nha-xe.lock');
+        Route::post('tai-khoan-nha-xe/{taikhoan}/unlock', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'unlock'])->name('tai-khoan-nha-xe.unlock');
+        Route::post('tai-khoan-nha-xe/{taikhoan}/reset-password', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'resetPassword'])->name('tai-khoan-nha-xe.reset-password');
+        Route::delete('tai-khoan-nha-xe/{taikhoan}', [App\Http\Controllers\Admin\TaiKhoanNhaXeController::class, 'destroy'])->name('tai-khoan-nha-xe.destroy');
+
         // Quản lý doanh thu
         Route::get('doanhthu', [App\Http\Controllers\Admin\DoanhThuController::class, 'index'])->name('doanhthu.index');
         Route::get('doanhthu/by-trip', [App\Http\Controllers\Admin\DoanhThuController::class, 'byTrip'])->name('doanhthu.by-trip');
@@ -185,7 +200,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Staff Dashboard Routes
-    Route::prefix('staff')->name('staff.')->middleware('role:staff')->group(function () {
+    Route::prefix('staff')->name('staff.')->middleware(['role:staff', 'staff.company'])->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Staff\DashboardController::class, 'index'])->name('dashboard');
 
         // Quản lý đặt vé

@@ -18,7 +18,30 @@ class DashboardController extends Controller
         try {
             // Get the authenticated user's bus company
             $user = Auth::user();
+            
+            // Debug logging
+            Log::info('Bus Owner Dashboard Access', [
+                'user_id' => $user->id,
+                'username' => $user->username,
+                'ma_nha_xe' => $user->ma_nha_xe,
+                'role' => $user->role
+            ]);
+            
             $bus_company = $user->nhaXe;
+            
+            // Debug logging for bus company
+            if ($bus_company) {
+                Log::info('Bus Company Found', [
+                    'ma_nha_xe' => $bus_company->ma_nha_xe,
+                    'ten_nha_xe' => $bus_company->ten_nha_xe
+                ]);
+            } else {
+                Log::warning('No Bus Company Found', [
+                    'user_id' => $user->id,
+                    'username' => $user->username,
+                    'ma_nha_xe' => $user->ma_nha_xe
+                ]);
+            }
 
             // If user doesn't have a bus company assigned, show error message
             if (!$bus_company) {
@@ -217,17 +240,22 @@ class DashboardController extends Controller
                 ->withCount(['datVe as bookings_count' => function ($q) {
                     $q->where('trang_thai', '!=', 'Đã hủy');
                 }])
-                ->with(['datVe' => function ($q) {
-                    $q->where('trang_thai', '!=', 'Đã hủy')
-                        ->selectRaw('chuyen_xe_id, SUM(so_luong_ve) as total_seats_booked')
-                        ->groupBy('chuyen_xe_id');
-                }])
                 ->where('ma_nha_xe', $bus_company->ma_nha_xe)
                 ->orderBy('bookings_count', 'desc')
                 ->limit(5)
                 ->get()
                 ->map(function ($trip) {
-                    $totalSeatsBooked = $trip->dat_ve ? $trip->dat_ve->sum('total_seats_booked') : 0;
+                    // Count booked seats from so_ghe (comma-separated seat numbers)
+                    $bookedSeatsData = DatVe::where('chuyen_xe_id', $trip->id)
+                        ->where('trang_thai', '!=', 'Đã hủy')
+                        ->pluck('so_ghe');
+                    
+                    $totalSeatsBooked = $bookedSeatsData->reduce(function ($carry, $seats) {
+                        // Count commas + 1 to get number of seats (e.g., "A1,A2,A3" = 3 seats)
+                        return $carry + (empty($seats) ? 0 : substr_count($seats, ',') + 1);
+                    }, 0);
+                    
+                    $trip->total_seats_booked = $totalSeatsBooked;
                     $trip->occupancy_rate = $trip->so_cho > 0 ?
                         round(($totalSeatsBooked / $trip->so_cho) * 100, 1) : 0;
                     return $trip;
