@@ -68,9 +68,7 @@ class DashboardController extends Controller
                         });
                 });
             })
-            ->join('chuyen_xe', 'dat_ve.chuyen_xe_id', '=', 'chuyen_xe.id')
-            ->orderByRaw("CASE WHEN ngay_di > CURDATE() THEN ngay_di ELSE CONCAT(ngay_di, ' ', gio_di) END")
-            ->select('dat_ve.*')
+            ->orderByDesc('ngay_dat')
             ->limit(5)
             ->get();
 
