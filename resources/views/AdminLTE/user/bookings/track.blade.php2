@@ -9,7 +9,7 @@
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/user-trip-tracking.css') }}">
+<link rel="stylesheet" href="{{ asset('css/user-trip-tracking.css') }}">
 @endpush
 
 @section('content')
@@ -237,11 +237,8 @@
 </div>
 @endsection
 
-@push('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/user-trip-tracking.css') }}">
-@endpush
-
 @push('scripts')
 <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry&callback=initMap" async defer></script>
-<script src="{{ asset('assets/js/user-trip-tracking.js') }}"></script>
+<script src="{{ asset('js/user-trip-tracking.js') }}"></script>
 @endpush
+

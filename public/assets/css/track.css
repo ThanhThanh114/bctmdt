@@ -1,0 +1,267 @@
+.tracking-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.tracking-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.tracking-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.tracking-header p {
+    margin: 0.5rem 0 0 0;
+    opacity: 0.9;
+}
+
+.info-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.info-card-header {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.info-card-header h3 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.info-card-body {
+    padding: 2rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.status-upcoming {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+}
+
+.status-in-progress {
+    background: linear-gradient(135deg, #17a2b8 0%, #007bff 100%);
+    color: white;
+}
+
+.status-completed {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.route-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #007bff;
+    margin-bottom: 1.5rem;
+}
+
+.route-point {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.route-point:last-child {
+    margin-bottom: 0;
+}
+
+.route-point i {
+    font-size: 1.2rem;
+    margin-right: 1rem;
+    width: 20px;
+}
+
+.driver-info {
+    background: #e3f2fd;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #2196f3;
+}
+
+.trip-details {
+    background: #fff3cd;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #ffc107;
+}
+
+.company-info {
+    background: #f8d7da;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #dc3545;
+}
+
+.btn-back {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: linear-gradient(135deg, #5a6268 0%, #3e4449 100%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.btn-call {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-call:hover {
+    background: linear-gradient(135deg, #218838 0%, #1ba085 100%);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+}
+
+.map-container {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.progress-timeline {
+    position: relative;
+    padding-left: 3rem;
+}
+
+.progress-timeline::before {
+    content: '';
+    position: absolute;
+    left: 1.5rem;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: #dee2e6;
+}
+
+.progress-item {
+    position: relative;
+    margin-bottom: 2rem;
+    padding-left: 1rem;
+}
+
+.progress-item.completed .progress-marker {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-color: #28a745;
+    color: white;
+}
+
+.progress-item.current .progress-marker {
+    background: linear-gradient(135deg, #007bff 0%, #17a2b8 100%);
+    border-color: #007bff;
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.progress-item .progress-marker {
+    position: absolute;
+    left: -2.5rem;
+    top: 0;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: 3px solid #6c757d;
+    color: #6c757d;
+    font-size: 1.2rem;
+}
+
+.progress-content h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.progress-content p {
+    margin-bottom: 0.25rem;
+    color: #666;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(0, 123, 255, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(0, 123, 255, 0);
+    }
+}
+
+.actions-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .tracking-container {
+        padding: 1rem 0.5rem;
+    }
+
+    .tracking-header {
+        padding: 1.5rem;
+    }
+
+    .tracking-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .info-card-body {
+        padding: 1rem;
+    }
+
+    .btn-back, .btn-call {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}
