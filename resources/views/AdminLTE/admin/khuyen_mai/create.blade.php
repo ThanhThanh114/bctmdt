@@ -94,6 +94,24 @@
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
+
+                            <div class="form-group">
+                                <label>Áp dụng cho nhà xe</label>
+                                <select name="ma_nha_xe" class="form-control @error('ma_nha_xe') is-invalid @enderror">
+                                    <option value="">Tất cả nhà xe</option>
+                                    @foreach($nhaXes as $nhaXe)
+                                        <option value="{{ $nhaXe->ma_nha_xe }}" {{ old('ma_nha_xe') == $nhaXe->ma_nha_xe ? 'selected' : '' }}>
+                                            {{ $nhaXe->ten_nha_xe }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('ma_nha_xe')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                                <small class="form-text text-muted">
+                                    <i class="fas fa-info-circle"></i> Để trống để áp dụng cho tất cả nhà xe
+                                </small>
+                            </div>
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary btn-block">

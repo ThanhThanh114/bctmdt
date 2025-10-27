@@ -11,7 +11,17 @@ class BookingsController extends Controller
 {
     public function index(Request $request)
     {
-        $query = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        $query = DatVe::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe']);
+
+        // Nếu nhân viên có mã nhà xe, chỉ hiển thị đặt vé của nhà xe đó
+        if ($maNhaXe) {
+            $query->whereHas('chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+        }
 
         if ($request->filled('ma_ve')) {
             $query->where('ma_ve', 'like', '%' . $request->ma_ve . '%');
@@ -35,11 +45,19 @@ class BookingsController extends Controller
 
         $datVe = $query->orderBy('ngay_dat', 'desc')->paginate(15);
 
+        // Thống kê - chỉ tính vé của nhà xe mình
+        $statsQuery = DatVe::query();
+        if ($maNhaXe) {
+            $statsQuery->whereHas('chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+        }
+        
         $stats = [
-            'total' => DatVe::count(),
-            'da_dat' => DatVe::where('trang_thai', 'Đã đặt')->count(),
-            'da_thanh_toan' => DatVe::where('trang_thai', 'Đã thanh toán')->count(),
-            'da_huy' => DatVe::where('trang_thai', 'Đã hủy')->count(),
+            'total' => (clone $statsQuery)->count(),
+            'da_dat' => (clone $statsQuery)->where('trang_thai', 'Đã đặt')->count(),
+            'da_thanh_toan' => (clone $statsQuery)->where('trang_thai', 'Đã thanh toán')->count(),
+            'da_huy' => (clone $statsQuery)->where('trang_thai', 'Đã hủy')->count(),
         ];
 
         return view('AdminLTE.staff.bookings.index', compact('datVe', 'stats'));
@@ -47,12 +65,29 @@ class BookingsController extends Controller
 
     public function show(DatVe $booking)
     {
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        // Kiểm tra booking có thuộc nhà xe của staff không
+        if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
+            abort(403, 'Bạn không có quyền xem đặt vé này.');
+        }
+        
         $booking->load(['user', 'chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
         return view('AdminLTE.staff.bookings.show', compact('booking'));
     }
 
     public function updateStatus(Request $request, DatVe $booking)
     {
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        // Kiểm tra booking có thuộc nhà xe của staff không
+        if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
+            return redirect()->route('staff.bookings.index')
+                ->with('error', 'Bạn không có quyền cập nhật đặt vé này.');
+        }
+        
         $request->validate([
             'status' => 'required|string',
             'notes' => 'nullable|string|max:500'

@@ -18,7 +18,15 @@ class NhanVien extends Model
         'chuc_vu',
         'so_dien_thoai',
         'email',
+        'ngay_sinh',
+        'gioi_tinh',
+        'cccd',
+        'dia_chi',
         'ma_nha_xe'
+    ];
+
+    protected $casts = [
+        'ngay_sinh' => 'date',
     ];
 
     // Relationships

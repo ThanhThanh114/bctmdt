@@ -103,7 +103,12 @@ class NhanVienController extends Controller
             'ten_nv' => 'required|string|max:255',
             'chuc_vu' => 'required|string|max:100',
             'so_dien_thoai' => 'required|string|max:20|unique:nhan_vien,so_dien_thoai',
-            'email' => 'required|email|max:255|unique:nhan_vien,email',
+            'email' => 'required|email|max:255|unique:nhan_vien,email|unique:users,email',
+            'ngay_sinh' => 'nullable|date|before:today',
+            'gioi_tinh' => 'nullable|in:Nam,Nữ,Khác',
+            'cccd' => 'nullable|string|max:20|unique:nhan_vien,cccd',
+            'dia_chi' => 'nullable|string|max:500',
+            'password' => 'nullable|string|min:6|confirmed',
         ], [
             'ten_nv.required' => 'Vui lòng nhập tên nhân viên',
             'chuc_vu.required' => 'Vui lòng chọn chức vụ',
@@ -112,18 +117,41 @@ class NhanVienController extends Controller
             'email.required' => 'Vui lòng nhập email',
             'email.email' => 'Email không hợp lệ',
             'email.unique' => 'Email này đã được sử dụng',
+            'cccd.unique' => 'Số CCCD này đã được sử dụng',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
         ]);
 
-        NhanVien::create([
+        // Create employee record
+        $nhanVien = NhanVien::create([
             'ten_nv' => $validated['ten_nv'],
             'chuc_vu' => $validated['chuc_vu'],
             'so_dien_thoai' => $validated['so_dien_thoai'],
             'email' => $validated['email'],
+            'ngay_sinh' => $validated['ngay_sinh'] ?? null,
+            'gioi_tinh' => $validated['gioi_tinh'] ?? null,
+            'cccd' => $validated['cccd'] ?? null,
+            'dia_chi' => $validated['dia_chi'] ?? null,
             'ma_nha_xe' => $nhaXe->ma_nha_xe,
         ]);
 
+        // Nếu chức vụ là "Quản lý" và có mật khẩu, tạo tài khoản User
+        if ($validated['chuc_vu'] === 'Quản lý' && !empty($validated['password'])) {
+            \App\Models\User::create([
+                'username' => $validated['email'],
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'fullname' => $validated['ten_nv'],
+                'phone' => $validated['so_dien_thoai'],
+                'role' => 'staff',
+                'ma_nha_xe' => $nhaXe->ma_nha_xe,
+            ]);
+        }
+
         return redirect()->route('bus-owner.nhan-vien.index')
-            ->with('success', 'Thêm nhân viên thành công!');
+            ->with('success', 'Thêm nhân viên thành công!' . 
+                ($validated['chuc_vu'] === 'Quản lý' && !empty($validated['password']) ? 
+                ' Tài khoản đăng nhập đã được tạo.' : ''));
     }
 
     /**

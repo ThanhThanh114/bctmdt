@@ -52,7 +52,12 @@
             </div>
             <div class="card-body">
                 <div class="scanner-container">
-                    <div id="reader" style="width: 100%;"></div>
+                    <div id="reader" style="width: 100%; min-height: 300px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-camera fa-3x mb-3"></i>
+                            <p>Nhấn "Bật Camera" để bắt đầu quét</p>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="mt-3">
@@ -76,9 +81,25 @@
                     <small class="text-muted d-block mt-2 text-center">Chọn ảnh chứa mã QR từ thư viện hoặc chụp ảnh</small>
                 </div>
 
+                <div class="divider my-3">
+                    <span>HOẶC</span>
+                </div>
+
+                <div class="manual-input-section">
+                    <div class="input-group">
+                        <input type="text" id="manualTicketCode" class="form-control" placeholder="Nhập mã vé thủ công (nếu không quét được)">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-success" onclick="verifyManualTicket()">
+                                <i class="fas fa-search mr-1"></i>Kiểm tra
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-2 text-center">Nhập mã vé nếu không thể quét QR</small>
+                </div>
+
                 <div class="alert alert-info mt-3">
                     <i class="fas fa-info-circle mr-2"></i>
-                    Hướng camera vào mã QR hoặc upload ảnh chứa mã QR
+                    Hướng camera vào mã QR, upload ảnh, hoặc nhập mã vé
                 </div>
             </div>
         </div>
@@ -121,6 +142,8 @@
 
 <!-- HTML5 QR Code Scanner -->
 <script src="https://unpkg.com/html5-qrcode"></script>
+<!-- jsQR for image file scanning -->
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
 <script>
     let html5QrcodeScanner;
@@ -128,110 +151,165 @@
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    // Handle image upload for QR scanning
+    // Handle image upload for QR scanning - Sử dụng jsQR
     function handleImageUpload(event) {
-        console.log('handleImageUpload called');
         const file = event.target.files[0];
         if (!file) {
-            console.log('No file selected');
             return;
         }
 
-        console.log('File selected:', file.name, file.type, file.size);
+        // Validate file type
+        if (!file.type.match('image.*')) {
+            Swal.fire({
+                icon: 'error',
+                title: 'File không hợp lệ',
+                text: 'Vui lòng chọn file ảnh (JPG, PNG, etc.)',
+                confirmButtonColor: '#007bff'
+            });
+            event.target.value = '';
+            return;
+        }
 
-        // Show loading state
-        const uploadBtn = document.querySelector('.btn-upload');
-        const originalText = uploadBtn.innerHTML;
-        uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-        uploadBtn.disabled = true;
+        // Show loading
+        Swal.fire({
+            title: 'Đang xử lý...',
+            html: 'Đang đọc mã QR từ ảnh',
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
-        // Stop camera scanner if running
+        // Stop camera if running
         if (html5QrcodeScanner) {
-            console.log('Stopping camera scanner');
             stopScanner();
         }
 
-        // Create a hidden div for scanning
-        let tempDiv = document.getElementById('temp-qr-reader');
-        if (!tempDiv) {
-            console.log('Creating temp div for QR scanning');
-            tempDiv = document.createElement('div');
-            tempDiv.id = 'temp-qr-reader';
-            tempDiv.style.display = 'none';
-            document.body.appendChild(tempDiv);
-        }
-
-        // Create Html5Qrcode instance for file scanning
-        console.log('Creating Html5Qrcode instance');
-        const html5QrCode = new Html5Qrcode("temp-qr-reader");
+        // Read file as image using FileReader
+        const reader = new FileReader();
         
-        console.log('Starting scanFile...');
-        html5QrCode.scanFile(file, true)
-            .then(decodedText => {
-                console.log('✅ QR Code decoded from image:', decodedText);
-                
-                // Reset button immediately
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-                
-                // Clear file input
+        reader.onload = function(e) {
+            const img = new Image();
+            
+            img.onload = function() {
+                try {
+                    // Create canvas to draw image
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // Get image data
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    // Scan for QR code using jsQR
+                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "dontInvert",
+                    });
+                    
+                    // Clear file input
+                    event.target.value = '';
+                    
+                    if (code && code.data) {
+                        // QR code found!
+                        Swal.close();
+                        verifyTicket(code.data);
+                    } else {
+                        // No QR code found
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Không thể quét mã QR',
+                            html: '<strong>Ảnh không chứa mã QR hợp lệ</strong><br><br>' +
+                                  'Vui lòng thử:<br>' +
+                                  '• Chụp ảnh QR rõ hơn<br>' +
+                                  '• Đảm bảo mã QR nằm trong khung hình<br>' +
+                                  '• Sử dụng camera để quét trực tiếp<br>' +
+                                  '• Hoặc nhập mã vé thủ công',
+                            confirmButtonText: 'Đóng',
+                            confirmButtonColor: '#007bff'
+                        });
+                    }
+                } catch (error) {
+                    event.target.value = '';
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Lỗi xử lý ảnh',
+                        text: 'Không thể xử lý file ảnh này: ' + error.message,
+                        confirmButtonColor: '#007bff'
+                    });
+                }
+            };
+            
+            img.onerror = function() {
                 event.target.value = '';
-                
-                // Clear temp scanner
-                html5QrCode.clear().catch(e => console.log('Clear error:', e));
-                
-                // Verify ticket
-                console.log('Calling verifyTicket...');
-                verifyTicket(decodedText);
-            })
-            .catch(err => {
-                console.error('❌ Error scanning image:', err);
-                
-                // Reset button
-                uploadBtn.innerHTML = originalText;
-                uploadBtn.disabled = false;
-                
-                // Clear file input
-                event.target.value = '';
-                
-                // Clear temp scanner
-                html5QrCode.clear().catch(e => console.log('Clear error:', e));
-                
                 Swal.fire({
                     icon: 'error',
-                    title: 'Lỗi quét mã QR',
-                    html: 'Không thể đọc mã QR từ ảnh.<br><br>' +
-                          '<strong>Nguyên nhân có thể:</strong><br>' +
-                          '• Ảnh không chứa mã QR<br>' +
-                          '• Mã QR bị mờ hoặc không rõ<br>' +
-                          '• Định dạng ảnh không được hỗ trợ<br><br>' +
-                          'Vui lòng thử:<br>' +
-                          '• Chụp ảnh rõ hơn<br>' +
-                          '• Sử dụng camera để quét trực tiếp',
-                    confirmButtonColor: '#6f42c1'
+                    title: 'Lỗi',
+                    text: 'Không thể tải ảnh. Vui lòng thử file khác.',
+                    confirmButtonColor: '#007bff'
                 });
+            };
+            
+            img.src = e.target.result;
+        };
+        
+        reader.onerror = function() {
+            event.target.value = '';
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi',
+                text: 'Không thể đọc file. Vui lòng thử lại.',
+                confirmButtonColor: '#007bff'
             });
+        };
+        
+        // Read the file
+        reader.readAsDataURL(file);
     }
 
     function startScanner() {
         document.getElementById('startScanBtn').classList.add('d-none');
         document.getElementById('stopScanBtn').classList.remove('d-none');
 
-        html5QrcodeScanner = new Html5QrcodeScanner(
-            "reader", 
-            { 
-                fps: 10, 
-                qrbox: { width: 250, height: 250 },
-                aspectRatio: 1.0
-            }
-        );
+        try {
+            html5QrcodeScanner = new Html5QrcodeScanner(
+                "reader", 
+                { 
+                    fps: 10, 
+                    qrbox: { width: 250, height: 250 },
+                    aspectRatio: 1.0,
+                    rememberLastUsedCamera: true,
+                    showTorchButtonIfSupported: true
+                },
+                /* verbose= */ false
+            );
 
-        html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+            html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+        } catch (error) {
+            console.error('Error starting scanner:', error);
+            document.getElementById('startScanBtn').classList.remove('d-none');
+            document.getElementById('stopScanBtn').classList.add('d-none');
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Lỗi khởi động camera',
+                text: 'Không thể khởi động camera. Vui lòng kiểm tra quyền truy cập camera hoặc sử dụng chức năng Upload ảnh.',
+                confirmButtonColor: '#007bff'
+            });
+        }
     }
 
     function stopScanner() {
         if (html5QrcodeScanner) {
-            html5QrcodeScanner.clear();
+            try {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            } catch (error) {
+                console.error('Error stopping scanner:', error);
+            }
         }
         document.getElementById('startScanBtn').classList.remove('d-none');
         document.getElementById('stopScanBtn').classList.add('d-none');
@@ -283,6 +361,48 @@
         })
         .catch(error => {
             console.error('Fetch error:', error);
+            showError('Lỗi kết nối: ' + error.message);
+        });
+    }
+
+    function verifyManualTicket() {
+        const ticketCode = document.getElementById('manualTicketCode').value.trim();
+        
+        if (!ticketCode) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Thiếu thông tin',
+                text: 'Vui lòng nhập mã vé',
+                confirmButtonColor: '#007bff'
+            });
+            return;
+        }
+
+        // Show loading
+        showLoading();
+
+        // Search by ticket code
+        fetch('{{ route("staff.ticket-scanner.verify") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({ 
+                ticket_code: ticketCode,
+                manual: true
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayTicketInfo(data.ticket, null);
+                document.getElementById('manualTicketCode').value = '';
+            } else {
+                showError(data.message || 'Không tìm thấy vé với mã này');
+            }
+        })
+        .catch(error => {
             showError('Lỗi kết nối: ' + error.message);
         });
     }
@@ -530,10 +650,9 @@
         return statusMap[status] || 'secondary';
     }
 
-    // Tự động bật camera khi load trang
-    window.addEventListener('load', function() {
-        startScanner();
-    });
+    // Không tự động bật camera - để người dùng tự bật khi cần
+    // Điều này tránh loading không cần thiết và tiết kiệm tài nguyên
+
 </script>
 
 <style>
@@ -551,6 +670,56 @@
 
     .table th {
         background-color: #f8f9fa;
+    }
+
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .divider span {
+        padding: 0 10px;
+        color: #6c757d;
+        font-weight: bold;
+        font-size: 12px;
+    }
+
+    .manual-input-section {
+        margin-top: 15px;
+    }
+
+    #manualTicketCode {
+        height: 45px;
+        font-size: 16px;
+    }
+
+    .manual-input-section .btn {
+        height: 45px;
+    }
+
+    /* Ẩn loading spinner của html5-qrcode khi đang xử lý file */
+    #temp-qr-reader {
+        display: none !important;
+    }
+
+    /* Ẩn tất cả loading indicator không mong muốn */
+    #reader__dashboard_section_csr,
+    #reader__scan_region__dashboard {
+        display: none !important;
+    }
+
+    /* Chỉ hiện loading khi đang scan camera, không phải upload file */
+    .scanner-container.scanning #reader__dashboard_section_csr {
+        display: block !important;
     }
 </style>
 @endsection

@@ -17,7 +17,15 @@ class NhaXe extends Model
         'ten_nha_xe',
         'dia_chi',
         'so_dien_thoai',
-        'email'
+        'email',
+        'trang_thai',
+        'ly_do_khoa',
+        'ngay_khoa',
+        'admin_khoa_id'
+    ];
+
+    protected $casts = [
+        'ngay_khoa' => 'datetime',
     ];
 
     // Relationships

@@ -27,7 +27,13 @@ class User extends Authenticatable
         'reset_token',
         'reset_token_expires_at',
         'role',
-        'ma_nha_xe'
+        'ma_nha_xe',
+        'is_active',
+        'locked_reason',
+        'locked_at',
+        'locked_by',
+        'locked_original_role',
+        'locked_original_ma_nha_xe',
     ];
 
     // Disable timestamps because they don't exist in database
@@ -44,8 +50,10 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'date_of_birth' => 'date',
         'is_verified' => 'boolean',
+        'is_active' => 'boolean',
         'otp_expires_at' => 'datetime',
         'reset_token_expires_at' => 'datetime',
+        'locked_at' => 'datetime',
         'created_at' => 'datetime',
     ];
 

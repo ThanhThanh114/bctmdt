@@ -14,47 +14,65 @@ class DashboardController extends Controller
 
     public function index()
     {
+        $user = auth()->user();
+        $maNhaXe = $user->ma_nha_xe;
+        
+        // Build base query for filtering by bus company
+        $bookingsQuery = DatVe::query();
+        $tripsQuery = ChuyenXe::query();
+        
+        if ($maNhaXe) {
+            // Filter bookings by bus company
+            $bookingsQuery->whereHas('chuyenXe', function($q) use ($maNhaXe) {
+                $q->where('ma_nha_xe', $maNhaXe);
+            });
+            
+            // Filter trips by bus company
+            $tripsQuery->where('ma_nha_xe', $maNhaXe);
+        }
+        
         // Staff-specific statistics
         $stats = [
-            'today_bookings' => DatVe::whereDate('ngay_dat', date('Y-m-d'))->count(),
-            'pending_bookings' => DatVe::whereStatus('pending')->count(),
-            'confirmed_bookings' => DatVe::whereStatus('confirmed')->count(),
-            'cancelled_bookings' => DatVe::whereStatus('cancelled')->count(),
-            'today_trips' => ChuyenXe::where('ngay_di', date('Y-m-d'))->count(),
+            'today_bookings' => (clone $bookingsQuery)->whereDate('ngay_dat', date('Y-m-d'))->count(),
+            'pending_bookings' => (clone $bookingsQuery)->whereStatus('pending')->count(),
+            'confirmed_bookings' => (clone $bookingsQuery)->whereStatus('confirmed')->count(),
+            'cancelled_bookings' => (clone $bookingsQuery)->whereStatus('cancelled')->count(),
+            'today_trips' => (clone $tripsQuery)->where('ngay_di', date('Y-m-d'))->count(),
             'total_customers' => User::where('role', 'User')->count(),
-            'monthly_bookings' => DatVe::whereMonth('ngay_dat', date('m'))
+            'monthly_bookings' => (clone $bookingsQuery)->whereMonth('ngay_dat', date('m'))
                 ->whereYear('ngay_dat', date('Y'))
                 ->count(),
         ];
 
         // Recent bookings for staff to manage
-        $recent_bookings = DatVe::with(['user', 'chuyenXe'])
+        $recent_bookings = (clone $bookingsQuery)->with(['user', 'chuyenXe'])
             ->orderBy('ngay_dat', 'desc')
             ->limit(15)
             ->get();
 
         // Today's trips
-        $today_trips = ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
+        $today_trips = (clone $tripsQuery)->with(['nhaXe', 'tramDi', 'tramDen'])
             ->where('ngay_di', date('Y-m-d'))
             ->orderBy('gio_di')
             ->get();
 
         // Pending bookings that need attention
-        $pending_bookings = DatVe::with(['user', 'chuyenXe'])
+        $pending_bookings = (clone $bookingsQuery)->with(['user', 'chuyenXe'])
             ->whereStatus('pending')
             ->orderBy('ngay_dat', 'desc')
             ->limit(10)
             ->get();
 
         // Monthly booking trend
-        $monthly_trend = DatVe::select(
+        $trendQuery = (clone $bookingsQuery)->select(
             DB::raw('DATE(ngay_dat) as date'),
             DB::raw('COUNT(*) as count')
         )
             ->where('ngay_dat', '>=', now()->subDays(30))
             ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('count', 'date');
+            ->orderBy('date');
+        
+        $monthly_trend = $trendQuery->pluck('count', 'date');
 
         return view('AdminLTE.staff.dashboard', compact(
             'stats',

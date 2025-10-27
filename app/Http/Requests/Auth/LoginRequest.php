@@ -52,6 +52,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Nếu tài khoản đã bị khóa (is_active = 0) thì chặn không cho đăng nhập
+        if (isset($user->is_active) && !$user->is_active) {
+            // Tăng rate limiter để tránh thử brute-force liên tiếp
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
 
         return $user;
