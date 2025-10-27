@@ -76,11 +76,23 @@
                     <tbody>
                         @forelse($upcoming_trips as $booking)
                         <tr>
-                            <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</td>
-                            <td>{{ $booking->chuyenXe->route_name }}</td>
-                            <td>{{ $booking->chuyenXe->nhaXe->name ?? 'N/A' }}</td>
-                            <td>{{ $booking->seat_number }}</td>
-                            <td>{{ number_format($booking->total_price) }}đ</td>
+                            <td>
+                                @if($booking->chuyenXe)
+                                    {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>
+                                @if($booking->chuyenXe && $booking->chuyenXe->tramDi && $booking->chuyenXe->tramDen)
+                                    {{ $booking->chuyenXe->tramDi->ten_tram }} - {{ $booking->chuyenXe->tramDen->ten_tram }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $booking->chuyenXe && $booking->chuyenXe->nhaXe ? $booking->chuyenXe->nhaXe->ten_nha_xe : 'N/A' }}</td>
+                            <td>{{ $booking->so_ghe ?? 'N/A' }}</td>
+                            <td>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</td>
                             <td>
                                 @if($booking->status == 'confirmed')
                                     <span class="badge badge-success">Đã xác nhận</span>
@@ -122,9 +134,21 @@
                         @forelse($recent_bookings as $booking)
                         <tr>
                             <td>{{ $booking->id }}</td>
-                            <td>{{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}</td>
-                            <td>{{ $booking->chuyenXe->route_name }}</td>
-                            <td>{{ $booking->seat_number }}</td>
+                            <td>
+                                @if($booking->chuyenXe)
+                                    {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} {{ \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>
+                                @if($booking->chuyenXe && $booking->chuyenXe->tramDi && $booking->chuyenXe->tramDen)
+                                    {{ $booking->chuyenXe->tramDi->ten_tram }} - {{ $booking->chuyenXe->tramDen->ten_tram }}
+                                @else
+                                    N/A
+                                @endif
+                            </td>
+                            <td>{{ $booking->so_ghe ?? 'N/A' }}</td>
                             <td>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</td>
                             <td>
                                 @if($booking->status == 'confirmed')
