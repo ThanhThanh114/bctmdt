@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="{{ asset('assets/css/BookingHistory.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/track.css') }}">
 </head>
@@ -251,11 +252,161 @@
         </div>
     </div>
 
-    <!-- Google Maps Script -->
-    @if($mapStations->count() >= 2)
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&libraries=geometry&callback=initMap" async defer></script>
-    <script src="{{ asset('assets/js/user-trip-tracking.js') }}"></script>
-    @endif
+    <!-- OpenStreetMap with Leaflet and OSRM Routing -->
+@if($mapStations->count() >= 2)
+<script>
+    // Prepare station data with proper type assignment for marker colors
+    // First station = departure (green), last station = arrival (red), others = intermediate (yellow)
+    window.mapStations = {!! json_encode(
+        $mapStations->map(function($station, $index) use ($mapStations) {
+            $type = 'intermediate';
+            if ($index === 0) {
+                $type = 'departure';
+            } elseif ($index === $mapStations->count() - 1) {
+                $type = 'arrival';
+            }
+
+            // Ensure coordinates are properly converted to float
+            $lat = $station->latitude ? floatval($station->latitude) : null;
+            $lng = $station->longitude ? floatval($station->longitude) : null;
+
+            return [
+                'name' => $station->ten_tram ?? 'Không rõ',
+                'lat' => $lat,
+                'lng' => $lng,
+                'address' => $station->dia_chi ?? '',
+                'province' => $station->tinh_thanh ?? '',
+                'type' => $type
+            ];
+        })->filter(function($station) {
+            // Filter stations that have valid numeric coordinates
+            return is_numeric($station['lat']) && is_numeric($station['lng']) &&
+                   $station['lat'] >= -90 && $station['lat'] <= 90 &&
+                   $station['lng'] >= -180 && $station['lng'] <= 180;
+        })->values()->all()
+    ) !!};
+</script>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // Initialize map when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get station data from backend
+        const mapStations = window.mapStations || [];
+        console.log('Map stations data:', mapStations);
+
+        if (mapStations.length < 2) {
+            console.warn('Not enough stations with coordinates');
+            return;
+        }
+
+        // Filter valid stations with coordinates
+        const validStations = mapStations.filter(station => {
+            const lat = parseFloat(station.lat);
+            const lng = parseFloat(station.lng);
+            const isValid = !isNaN(lat) && !isNaN(lng) && lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180;
+            if (!isValid) {
+                console.warn('Invalid coordinates for station:', station);
+            }
+            return isValid;
+        });
+
+        console.log('Valid stations:', validStations);
+
+        if (validStations.length < 2) {
+            console.error('Not enough valid coordinates for map');
+            return;
+        }
+
+        // Initialize map centered on first station
+        const firstStation = validStations[0];
+        const map = L.map('map').setView([parseFloat(firstStation.lat), parseFloat(firstStation.lng)], 12);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Create markers for each station with color coding
+        const markers = [];
+        validStations.forEach(function(station, index) {
+            // Get marker icon based on station type
+            const icon = getMarkerIcon(station.type);
+            const marker = L.marker([parseFloat(station.lat), parseFloat(station.lng)], { icon: icon }).addTo(map);
+
+            // Create detailed popup content
+            let popupContent = `<div style="font-family: Poppins, sans-serif; max-width: 200px;">`;
+            popupContent += `<h6 style="color: #007bff; margin-bottom: 8px;"><strong>${station.name}</strong></h6>`;
+            if (station.address) popupContent += `<p style="margin: 4px 0;"><strong>Địa chỉ:</strong> ${station.address}</p>`;
+            if (station.province) popupContent += `<p style="margin: 4px 0;"><strong>Tỉnh:</strong> ${station.province}</p>`;
+            popupContent += `<p style="margin: 4px 0;"><strong>Loại:</strong> ${getStationTypeText(station.type)}</p>`;
+            popupContent += `</div>`;
+
+            marker.bindPopup(popupContent);
+            markers.push(marker);
+        });
+
+        // Draw route line connecting all stations
+        const routeCoords = validStations.map(station => [parseFloat(station.lat), parseFloat(station.lng)]);
+        console.log('Route coordinates:', routeCoords);
+
+        const polyline = L.polyline(routeCoords, {
+            color: '#007bff',
+            weight: 4,
+            opacity: 0.8
+        }).addTo(map);
+
+        // Fit map to show entire route with padding
+        try {
+            map.fitBounds(polyline.getBounds(), { padding: [20, 20] });
+            console.log('Map bounds fitted successfully');
+        } catch (error) {
+            console.error('Error fitting bounds:', error);
+            // Fallback: fit to markers
+            const markerGroup = L.featureGroup(markers);
+            map.fitBounds(markerGroup.getBounds(), { padding: [20, 20] });
+        }
+
+        console.log('Map initialized successfully with', markers.length, 'markers and route');
+    });
+
+    // Function to get marker icon based on station type
+    function getMarkerIcon(type) {
+        let iconUrl;
+        switch(type) {
+            case 'departure':
+                iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png';
+                break;
+            case 'arrival':
+                iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png';
+                break;
+            default:
+                iconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-yellow.png';
+                break;
+        }
+        return L.icon({
+            iconUrl: iconUrl,
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+    }
+
+    // Function to get station type text
+    function getStationTypeText(type) {
+        switch(type) {
+            case 'departure':
+                return 'Điểm khởi hành';
+            case 'arrival':
+                return 'Điểm đến';
+            default:
+                return 'Trạm trung chuyển';
+        }
+    }
+</script>
+@endif
 </body>
 
 </html>

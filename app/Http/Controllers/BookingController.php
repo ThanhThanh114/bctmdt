@@ -525,8 +525,17 @@ class BookingController extends Controller
         }
         $mapStations = $mapStations->merge([$booking->chuyenXe->tramDen]);
 
-        // Filter stations with coordinates for the map
-        $mapStations = $mapStations->filter(function($station) {
+        // Set station types and filter stations with coordinates for the map
+        $mapStations = $mapStations->map(function($station, $index) use ($intermediateStops) {
+            if ($index === 0) {
+                $station->type = 'departure';
+            } elseif ($index === count($intermediateStops) + 1) {
+                $station->type = 'arrival';
+            } else {
+                $station->type = 'intermediate';
+            }
+            return $station;
+        })->filter(function($station) {
             return $station->latitude && $station->longitude;
         });
 
