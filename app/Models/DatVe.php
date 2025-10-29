@@ -22,6 +22,7 @@ class DatVe extends Model
         'ten_khach_hang',
         'email_khach_hang',
         'sdt_khach_hang',
+        'total_price',
         'ngay_dat'
     ];
 

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class BookingController extends Controller
 {
@@ -115,6 +117,193 @@ class BookingController extends Controller
         // Lấy chuyến đầu tiên làm chuyến mặc định để hiển thị
         $trip = $trips->first();
         return view('booking.booking', compact('trip', 'cities', 'start', 'end', 'date', 'trips'));
+    }
+
+    public function track(
+        $maVe,
+        Request $request
+    )
+    {
+        // Try to find the booking in multiple ways to support both
+        // authenticated users and public lookups by booking code.
+        // Public lookups may optionally include `phone` or `email` query params
+        // to verify ownership. If none provided we fallback to a direct lookup
+        // by `ma_ve` so users can open the tracking link directly.
+
+        // Normalize booking code: trim and remove internal whitespace to be tolerant
+        $maVe = trim($maVe);
+        $maVeNoSpace = preg_replace('/\s+/', '', $maVe);
+
+        // Log the incoming lookup for diagnostics
+        Log::info('BookingController::track lookup', [
+            'maVe' => $maVe,
+            'maVeNoSpace' => $maVeNoSpace,
+            'auth' => Auth::check() ? Auth::id() : null,
+            'query' => $request->query(),
+        ]);
+
+        // Use a normalized comparison (remove spaces from column) to tolerate accidental spaces
+        $bookingQuery = DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->whereRaw('REPLACE(ma_ve, " ", "") = ?', [$maVeNoSpace]);
+
+        // 1) If authenticated, prefer bookings belonging to the current user
+        if (Auth::check()) {
+            $user = Auth::user();
+            $booking = (clone $bookingQuery)->where('user_id', $user->id)->first();
+            if ($booking) {
+                // found booking for authenticated user
+            }
+        }
+
+        // 2) If not found yet, allow public lookup by phone/email if provided
+        if (empty($booking)) {
+            $phone = $request->query('phone');
+            $email = $request->query('email');
+
+            if ($phone || $email) {
+                $booking = (clone $bookingQuery)
+                    ->where(function ($q) use ($phone, $email) {
+                        if ($phone) {
+                            $q->orWhere('sdt_khach_hang', $phone);
+                        }
+                        if ($email) {
+                            $q->orWhere('email_khach_hang', $email);
+                        }
+                    })->first();
+            }
+        }
+
+        // 3) Final fallback: try to find by ma_ve only (useful for direct links).
+        // Note: this will return the booking even if the user is not authenticated.
+        if (empty($booking)) {
+            $booking = $bookingQuery->first();
+        }
+
+        if (!$booking) {
+            // Prepare a helpful not-found page. For security, we don't auto-create
+            // production records here. The view offers phone/email verification and
+            // shows similar booking codes to help the user find their booking.
+            $maVeDisplay = $maVeNoSpace;
+
+            // Find similar codes (same prefix or date) to suggest to the user
+            $prefix = substr($maVeNoSpace, 0, 12);
+            $similar = DatVe::where('ma_ve', 'like', $prefix . '%')
+                ->limit(8)
+                ->pluck('ma_ve')
+                ->toArray();
+
+            return response()->view('booking.not-found', [
+                'maVe' => $maVeDisplay,
+                'similarCodes' => $similar,
+            ], 404);
+        }
+
+        // Check if booking is confirmed (only confirmed bookings can be tracked)
+        if (!str_contains($booking->trang_thai, 'thanh toán')) {
+            return redirect()->route('booking.history')->with('error', 'Chỉ có thể theo dõi các vé đã được thanh toán.');
+        }
+
+        // Get intermediate stops if any — always keep as a Collection
+        $intermediateStops = collect([]);
+        if (!empty($booking->chuyenXe->tram_trung_gian)) {
+            $stopIds = explode(',', $booking->chuyenXe->tram_trung_gian);
+            $intermediateStops = \App\Models\TramXe::whereIn('ma_tram_xe', $stopIds)->get();
+        }
+
+        // Calculate trip status
+        try {
+            // Clean and format the time data
+            $gio_di = trim($booking->chuyenXe->gio_di);
+            $ngay_di = trim($booking->chuyenXe->ngay_di);
+
+            // Ensure time format is H:i:s
+            if (strlen($gio_di) === 5) {
+                $gio_di .= ':00'; // Add seconds if missing
+            }
+
+            $departure_datetime = \Carbon\Carbon::createFromFormat('Y-m-d H:i:s', $ngay_di . ' ' . $gio_di);
+        } catch (\Exception $e) {
+            // If date parsing fails, assume upcoming
+            $departure_datetime = now()->addHour();
+        }
+
+        $now = now();
+        $tripStatus = 'upcoming';
+
+        if ($departure_datetime <= $now) {
+            $tripStatus = 'in_progress';
+        }
+
+        // Check if trip is completed (1 hour after departure)
+        $completion_time = clone $departure_datetime;
+        $completion_time->addHours(1);
+
+        if ($completion_time <= $now) {
+            $tripStatus = 'completed';
+        }
+
+        // Get all stations for the map (departure, intermediate, arrival)
+        $mapStations = collect([$booking->chuyenXe->tramDi]);
+        if ($intermediateStops->count() > 0) {
+            $mapStations = $mapStations->merge($intermediateStops);
+        }
+        $mapStations = $mapStations->merge([$booking->chuyenXe->tramDen]);
+
+        // Set station types and filter stations with coordinates for the map
+        $mapStations = $mapStations->map(function($station, $index) use ($intermediateStops) {
+            if ($index === 0) {
+                $station->type = 'departure';
+            } elseif ($index === count($intermediateStops) + 1) {
+                $station->type = 'arrival';
+            } else {
+                $station->type = 'intermediate';
+            }
+            return $station;
+        })->filter(function($station) {
+            return $station->latitude && $station->longitude;
+        });
+
+        return view('booking.track', compact(
+            'booking',
+            'intermediateStops',
+            'tripStatus',
+            'mapStations'
+        ));
+    }
+
+    /**
+     * Verify ownership of a booking by ma_ve + phone/email and redirect to track page.
+     */
+    public function verifyTrack(Request $request)
+    {
+        $request->validate([
+            'ma_ve' => 'required|string',
+            'phone' => 'nullable|string',
+            'email' => 'nullable|email',
+        ]);
+
+        $maVe = trim($request->input('ma_ve'));
+        $maVeNoSpace = preg_replace('/\s+/', '', $maVe);
+
+        $query = DatVe::whereRaw("REPLACE(ma_ve, ' ', '') = ?", [$maVeNoSpace]);
+
+        $phone = $request->input('phone');
+        $email = $request->input('email');
+
+        if ($phone || $email) {
+            $query->where(function ($q) use ($phone, $email) {
+                if ($phone) $q->orWhere('sdt_khach_hang', $phone);
+                if ($email) $q->orWhere('email_khach_hang', $email);
+            });
+        }
+
+        $booking = $query->first();
+
+        if (! $booking) {
+            return back()->withErrors(['not_found' => 'Không tìm thấy vé với thông tin cung cấp.']);
+        }
+
+        return redirect()->route('booking.track', $booking->ma_ve);
     }
 
     public function show($id)
@@ -440,7 +629,7 @@ class BookingController extends Controller
         $perPage = 10;
         $currentPage = request()->get('page', 1);
         $offset = ($currentPage - 1) * $perPage;
-        
+
         $paginatedBookings = new \Illuminate\Pagination\LengthAwarePaginator(
             $bookings->slice($offset, $perPage)->values(),
             $bookings->count(),

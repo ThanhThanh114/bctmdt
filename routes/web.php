@@ -104,7 +104,26 @@ Route::put('/password', [AuthController::class, 'updatePassword'])->name('passwo
 
 // Booking History routes
 Route::get('/booking-history', [BookingController::class, 'history'])->name('booking.history');
+// Track a booking by booking code (ma_ve)
+Route::get('/booking-history/track/{maVe}', [BookingController::class, 'track'])->name('booking.track');
+Route::post('/booking-history/track/verify', [BookingController::class, 'verifyTrack'])->name('booking.track.verify');
 Route::get('/booking-qrcode/{id}', [BookingController::class, 'showQRCode'])->name('booking.qrcode');
+
+// Local debug route: return booking JSON by ma_ve (normalized). Only enabled when APP_DEBUG=true or in local env.
+if (app()->environment('local') || config('app.debug')) {
+    Route::get('/debug/booking-track/{maVe}', function ($maVe) {
+        $maVeNorm = preg_replace('/\s+/', '', trim($maVe));
+        $booking = \App\Models\DatVe::with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->whereRaw("REPLACE(ma_ve, ' ', '') = ?", [$maVeNorm])
+            ->first();
+
+        if (! $booking) {
+            return response()->json(['error' => 'not_found'], 404);
+        }
+
+        return response()->json($booking);
+    });
+}
 
 //Page controllers
 Route::get('/about', [PageController::class, 'index'])->name('about.about');
@@ -118,7 +137,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Quản lý người dùng
         Route::resource('users', App\Http\Controllers\Admin\UsersController::class);
-        
+
         // Quản lý yêu cầu nâng cấp
         Route::get('upgrade-requests', [App\Http\Controllers\Admin\UsersController::class, 'upgradeRequests'])->name('users.upgrade-requests');
         Route::get('upgrade-requests/{upgradeRequest}', [App\Http\Controllers\Admin\UsersController::class, 'showUpgradeRequest'])->name('users.upgrade-request-detail');
@@ -256,14 +275,14 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('bookings', App\Http\Controllers\User\BookingsController::class)->except(['edit', 'update']);
         Route::patch('bookings/{booking}/cancel', [App\Http\Controllers\User\BookingsController::class, 'cancel'])->name('bookings.cancel');
         Route::get('bookings/{booking}/qrcode', [App\Http\Controllers\User\BookingsController::class, 'qrcode'])->name('bookings.qrcode');
-        
+
         // Bình luận routes - User có thể xem và viết bình luận
         Route::get('/binh-luan', [App\Http\Controllers\User\BinhLuanController::class, 'index'])->name('binh-luan.index');
         Route::post('/binh-luan', [App\Http\Controllers\User\BinhLuanController::class, 'store'])->name('binh-luan.store');
         Route::post('/binh-luan/{binhLuan}/reply', [App\Http\Controllers\User\BinhLuanController::class, 'reply'])->name('binh-luan.reply');
         Route::put('/binh-luan/{binhLuan}', [App\Http\Controllers\User\BinhLuanController::class, 'update'])->name('binh-luan.update');
         Route::delete('/binh-luan/{binhLuan}', [App\Http\Controllers\User\BinhLuanController::class, 'destroy'])->name('binh-luan.destroy');
-        
+
         // Upgrade routes
         Route::get('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'index'])->name('upgrade.index');
         Route::post('/upgrade', [App\Http\Controllers\User\UpgradeController::class, 'store'])->name('upgrade.store');

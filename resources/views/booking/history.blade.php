@@ -161,18 +161,26 @@
                                     </div>
                                 </div>
 
-                                <!-- Nút xem QR Code -->
+                                <!-- Nút hành động -->
                                 @php
                                     $canShowQR = in_array($booking->trang_thai, ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
                                 @endphp
-                                
-                                @if($canShowQR)
                                 <div class="booking-actions">
-                                    <a href="{{ route('booking.qrcode', $booking->id) }}" class="btn-qr">
-                                        <i class="fas fa-qrcode"></i> Xem mã QR vé
+                                    @if($canShowQR)
+                                    <div class="booking-action-qr">
+                                        <a href="{{ route('booking.qrcode', $booking->id) }}" class="btn-qr">
+                                            <i class="fas fa-qrcode"></i> Xem mã QR vé
+                                        </a>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                <div class="booking-track-wrapper">
+                                    {{-- Track button: uses booking code (ma_ve) placed separately --}}
+                                    <a href="{{ url('/booking-history/track/' . $booking->ma_ve) }}" class="btn-track">
+                                        <i class="fas fa-map-marked-alt"></i> Theo dõi chuyến
                                     </a>
                                 </div>
-                                @endif
                             </div>
                         </div>
                     @endforeach
