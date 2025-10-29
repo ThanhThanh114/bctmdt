@@ -323,14 +323,14 @@
                                             </small>
                                         </div>
                                     @else
-                                        {{-- Reply từ nhà xe/admin --}}
+                                        {{-- Reply từ nhân viên/admin --}}
                                         <div class="user-avatar mr-3" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                            <i class="fas fa-user-tie"></i>
+                                            {{ strtoupper(substr($reply->user->fullname, 0, 1)) }}
                                         </div>
                                         <div class="flex-grow-1">
                                             <h6 class="mb-1">
-                                                <strong>{{ $chuyenXe->nhaXe->ten_nha_xe }}</strong>
-                                                <span class="admin-badge">NHÀ XE</span>
+                                                <strong>{{ $reply->user->fullname }}</strong>
+                                                <span class="admin-badge">{{ $reply->user->role === 'admin' ? 'ADMIN' : 'NHÂN VIÊN' }}</span>
                                             </h6>
                                             <p class="mb-1">{{ $reply->noi_dung }}</p>
                                             <small class="text-muted">
