@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\NhaXe;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class NhaXeController extends Controller
 {
@@ -26,18 +28,28 @@ class NhaXeController extends Controller
             });
         }
 
-        // Lọc theo trạng thái
-        if ($request->filled('trang_thai') && $request->trang_thai !== 'all') {
+        // Lọc theo trạng thái (chỉ khi cột tồn tại)
+        if ($request->filled('trang_thai') && $request->trang_thai !== 'all' && Schema::hasColumn('nha_xe', 'trang_thai')) {
             $query->where('trang_thai', $request->trang_thai);
         }
 
         $nhaXe = $query->orderBy('ma_nha_xe', 'desc')->paginate(15);
 
         // Thống kê
+        $total = NhaXe::count();
+        if (Schema::hasColumn('nha_xe', 'trang_thai')) {
+            $hoat_dong = NhaXe::where('trang_thai', 'hoat_dong')->count();
+            $bi_khoa = NhaXe::where('trang_thai', 'bi_khoa')->count();
+        } else {
+            // Nếu cột không tồn tại, fallback an toàn
+            $hoat_dong = $total;
+            $bi_khoa = 0;
+        }
+
         $stats = [
-            'total' => NhaXe::count(),
-            'hoat_dong' => NhaXe::where('trang_thai', 'hoat_dong')->count(),
-            'bi_khoa' => NhaXe::where('trang_thai', 'bi_khoa')->count(),
+            'total' => $total,
+            'hoat_dong' => $hoat_dong,
+            'bi_khoa' => $bi_khoa,
         ];
 
         return view('AdminLTE.admin.nha_xe.index', compact('nhaXe', 'stats'));
@@ -83,12 +95,23 @@ class NhaXeController extends Controller
             'ly_do_khoa.max' => 'Lý do không được vượt quá 500 ký tự',
         ]);
 
-        $nhaxe->update([
-            'trang_thai' => 'bi_khoa',
-            'ly_do_khoa' => $validated['ly_do_khoa'],
-            'ngay_khoa' => now(),
-            'admin_khoa_id' => auth()->id(),
-        ]);
+        $updateData = [];
+        if (Schema::hasColumn('nha_xe', 'trang_thai')) {
+            $updateData['trang_thai'] = 'bi_khoa';
+        }
+        if (Schema::hasColumn('nha_xe', 'ly_do_khoa')) {
+            $updateData['ly_do_khoa'] = $validated['ly_do_khoa'];
+        }
+        if (Schema::hasColumn('nha_xe', 'ngay_khoa')) {
+            $updateData['ngay_khoa'] = now();
+        }
+        if (Schema::hasColumn('nha_xe', 'admin_khoa_id')) {
+            $updateData['admin_khoa_id'] = auth()->id();
+        }
+
+        if (!empty($updateData)) {
+            $nhaxe->update($updateData);
+        }
 
         // Lấy danh sách users để lưu thông tin gốc
         $users = User::where('ma_nha_xe', (string)$nhaxe->ma_nha_xe)
@@ -132,12 +155,23 @@ class NhaXeController extends Controller
      */
     public function unlock(NhaXe $nhaxe)
     {
-        $nhaxe->update([
-            'trang_thai' => 'hoat_dong',
-            'ly_do_khoa' => null,
-            'ngay_khoa' => null,
-            'admin_khoa_id' => null,
-        ]);
+        $updateData = [];
+        if (Schema::hasColumn('nha_xe', 'trang_thai')) {
+            $updateData['trang_thai'] = 'hoat_dong';
+        }
+        if (Schema::hasColumn('nha_xe', 'ly_do_khoa')) {
+            $updateData['ly_do_khoa'] = null;
+        }
+        if (Schema::hasColumn('nha_xe', 'ngay_khoa')) {
+            $updateData['ngay_khoa'] = null;
+        }
+        if (Schema::hasColumn('nha_xe', 'admin_khoa_id')) {
+            $updateData['admin_khoa_id'] = null;
+        }
+
+        if (!empty($updateData)) {
+            $nhaxe->update($updateData);
+        }
 
         // Lấy danh sách users bị khóa của nhà xe này
         $users = User::where('locked_original_ma_nha_xe', (string)$nhaxe->ma_nha_xe)
@@ -172,18 +206,29 @@ class NhaXeController extends Controller
     {
         // Kiểm tra xem có chuyến xe đang hoạt động không
         $activeTrips = $nhaxe->chuyenXe()->where('ngay_di', '>=', today())->count();
-        
+
         if ($activeTrips > 0) {
             return redirect()->back()->with('error', 'Không thể xóa nhà xe có chuyến xe đang hoạt động!');
         }
 
         // Khóa nhà xe thay vì xóa
-        $nhaxe->update([
-            'trang_thai' => 'bi_khoa',
-            'ly_do_khoa' => 'Đã xóa bởi Admin',
-            'ngay_khoa' => now(),
-            'admin_khoa_id' => auth()->id(),
-        ]);
+        $updateData = [];
+        if (Schema::hasColumn('nha_xe', 'trang_thai')) {
+            $updateData['trang_thai'] = 'bi_khoa';
+        }
+        if (Schema::hasColumn('nha_xe', 'ly_do_khoa')) {
+            $updateData['ly_do_khoa'] = 'Đã xóa bởi Admin';
+        }
+        if (Schema::hasColumn('nha_xe', 'ngay_khoa')) {
+            $updateData['ngay_khoa'] = now();
+        }
+        if (Schema::hasColumn('nha_xe', 'admin_khoa_id')) {
+            $updateData['admin_khoa_id'] = auth()->id();
+        }
+
+        if (!empty($updateData)) {
+            $nhaxe->update($updateData);
+        }
 
         // Vô hiệu hóa tất cả tài khoản
         User::where('ma_nha_xe', (string)$nhaxe->ma_nha_xe)->update(['is_active' => 0]);

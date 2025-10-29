@@ -139,14 +139,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('datve-auto-cancel', [App\Http\Controllers\Admin\DatVeController::class, 'autoCancelExpired'])->name('datve.auto-cancel');
 
         // Quản lý bình luận
-        Route::resource('binhluan', App\Http\Controllers\Admin\BinhLuanController::class)->except(['edit', 'update']);
-        Route::post('binhluan/{binhluan}/approve', [App\Http\Controllers\Admin\BinhLuanController::class, 'approve'])->name('binhluan.approve');
-        Route::post('binhluan/{binhluan}/reject', [App\Http\Controllers\Admin\BinhLuanController::class, 'reject'])->name('binhluan.reject');
-        Route::post('binhluan/{binhluan}/reply', [App\Http\Controllers\Admin\BinhLuanController::class, 'reply'])->name('binhluan.reply');
-        Route::post('binhluan/{binhluan}/toggle-lock', [App\Http\Controllers\Admin\BinhLuanController::class, 'toggleLock'])->name('binhluan.toggle-lock');
-        Route::post('binhluan/bulk-approve', [App\Http\Controllers\Admin\BinhLuanController::class, 'bulkApprove'])->name('binhluan.bulk-approve');
-        Route::post('binhluan/bulk-delete', [App\Http\Controllers\Admin\BinhLuanController::class, 'bulkDelete'])->name('binhluan.bulk-delete');
-        Route::get('binhluan-statistics', [App\Http\Controllers\Admin\BinhLuanController::class, 'statistics'])->name('binhluan.statistics');
+        Route::resource('comments', App\Http\Controllers\Admin\CommentsController::class);
+        Route::post('comments/{comment}/approve', [App\Http\Controllers\Admin\CommentsController::class, 'approve'])->name('comments.approve');
+        Route::post('comments/{comment}/reject', [App\Http\Controllers\Admin\CommentsController::class, 'reject'])->name('comments.reject');
+        Route::post('comments/{comment}/reply', [App\Http\Controllers\Admin\CommentsController::class, 'reply'])->name('comments.reply');
+        Route::post('comments/{comment}/toggle-lock', [App\Http\Controllers\Admin\CommentsController::class, 'toggleLock'])->name('comments.toggle-lock');
+        Route::post('comments/bulk-approve', [App\Http\Controllers\Admin\CommentsController::class, 'bulkApprove'])->name('comments.bulk-approve');
+        Route::post('comments/bulk-delete', [App\Http\Controllers\Admin\CommentsController::class, 'bulkDelete'])->name('comments.bulk-delete');
+        Route::get('comments-statistics', [App\Http\Controllers\Admin\CommentsController::class, 'statistics'])->name('comments.statistics');
 
         // Quản lý nhà xe
         Route::get('nha-xe', [App\Http\Controllers\Admin\NhaXeController::class, 'index'])->name('nha-xe.index');
@@ -209,7 +209,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('bookings-today', [App\Http\Controllers\Staff\BookingsController::class, 'todayBookings'])->name('bookings.today');
         Route::get('bookings-pending', [App\Http\Controllers\Staff\BookingsController::class, 'pendingBookings'])->name('bookings.pending');
 
-        // Quản lý bình luận
+        // Quản lý bình luận - chỉ giữ lại comments route, bỏ binh-luan
         Route::resource('comments', App\Http\Controllers\Staff\CommentsController::class);
         Route::post('comments/{comment}/reply', [App\Http\Controllers\Staff\CommentsController::class, 'reply'])->name('comments.reply');
 
@@ -230,13 +230,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('ticket-scanner/today-trips', [App\Http\Controllers\Staff\TicketScannerController::class, 'todayTrips'])->name('ticket-scanner.today-trips');
         Route::get('ticket-scanner/trip/{tripId}', [App\Http\Controllers\Staff\TicketScannerController::class, 'tripPassengers'])->name('ticket-scanner.trip');
 
-        // Quản lý bình luận - Staff có thể xem và trả lời bình luận
-        Route::get('binh-luan', [App\Http\Controllers\Staff\BinhLuanController::class, 'index'])->name('binh-luan.index');
-        Route::get('binh-luan/{binhLuan}', [App\Http\Controllers\Staff\BinhLuanController::class, 'show'])->name('binh-luan.show');
-        Route::post('binh-luan/{binhLuan}/reply', [App\Http\Controllers\Staff\BinhLuanController::class, 'reply'])->name('binh-luan.reply');
-        Route::post('binh-luan/{binhLuan}/approve', [App\Http\Controllers\Staff\BinhLuanController::class, 'approve'])->name('binh-luan.approve');
-        Route::post('binh-luan/{binhLuan}/reject', [App\Http\Controllers\Staff\BinhLuanController::class, 'reject'])->name('binh-luan.reject');
-        Route::delete('binh-luan/{binhLuan}', [App\Http\Controllers\Staff\BinhLuanController::class, 'destroy'])->name('binh-luan.destroy');
+        // Bỏ route binh-luan, chỉ giữ lại comments
     });
 
     // Bus Owner Dashboard Routes

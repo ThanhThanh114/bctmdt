@@ -50,6 +50,7 @@
                     <thead>
                         <tr>
                             <th>Mã vé</th>
+                            <th>Khách hàng</th>
                             <th>Chuyến xe</th>
                             <th>Ngày giờ</th>
                             <th>Số ghế</th>
@@ -60,15 +61,19 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($bookings as $booking)
+                        @forelse($paginatedBookings as $booking)
                         <tr>
                             <td>
-                                <strong>#{{ $booking->ma_ve ?? $booking->id }}</strong>
+                                <strong>#{{ $booking->ma_ve }}</strong>
                                 @if($booking->trang_thai == 'Đã thanh toán')
                                     <i class="fas fa-check-circle text-success" title="Đã thanh toán"></i>
                                 @else
                                     <i class="fas fa-clock text-warning" title="Chưa thanh toán"></i>
                                 @endif
+                            </td>
+                            <td>
+                                <strong>{{ $booking->ten_khach_hang ?? $booking->user->name ?? 'N/A' }}</strong>
+                                <br><small class="text-muted">{{ $booking->email_khach_hang ?? $booking->user->email ?? 'N/A' }}</small>
                             </td>
                             <td>
                                 <div>
@@ -79,14 +84,21 @@
                                 <small class="text-muted">{{ $booking->chuyenXe->nhaXe->ten_nha_xe ?? 'N/A' }}</small>
                             </td>
                             <td>
-                                {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }} 
+                                {{ \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') }}
                                 {{ date('H:i', strtotime($booking->chuyenXe->gio_di)) }}
                             </td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->so_ghe ?? 'N/A' }}</span>
+                                @if($booking->so_ghe_list)
+                                    @foreach($booking->so_ghe_list as $seat)
+                                        <span class="badge badge-info">{{ $seat }}</span>
+                                    @endforeach
+                                @else
+                                    <span class="badge badge-secondary">N/A</span>
+                                @endif
                             </td>
                             <td>
-                                <strong>{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</strong>
+                                <strong>{{ number_format($booking->tong_tien) }}đ</strong>
+                                <small class="text-muted d-block">{{ $booking->so_luong_ghe }} vé</small>
                             </td>
                             <td>
                                 @if($booking->trang_thai == 'Đã xác nhận' || $booking->trang_thai == 'Đã thanh toán')
@@ -105,23 +117,23 @@
                                     <a href="{{ route('user.bookings.show', $booking) }}" class="btn btn-sm btn-info" title="Xem chi tiết">
                                         <i class="fas fa-eye"></i>
                                     </a>
-                                    
+
                                     @php
                                         $canShowQR = in_array($booking->trang_thai, ['Đã đặt', 'Đã thanh toán', 'Đã xác nhận']);
                                     @endphp
-                                    
+
                                     @if($canShowQR)
                                     <a href="{{ route('user.bookings.qrcode', $booking) }}" class="btn btn-sm btn-success" title="Xem mã QR">
                                         <i class="fas fa-qrcode"></i>
                                     </a>
-                                    
-                                    <a href="{{ route('user.binh-luan.index', ['chuyen_xe_id' => $booking->chuyen_xe_id]) }}" 
+
+                                    <a href="{{ route('user.binh-luan.index', ['chuyen_xe_id' => $booking->chuyen_xe_id]) }}"
                                        class="btn btn-sm btn-primary" title="Đánh giá chuyến xe">
                                         <i class="fas fa-comment-dots"></i>
                                     </a>
                                     @endif
-                                    
-                                    @if($booking->status == 'confirmed')
+
+                                    @if($booking->trang_thai == 'Đã đặt')
                                         @php
                                             try {
                                                 $departureDate = \Carbon\Carbon::parse($booking->chuyenXe->ngay_di);
@@ -132,7 +144,7 @@
                                                 $canCancel = false;
                                             }
                                         @endphp
-                                        
+
                                         @if($canCancel)
                                         <form method="POST" action="{{ route('user.bookings.cancel', $booking) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy vé này?')">
                                             @csrf
@@ -148,7 +160,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="8" class="text-center py-4">
+                            <td colspan="9" class="text-center py-4">
                                 <i class="fas fa-ticket-alt fa-2x text-muted mb-2"></i>
                                 <p class="text-muted">Chưa có đặt vé nào</p>
                                 <a href="{{ route('trips.trips') }}" class="btn btn-primary">Đặt vé ngay</a>
@@ -168,13 +180,13 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-primary">
             <div class="inner">
-                <h3>{{ $bookings->where('status', 'confirmed')->count() }}</h3>
+                <h3>{{ $paginatedBookings->where('trang_thai', 'Đã xác nhận')->count() + $paginatedBookings->where('trang_thai', 'Đã thanh toán')->count() }}</h3>
                 <p>Vé đã xác nhận</p>
             </div>
             <div class="icon">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <a href="{{ route('user.bookings.index', ['status' => 'confirmed']) }}" class="small-box-footer">
+            <a href="{{ route('user.bookings.index', ['status' => 'Đã xác nhận']) }}" class="small-box-footer">
                 Xem tất cả <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
@@ -183,13 +195,13 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
             <div class="inner">
-                <h3>{{ $bookings->where('status', 'pending')->count() }}</h3>
+                <h3>{{ $paginatedBookings->where('trang_thai', 'Đã đặt')->count() }}</h3>
                 <p>Chờ xử lý</p>
             </div>
             <div class="icon">
                 <i class="fas fa-clock"></i>
             </div>
-            <a href="{{ route('user.bookings.index', ['status' => 'pending']) }}" class="small-box-footer">
+            <a href="{{ route('user.bookings.index', ['status' => 'Đã đặt']) }}" class="small-box-footer">
                 Xem tất cả <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
@@ -198,13 +210,13 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
             <div class="inner">
-                <h3>{{ $bookings->where('status', 'cancelled')->count() }}</h3>
+                <h3>{{ $paginatedBookings->where('trang_thai', 'Đã hủy')->count() }}</h3>
                 <p>Đã hủy</p>
             </div>
             <div class="icon">
                 <i class="fas fa-times-circle"></i>
             </div>
-            <a href="{{ route('user.bookings.index', ['status' => 'cancelled']) }}" class="small-box-footer">
+            <a href="{{ route('user.bookings.index', ['status' => 'Đã hủy']) }}" class="small-box-footer">
                 Xem tất cả <i class="fas fa-arrow-circle-right"></i>
             </a>
         </div>
@@ -213,7 +225,7 @@
     <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
             <div class="inner">
-                <h3>{{ number_format($bookings->where('status', 'confirmed')->sum(function($booking) { return $booking->chuyenXe->gia_ve ?? 0; })) }}đ</h3>
+                <h3>{{ number_format($paginatedBookings->whereIn('trang_thai', ['Đã xác nhận', 'Đã thanh toán'])->sum('tong_tien')) }}đ</h3>
                 <p>Tổng chi tiêu</p>
             </div>
             <div class="icon">

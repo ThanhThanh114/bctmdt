@@ -65,6 +65,43 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
 
                 <div class="filter-section">
+                    <h4><i class="fas fa-building"></i> Nhà xe</h4>
+                    <select id="busCompanySelect" onchange="changeBusCompany(this.value)" class="filter-select">
+                        <option value="all" {{ ($params['bus_company'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả nhà xe</option>
+                        @foreach(\App\Models\NhaXe::all() as $nhaXe)
+                        <option value="{{ $nhaXe->ma_nha_xe }}" {{ ($params['bus_company'] ?? 'all') == $nhaXe->ma_nha_xe ? 'selected' : '' }}>
+                            {{ $nhaXe->ten_nha_xe }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-day"></i> Ngày đi</h4>
+                    <input type="date" id="departureDateSelect" onchange="changeDepartureDate(this.value)" class="filter-select"
+                           value="{{ $params['departure_date'] ?? '' }}" min="{{ date('Y-m-d') }}">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-check"></i> Ngày đến</h4>
+                    <input type="date" id="arrivalDateSelect" onchange="changeArrivalDate(this.value)" class="filter-select"
+                           value="{{ $params['arrival_date'] ?? '' }}">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-user-tie"></i> Tài xế</h4>
+                    <select id="driverSelect" onchange="changeDriver(this.value)" class="filter-select">
+                        <option value="all" {{ ($params['driver'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả tài xế</option>
+                        @foreach(\App\Models\NhanVien::where('chuc_vu', 'Tài xế')->get() as $driver)
+                        {{-- Pass driver's name here because the controller filters by ten_tai_xe (name) --}}
+                        <option value="{{ $driver->ten_nv }}" {{ ($params['driver'] ?? 'all') == $driver->ten_nv ? 'selected' : '' }}>
+                            {{ $driver->ten_nv }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-section">
                     <h4><i class="fas fa-money-bill-wave"></i> Khoảng giá</h4>
                     <select id="priceRangeSelect" onchange="changePriceRange(this.value)" class="filter-select">
                         <option value="all" {{ ($params['price_range'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả
@@ -99,6 +136,72 @@ if (session_status() === PHP_SESSION_NONE) {
 
     <script src="{{ asset('assets/js/Search-form.js') }}"></script>
     <script src="{{ asset('assets/js/Lichtrinh.js') }}"></script>
+    <script>
+        // Intercept pagination link clicks and use AJAX fragment loading so URL stays /lichtrinh
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('#paginationWrapper a, .pagination a, a.page-btn');
+            if (a && a.tagName === 'A') {
+                // Only intercept links that point to the trips route
+                try {
+                    var href = a.getAttribute('href');
+                    if (href && href.indexOf('/lichtrinh') !== -1) {
+                        e.preventDefault();
+                        if (typeof fetchAndReplace === 'function') {
+                            fetchAndReplace(href);
+                        } else {
+                            // fallback
+                            window.location.href = href;
+                        }
+                    }
+                } catch (err) {
+                    // ignore and allow default
+                }
+            }
+        });
+
+        // Remove / hide default query parameters (like show_all=1) from the address bar
+        // without reloading the page. This keeps the page content (showing all trips)
+        // but cleans the URL to /lichtrinh for a nicer canonical link.
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var url = new URL(window.location.href);
+                var params = new URLSearchParams(url.search);
+
+                // If show_all present, remove entire query string to hide it
+                if (params.has('show_all')) {
+                    history.replaceState({}, document.title, url.pathname);
+                    return;
+                }
+
+                // Otherwise, if only default params are present (driver=all&page=1 etc.),
+                // hide them as well to keep the URL clean.
+                var defaults = {
+                    driver: 'all',
+                    page: '1',
+                    bus_type: 'all',
+                    sort: 'date_asc',
+                    price_range: 'all',
+                    bus_company: 'all',
+                    departure_date: '',
+                    arrival_date: ''
+                };
+
+                var onlyDefaults = true;
+                params.forEach(function (value, key) {
+                    if (!defaults.hasOwnProperty(key) || String(value) !== String(defaults[key])) {
+                        onlyDefaults = false;
+                    }
+                });
+
+                if (onlyDefaults && params.toString().length > 0) {
+                    history.replaceState({}, document.title, url.pathname);
+                }
+            } catch (e) {
+                // don't block the page if URL API fails
+                console && console.warn && console.warn('Failed to normalize URL', e);
+            }
+        });
+    </script>
 </body>
 
 </html>

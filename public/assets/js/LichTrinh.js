@@ -392,21 +392,57 @@ function changeSort(sortValue) {
     const url = new URL(window.location);
     url.searchParams.set('sort', sortValue);
     url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi sắp xếp
-    window.location.href = url.toString();
+    fetchAndReplace(url.toString());
 }
 
 function changeBusType(busTypeValue) {
     const url = new URL(window.location);
     url.searchParams.set('bus_type', busTypeValue);
     url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi loại xe
-    window.location.href = url.toString();
+    fetchAndReplace(url.toString());
+}
+
+function changeBusCompany(busCompanyValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('bus_company', busCompanyValue);
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi nhà xe
+    fetchAndReplace(url.toString());
+}
+
+function changeDepartureDate(dateValue) {
+    const url = new URL(window.location);
+    if (dateValue) {
+        url.searchParams.set('departure_date', dateValue);
+    } else {
+        url.searchParams.delete('departure_date');
+    }
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi ngày đi
+    fetchAndReplace(url.toString());
+}
+
+function changeArrivalDate(dateValue) {
+    const url = new URL(window.location);
+    if (dateValue) {
+        url.searchParams.set('arrival_date', dateValue);
+    } else {
+        url.searchParams.delete('arrival_date');
+    }
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi ngày đến
+    fetchAndReplace(url.toString());
+}
+
+function changeDriver(driverValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('driver', driverValue);
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi tài xế
+    fetchAndReplace(url.toString());
 }
 
 function changePriceRange(priceRangeValue) {
     const url = new URL(window.location);
     url.searchParams.set('price_range', priceRangeValue);
     url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi khoảng giá
-    window.location.href = url.toString();
+    fetchAndReplace(url.toString());
 }
 
 function resetFilters() {
@@ -424,7 +460,40 @@ function resetFilters() {
     if (end) url.searchParams.set('end', end);
     if (date) url.searchParams.set('date', date);
 
-    window.location.href = url.toString();
+    fetchAndReplace(url.toString());
+}
+
+// Helper: fetch the URL and replace the trips-content HTML, then hide query params
+async function fetchAndReplace(url) {
+    try {
+        const resp = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (!resp.ok) {
+            window.location.href = url; // fallback to full load on error
+            return;
+        }
+        const text = await resp.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const newContent = doc.querySelector('.trips-content');
+        if (newContent) {
+            const current = document.querySelector('.trips-content');
+            current.innerHTML = newContent.innerHTML;
+            // update pagination area too (in case it's outside .trips-content)
+            const newPagination = doc.querySelector('#paginationWrapper');
+            const currentPagination = document.querySelector('#paginationWrapper');
+            if (newPagination && currentPagination) currentPagination.innerHTML = newPagination.innerHTML;
+            // Scroll to top of results
+            window.scrollTo({ top: current.getBoundingClientRect().top + window.scrollY - 20, behavior: 'smooth' });
+            // Hide query params from the address bar but keep the state
+            history.replaceState({}, document.title, '/lichtrinh');
+        } else {
+            // If we couldn't find the fragment, fallback to full navigation
+            window.location.href = url;
+        }
+    } catch (e) {
+        console.warn('AJAX fetch failed, falling back to full navigation', e);
+        window.location.href = url;
+    }
 }
 
 /* ==================== START */

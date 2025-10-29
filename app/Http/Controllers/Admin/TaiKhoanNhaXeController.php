@@ -8,6 +8,7 @@ use App\Models\NhaXe;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class TaiKhoanNhaXeController extends Controller
 {
@@ -40,8 +41,8 @@ class TaiKhoanNhaXeController extends Controller
             $query->where('role', $request->role);
         }
 
-        // Lọc theo trạng thái
-        if ($request->filled('is_active')) {
+        // Lọc theo trạng thái (chỉ áp dụng nếu cột tồn tại)
+        if ($request->filled('is_active') && Schema::hasColumn('users', 'is_active')) {
             if ($request->is_active === '1') {
                 $query->where('is_active', 1);
             } elseif ($request->is_active === '0') {
@@ -55,10 +56,20 @@ class TaiKhoanNhaXeController extends Controller
         $nhaXe = NhaXe::orderBy('ten_nha_xe')->get();
 
         // Thống kê
+        $total = User::whereIn('role', ['staff', 'bus_owner'])->count();
+        if (Schema::hasColumn('users', 'is_active')) {
+            $activeCount = User::whereIn('role', ['staff', 'bus_owner'])->where('is_active', 1)->count();
+            $lockedCount = User::whereIn('role', ['staff', 'bus_owner'])->where('is_active', 0)->count();
+        } else {
+            // Nếu cột không tồn tại, fallback an toàn: coi tất cả là active, locked = 0
+            $activeCount = $total;
+            $lockedCount = 0;
+        }
+
         $stats = [
-            'total' => User::whereIn('role', ['staff', 'bus_owner'])->count(),
-            'active' => User::whereIn('role', ['staff', 'bus_owner'])->where('is_active', 1)->count(),
-            'locked' => User::whereIn('role', ['staff', 'bus_owner'])->where('is_active', 0)->count(),
+            'total' => $total,
+            'active' => $activeCount,
+            'locked' => $lockedCount,
             'staff' => User::where('role', 'staff')->count(),
             'bus_owner' => User::where('role', 'bus_owner')->count(),
         ];
@@ -90,15 +101,26 @@ class TaiKhoanNhaXeController extends Controller
         // Lưu role cũ và ma_nha_xe cũ để khôi phục sau
         $oldRole = $taikhoan->role;
         $oldMaNhaXe = $taikhoan->ma_nha_xe;
-        
-        $updateData = [
-            'is_active' => 0,
-            'locked_reason' => $validated['ly_do_khoa'],
-            'locked_at' => now(),
-            'locked_by' => auth()->id(),
-            'locked_original_role' => $oldRole, // Lưu role gốc
-            'locked_original_ma_nha_xe' => $oldMaNhaXe, // Lưu ma_nha_xe gốc
-        ];
+
+        $updateData = [];
+        if (Schema::hasColumn('users', 'is_active')) {
+            $updateData['is_active'] = 0;
+        }
+        if (Schema::hasColumn('users', 'locked_reason')) {
+            $updateData['locked_reason'] = $validated['ly_do_khoa'];
+        }
+        if (Schema::hasColumn('users', 'locked_at')) {
+            $updateData['locked_at'] = now();
+        }
+        if (Schema::hasColumn('users', 'locked_by')) {
+            $updateData['locked_by'] = auth()->id();
+        }
+        if (Schema::hasColumn('users', 'locked_original_role')) {
+            $updateData['locked_original_role'] = $oldRole; // Lưu role gốc
+        }
+        if (Schema::hasColumn('users', 'locked_original_ma_nha_xe')) {
+            $updateData['locked_original_ma_nha_xe'] = $oldMaNhaXe; // Lưu ma_nha_xe gốc
+        }
 
         // Nếu là bus_owner hoặc staff, hạ cấp xuống user
         if (in_array($taikhoan->role, ['bus_owner', 'staff'])) {
@@ -136,12 +158,19 @@ class TaiKhoanNhaXeController extends Controller
     public function unlock(User $taikhoan)
     {
         // Khôi phục role và ma_nha_xe gốc nếu có
-        $updateData = [
-            'is_active' => 1,
-            'locked_reason' => null,
-            'locked_at' => null,
-            'locked_by' => null,
-        ];
+        $updateData = [];
+        if (Schema::hasColumn('users', 'is_active')) {
+            $updateData['is_active'] = 1;
+        }
+        if (Schema::hasColumn('users', 'locked_reason')) {
+            $updateData['locked_reason'] = null;
+        }
+        if (Schema::hasColumn('users', 'locked_at')) {
+            $updateData['locked_at'] = null;
+        }
+        if (Schema::hasColumn('users', 'locked_by')) {
+            $updateData['locked_by'] = null;
+        }
 
         // Tự động khôi phục role và ma_nha_xe gốc
         if ($taikhoan->locked_original_role) {
@@ -151,11 +180,17 @@ class TaiKhoanNhaXeController extends Controller
             $updateData['ma_nha_xe'] = $taikhoan->locked_original_ma_nha_xe;
         }
 
-        // Xóa thông tin backup sau khi khôi phục
-        $updateData['locked_original_role'] = null;
-        $updateData['locked_original_ma_nha_xe'] = null;
+        // Xóa thông tin backup sau khi khôi phục (chỉ nếu cột tồn tại)
+        if (Schema::hasColumn('users', 'locked_original_role')) {
+            $updateData['locked_original_role'] = null;
+        }
+        if (Schema::hasColumn('users', 'locked_original_ma_nha_xe')) {
+            $updateData['locked_original_ma_nha_xe'] = null;
+        }
 
-        $taikhoan->update($updateData);
+        if (!empty($updateData)) {
+            $taikhoan->update($updateData);
+        }
 
         $message = "Admin " . auth()->id() . " đã mở khóa tài khoản {$taikhoan->id} - {$taikhoan->username}";
         if ($taikhoan->role !== 'user') {
@@ -177,7 +212,7 @@ class TaiKhoanNhaXeController extends Controller
     public function resetPassword(User $taikhoan)
     {
         $newPassword = 'Password@123'; // Mật khẩu mặc định
-        
+
         $taikhoan->update([
             'password' => Hash::make($newPassword),
         ]);
@@ -223,18 +258,35 @@ class TaiKhoanNhaXeController extends Controller
 
         $userIds = $users->pluck('id')->toArray();
 
-        // Cập nhật từng user để lưu thông tin gốc
+        // Cập nhật từng user để lưu thông tin gốc (chỉ set các cột tồn tại)
         foreach ($users as $user) {
-            $user->update([
-                'is_active' => 0,
-                'locked_reason' => $validated['ly_do_khoa'],
-                'locked_at' => now(),
-                'locked_by' => auth()->id(),
-                'locked_original_role' => $user->role, // Lưu role gốc
-                'locked_original_ma_nha_xe' => $user->ma_nha_xe, // Lưu ma_nha_xe gốc
-                'role' => 'user', // Hạ cấp xuống user
-                'ma_nha_xe' => null, // Xóa liên kết với nhà xe
-            ]);
+            $uUpdate = [];
+            if (Schema::hasColumn('users', 'is_active')) {
+                $uUpdate['is_active'] = 0;
+            }
+            if (Schema::hasColumn('users', 'locked_reason')) {
+                $uUpdate['locked_reason'] = $validated['ly_do_khoa'];
+            }
+            if (Schema::hasColumn('users', 'locked_at')) {
+                $uUpdate['locked_at'] = now();
+            }
+            if (Schema::hasColumn('users', 'locked_by')) {
+                $uUpdate['locked_by'] = auth()->id();
+            }
+            if (Schema::hasColumn('users', 'locked_original_role')) {
+                $uUpdate['locked_original_role'] = $user->role; // Lưu role gốc
+            }
+            if (Schema::hasColumn('users', 'locked_original_ma_nha_xe')) {
+                $uUpdate['locked_original_ma_nha_xe'] = $user->ma_nha_xe; // Lưu ma_nha_xe gốc
+            }
+
+            // Hạ cấp và xóa liên kết với nhà xe
+            $uUpdate['role'] = 'user';
+            $uUpdate['ma_nha_xe'] = null;
+
+            if (!empty($uUpdate)) {
+                $user->update($uUpdate);
+            }
         }
 
         $affected = count($users);
@@ -262,14 +314,28 @@ class TaiKhoanNhaXeController extends Controller
             'ma_nha_xe' => 'required|exists:nha_xe,ma_nha_xe',
         ]);
 
-        $affected = User::where('ma_nha_xe', $validated['ma_nha_xe'])
-            ->whereIn('role', ['staff', 'bus_owner'])
-            ->update([
-                'is_active' => 1,
-                'locked_reason' => null,
-                'locked_at' => null,
-                'locked_by' => null,
-            ]);
+        $update = [];
+        if (Schema::hasColumn('users', 'is_active')) {
+            $update['is_active'] = 1;
+        }
+        if (Schema::hasColumn('users', 'locked_reason')) {
+            $update['locked_reason'] = null;
+        }
+        if (Schema::hasColumn('users', 'locked_at')) {
+            $update['locked_at'] = null;
+        }
+        if (Schema::hasColumn('users', 'locked_by')) {
+            $update['locked_by'] = null;
+        }
+
+        if (!empty($update)) {
+            $affected = User::where('ma_nha_xe', $validated['ma_nha_xe'])
+                ->whereIn('role', ['staff', 'bus_owner'])
+                ->update($update);
+        } else {
+            // Nếu không có cột để cập nhật thì không thay đổi gì
+            $affected = 0;
+        }
 
         \Log::info("Admin " . auth()->id() . " đã mở khóa {$affected} tài khoản của nhà xe {$validated['ma_nha_xe']}");
 

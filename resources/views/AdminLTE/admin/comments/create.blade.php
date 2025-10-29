@@ -12,7 +12,7 @@
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.binhluan.index') }}">Bình luận</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.comments.index') }}">Bình luận</a></li>
                     <li class="breadcrumb-item active">Thêm mới</li>
                 </ol>
             </div>
@@ -31,7 +31,7 @@
                         </h3>
                     </div>
 
-                    <form action="{{ route('admin.binhluan.store') }}" method="POST">
+                    <form action="{{ route('admin.comments.store') }}" method="POST">
                         @csrf
                         <div class="card-body">
                             <!-- Success/Error Messages -->
@@ -158,7 +158,7 @@
                                     </button>
                                 </div>
                                 <div class="col-md-6">
-                                    <a href="{{ route('admin.binhluan.index') }}" class="btn btn-secondary btn-block">
+                                    <a href="{{ route('admin.comments.index') }}" class="btn btn-secondary btn-block">
                                         <i class="fas fa-times"></i> Hủy bỏ
                                     </a>
                                 </div>

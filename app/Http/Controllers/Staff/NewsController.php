@@ -15,6 +15,10 @@ class NewsController extends Controller
     {
         $query = TinTuc::with(['user', 'nhaXe']);
 
+        // Chỉ hiển thị tin tức của nhà xe của nhân viên
+        $nhaXeId = auth()->user()->ma_nha_xe;
+        $query->where('ma_nha_xe', $nhaXeId);
+
         // Tìm kiếm
         if ($request->filled('search')) {
             $search = $request->search;
@@ -30,11 +34,11 @@ class NewsController extends Controller
         $nhaXe = \App\Models\NhaXe::all();
         $tacGia = \App\Models\User::whereIn('role', ['admin', 'staff'])->get();
 
-        // Thống kê
+        // Thống kê - chỉ của nhà xe hiện tại
         $stats = [
-            'total' => TinTuc::count(),
-            'today' => TinTuc::whereDate('ngay_dang', today())->count(),
-            'this_month' => TinTuc::whereMonth('ngay_dang', date('m'))->whereYear('ngay_dang', date('Y'))->count(),
+            'total' => TinTuc::where('ma_nha_xe', $nhaXeId)->count(),
+            'today' => TinTuc::where('ma_nha_xe', $nhaXeId)->whereDate('ngay_dang', today())->count(),
+            'this_month' => TinTuc::where('ma_nha_xe', $nhaXeId)->whereMonth('ngay_dang', date('m'))->whereYear('ngay_dang', date('Y'))->count(),
         ];
 
         return view('AdminLTE.staff.news.index', compact('tinTuc', 'nhaXe', 'tacGia', 'stats'));
@@ -45,7 +49,8 @@ class NewsController extends Controller
      */
     public function create()
     {
-        $nhaXe = \App\Models\NhaXe::all();
+        // Chỉ lấy nhà xe của nhân viên hiện tại
+        $nhaXe = \App\Models\NhaXe::where('ma_nha_xe', auth()->user()->ma_nha_xe)->get();
         return view('AdminLTE.staff.news.create', compact('nhaXe'));
     }
 
@@ -62,6 +67,8 @@ class NewsController extends Controller
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ]);
 
+        // Tự động gán nhà xe của nhân viên hiện tại
+        $validated['ma_nha_xe'] = auth()->user()->ma_nha_xe;
         $validated['user_id'] = auth()->id();
         $validated['ngay_dang'] = now();
 
@@ -97,7 +104,14 @@ class NewsController extends Controller
     public function edit($id)
     {
         $tinTuc = TinTuc::findOrFail($id);
-        $nhaXe = \App\Models\NhaXe::all();
+
+        // Kiểm tra quyền - chỉ chỉnh sửa tin tức của nhà xe mình
+        if ($tinTuc->ma_nha_xe !== auth()->user()->ma_nha_xe) {
+            abort(403, 'Bạn không có quyền chỉnh sửa tin tức này.');
+        }
+
+        // Chỉ lấy nhà xe của nhân viên hiện tại
+        $nhaXe = \App\Models\NhaXe::where('ma_nha_xe', auth()->user()->ma_nha_xe)->get();
         return view('AdminLTE.staff.news.edit', compact('tinTuc', 'nhaXe'));
     }
 
@@ -108,6 +122,11 @@ class NewsController extends Controller
     {
         $tinTuc = TinTuc::findOrFail($id);
 
+        // Kiểm tra quyền - chỉ cập nhật tin tức của nhà xe mình
+        if ($tinTuc->ma_nha_xe !== auth()->user()->ma_nha_xe) {
+            abort(403, 'Bạn không có quyền cập nhật tin tức này.');
+        }
+
         $validated = $request->validate([
             'tieu_de' => 'required|string|max:200',
             'noi_dung' => 'required|string',
@@ -115,6 +134,9 @@ class NewsController extends Controller
             'image_url' => 'nullable|url',
             'ma_nha_xe' => 'nullable|exists:nha_xe,ma_nha_xe',
         ]);
+
+        // Đảm bảo không thể thay đổi nhà xe
+        $validated['ma_nha_xe'] = auth()->user()->ma_nha_xe;
 
         // Handle image upload or URL
         if ($request->hasFile('hinh_anh')) {
@@ -148,6 +170,11 @@ class NewsController extends Controller
     public function destroy($id)
     {
         $tinTuc = TinTuc::findOrFail($id);
+
+        // Kiểm tra quyền - chỉ xóa tin tức của nhà xe mình
+        if ($tinTuc->ma_nha_xe !== auth()->user()->ma_nha_xe) {
+            abort(403, 'Bạn không có quyền xóa tin tức này.');
+        }
 
         // Delete image if exists
         if ($tinTuc->hinh_anh && file_exists(public_path($tinTuc->hinh_anh))) {

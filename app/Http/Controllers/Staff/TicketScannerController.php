@@ -200,9 +200,6 @@ class TicketScannerController extends Controller
                 'qr_data' => 'required|string'
             ]);
 
-            // Giải mã lại để chắc chắn
-            $qrData = decrypt($request->qr_data);
-
             $booking = DatVe::with('chuyenXe')->find($request->booking_id);
 
             if (!$booking || !$booking->canBeScanned()) {
@@ -215,7 +212,7 @@ class TicketScannerController extends Controller
             // Kiểm tra nhân viên có quyền check-in vé này không (cùng nhà xe)
             $user = auth()->user();
             $maNhaXe = $user->ma_nha_xe;
-            
+
             if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
                 return response()->json([
                     'success' => false,
@@ -231,7 +228,7 @@ class TicketScannerController extends Controller
             if ($alreadyScanned) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Vé này đã được soát lúc: ' . 
+                    'message' => 'Vé này đã được soát lúc: ' .
                         \Carbon\Carbon::parse($alreadyScanned->scanned_at)->format('d/m/Y H:i:s')
                 ], 400);
             }
@@ -254,7 +251,8 @@ class TicketScannerController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Check-in thành công! Khách đã lên xe.',
-                'scanned_at' => now()->format('d/m/Y H:i:s')
+                'scanned_at' => now()->format('d/m/Y H:i:s'),
+                'booking_id' => $booking->id
             ]);
 
         } catch (\Exception $e) {
@@ -272,6 +270,14 @@ class TicketScannerController extends Controller
         try {
             $trip = \App\Models\ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
                 ->findOrFail($tripId);
+
+            // Kiểm tra nhân viên có quyền xem chuyến này không
+            $user = auth()->user();
+            $maNhaXe = $user->ma_nha_xe;
+
+            if ($maNhaXe && $trip->ma_nha_xe !== $maNhaXe) {
+                abort(403, 'Bạn không có quyền xem chuyến xe này!');
+            }
 
             // Lấy tất cả vé của chuyến này
             $bookings = DatVe::with('user')

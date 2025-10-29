@@ -12,18 +12,20 @@ class BookingsController extends Controller
 
     public function index(Request $request)
     {
-        $query = DatVe::where('user_id', Auth::id())->with(['chuyenXe.nhaXe']);
+        // Lấy lịch sử đặt vé của user, gộp theo ma_ve
+        $query = DatVe::where('user_id', Auth::id())
+            ->with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
 
         // Filter by status
         if ($request->filled('status')) {
-            $query->whereStatus($request->status);
+            $query->where('trang_thai', $request->status);
         }
 
         // Search by booking ID or route name
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
+                $q->where('ma_ve', 'like', "%{$search}%")
                     ->orWhereHas('chuyenXe', function ($tripQuery) use ($search) {
                         $tripQuery->where(function ($routeQuery) use ($search) {
                             $routeQuery->whereHas('tramDi', function ($tramDiQuery) use ($search) {
@@ -37,9 +39,31 @@ class BookingsController extends Controller
             });
         }
 
-        $bookings = $query->orderBy('ngay_dat', 'desc')->paginate(10);
+        $allBookings = $query->orderBy('ngay_dat', 'desc')->get();
 
-        return view('AdminLTE.user.bookings.index', compact('bookings'));
+        // Group by ma_ve and format data
+        $groupedBookings = $allBookings->groupBy('ma_ve')->map(function ($group) {
+            $first = $group->first();
+            $first->so_ghe_list = $group->pluck('so_ghe')->toArray();
+            $first->so_luong_ghe = $group->count();
+            $first->tong_tien = $first->chuyenXe->gia_ve * $group->count();
+            return $first;
+        })->values();
+
+        // Manual pagination
+        $perPage = 10;
+        $currentPage = $request->get('page', 1);
+        $offset = ($currentPage - 1) * $perPage;
+
+        $paginatedBookings = new \Illuminate\Pagination\LengthAwarePaginator(
+            $groupedBookings->slice($offset, $perPage)->values(),
+            $groupedBookings->count(),
+            $perPage,
+            $currentPage,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('AdminLTE.user.bookings.index', compact('paginatedBookings'));
     }
 
     public function show(DatVe $booking)

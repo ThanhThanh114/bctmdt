@@ -62,14 +62,33 @@ class NhanVienController extends Controller
             'so_dien_thoai' => 'nullable|string|max:15',
             'email' => 'nullable|email|max:100',
             'ma_nha_xe' => 'required|exists:nha_xe,ma_nha_xe',
+            'password' => 'nullable|string|min:6|confirmed',
         ], [
             'ten_nv.required' => 'Vui lòng nhập tên nhân viên',
             'chuc_vu.required' => 'Vui lòng chọn chức vụ',
             'ma_nha_xe.required' => 'Vui lòng chọn nhà xe',
             'ma_nha_xe.exists' => 'Nhà xe không tồn tại',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp',
         ]);
 
-        NhanVien::create($validated);
+        // Create employee
+        $nhanVien = NhanVien::create($validated);
+
+        // If role is "quản lý" and password is provided, create User account
+        if ($validated['chuc_vu'] === 'quản lý' && !empty($validated['password'])) {
+            \App\Models\User::create([
+                'username' => $validated['email'] ?? 'manager_' . $nhanVien->ma_nv,
+                'email' => $validated['email'],
+                'password' => bcrypt($validated['password']),
+                'fullname' => $validated['ten_nv'],
+                'phone' => $validated['so_dien_thoai'],
+                'role' => 'staff'
+            ]);
+
+            return redirect()->route('admin.nhanvien.index')
+                ->with('success', 'Thêm nhân viên thành công! Tài khoản đăng nhập đã được tạo.');
+        }
 
         return redirect()->route('admin.nhanvien.index')
             ->with('success', 'Thêm nhân viên thành công!');

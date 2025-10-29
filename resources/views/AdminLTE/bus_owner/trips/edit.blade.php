@@ -122,6 +122,17 @@
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
+
+                            <div class="form-group">
+                                <label for="ngay_den">Ngày đến</label>
+                                <input type="date" class="form-control @error('ngay_den') is-invalid @enderror"
+                                    id="ngay_den" name="ngay_den"
+                                    value="{{ old('ngay_den', $trip->ngay_den ? \Carbon\Carbon::parse($trip->ngay_den)->format('Y-m-d') : '') }}">
+                                @error('ngay_den')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                                <small class="form-text text-muted">Ngày đến (để trống nếu chuyến đi trong ngày)</small>
+                            </div>
                         </div>
 
                         <div class="col-md-6">
@@ -293,6 +304,12 @@
 
             // Update available seats display
             $('.form-text').text('Ghế trống: ' + (soCho - soVe));
+        });
+
+        // Set min date for ngay_den based on ngay_di
+        $('#ngay_di').on('change', function() {
+            var ngayDi = $(this).val();
+            $('#ngay_den').attr('min', ngayDi);
         });
     });
 </script>

@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Helpers\ProfanityFilter;
 use Illuminate\Http\Request;
 
-class BinhLuanController extends Controller
+class CommentsController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -50,7 +50,7 @@ class BinhLuanController extends Controller
             $query->whereNull('parent_id');
         }
 
-        $binhLuan = $query->orderBy('ngay_bl', 'desc')->paginate(15);
+        $comments = $query->orderBy('ngay_bl', 'desc')->paginate(15);
 
         // Thống kê
         $stats = [
@@ -60,7 +60,7 @@ class BinhLuanController extends Controller
             'tu_choi' => BinhLuan::where('trang_thai', 'tu_choi')->count(),
         ];
 
-        return view('AdminLTE.admin.binh_luan.index', compact('binhLuan', 'stats'));
+        return view('AdminLTE.admin.comments.index', compact('comments', 'stats'));
     }
 
     /**
@@ -77,7 +77,7 @@ class BinhLuanController extends Controller
             ->orderBy('ngay_di', 'desc') // Mới nhất lên đầu
             ->get();
 
-        return view('AdminLTE.admin.binh_luan.create', compact('users', 'chuyenXe'));
+        return view('AdminLTE.admin.comments.create', compact('users', 'chuyenXe'));
     }
 
     /**
@@ -131,23 +131,23 @@ class BinhLuanController extends Controller
             ? 'Thêm bình luận thành công! (Tự động duyệt vì đánh giá ≥ 3 sao)'
             : 'Thêm bình luận thành công! (Chờ duyệt vì đánh giá ≤ 2 sao)';
 
-        return redirect()->route('admin.binhluan.index')
+        return redirect()->route('admin.comments.index')
             ->with('success', $message);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(BinhLuan $binhluan)
+    public function show(BinhLuan $comment)
     {
-        $binhluan->load(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'parent.user', 'replies.user']);
-        return view('AdminLTE.admin.binh_luan.show', compact('binhluan'));
+        $comment->load(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'parent.user', 'replies.user']);
+        return view('AdminLTE.admin.comments.show', compact('comment'));
     }
 
     /**
      * Store reply to comment (Admin reply to customer)
      */
-    public function reply(Request $request, BinhLuan $binhluan)
+    public function reply(Request $request, BinhLuan $comment)
     {
         $validated = $request->validate([
             'noi_dung' => 'required|string|max:1000',
@@ -161,9 +161,9 @@ class BinhLuanController extends Controller
 
         // Create reply
         $reply = BinhLuan::create([
-            'parent_id' => $binhluan->ma_bl,
+            'parent_id' => $comment->ma_bl,
             'user_id' => auth()->id(),
-            'chuyen_xe_id' => $binhluan->chuyen_xe_id,
+            'chuyen_xe_id' => $comment->chuyen_xe_id,
             'noi_dung' => $noiDung,
             'noi_dung_tl' => '',
             'so_sao' => null, // Replies don't have rating, use NULL instead of 0
@@ -224,10 +224,10 @@ class BinhLuanController extends Controller
             // Xóa bình luận chính
             $binhluan->delete();
 
-            return redirect()->route('admin.binhluan.index')
+            return redirect()->route('admin.comments.index')
                 ->with('success', 'Xóa bình luận thành công!');
         } catch (\Exception $e) {
-            return redirect()->route('admin.binhluan.index')
+            return redirect()->route('admin.comments.index')
                 ->with('error', 'Không thể xóa bình luận này!');
         }
     }
@@ -305,6 +305,6 @@ class BinhLuanController extends Controller
             ],
         ];
 
-        return view('AdminLTE.admin.binh_luan.statistics', compact('stats'));
+        return view('AdminLTE.admin.comments.statistics', compact('stats'));
     }
 }

@@ -4,7 +4,7 @@
 
 @section('page-title', 'Quản lý Bình luận & Đánh giá')
 @section('breadcrumb')
-<li class="breadcrumb-item"><a href="{{ route('staff.dashboard') }}">Dashboard</a></li>
+<li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
 <li class="breadcrumb-item active">Bình luận</li>
 @endsection
 
@@ -76,14 +76,14 @@
     <div class="card-header">
         <h3 class="card-title">Danh sách bình luận</h3>
     </div>
-    
+
     <!-- Filters -->
     <div class="card-body border-bottom">
         <form method="GET" class="form-inline">
             <div class="form-group mr-2">
                 <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="{{ request('search') }}">
             </div>
-            
+
             <div class="form-group mr-2">
                 <select name="trang_thai" class="form-control">
                     <option value="all" {{ request('trang_thai') == 'all' ? 'selected' : '' }}>Tất cả trạng thái</option>
@@ -92,7 +92,7 @@
                     <option value="tu_choi" {{ request('trang_thai') == 'tu_choi' ? 'selected' : '' }}>Từ chối</option>
                 </select>
             </div>
-            
+
             <div class="form-group mr-2">
                 <select name="so_sao" class="form-control">
                     <option value="all" {{ request('so_sao') == 'all' ? 'selected' : '' }}>Tất cả đánh giá</option>
@@ -103,11 +103,11 @@
                     <option value="1" {{ request('so_sao') == '1' ? 'selected' : '' }}>⭐ (1 sao)</option>
                 </select>
             </div>
-            
+
             <button type="submit" class="btn btn-primary mr-2">
                 <i class="fas fa-search"></i> Tìm
             </button>
-            <a href="{{ route('staff.binh-luan.index') }}" class="btn btn-secondary">
+            <a href="{{ route('admin.comments.index') }}" class="btn btn-secondary">
                 <i class="fas fa-redo"></i> Reset
             </a>
         </form>
@@ -119,6 +119,7 @@
                 <tr>
                     <th>Khách hàng</th>
                     <th>Chuyến xe</th>
+                    <th>Nhà xe</th>
                     <th>Đánh giá</th>
                     <th>Trạng thái</th>
                     <th>Ngày</th>
@@ -126,7 +127,7 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse($binhLuan as $comment)
+                @forelse($comments as $comment)
                 <tr>
                     <td>
                         <strong>{{ $comment->user->fullname }}</strong><br>
@@ -142,6 +143,9 @@
                             {{ \Carbon\Carbon::parse($comment->chuyenXe->ngay_di)->format('d/m/Y') }}
                             - {{ date('H:i', strtotime($comment->chuyenXe->gio_di)) }}
                         </small>
+                    </td>
+                    <td>
+                        <strong>{{ $comment->chuyenXe->nhaXe->ten_nha_xe }}</strong>
                     </td>
                     <td>
                         @for($i = 1; $i <= 5; $i++)
@@ -166,21 +170,27 @@
                     </td>
                     <td>
                         <div class="btn-group">
-                            <a href="{{ route('staff.binh-luan.show', $comment->ma_bl) }}" 
+                            <a href="{{ route('admin.comments.show', $comment->ma_bl) }}"
                                class="btn btn-sm btn-info" title="Xem & Trả lời">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            
+
                             @if($comment->trang_thai == 'cho_duyet')
-                            <form action="{{ route('staff.binh-luan.approve', $comment->ma_bl) }}" method="POST" class="d-inline">
+                            <form action="{{ route('admin.comments.approve', $comment->ma_bl) }}" method="POST" class="d-inline">
                                 @csrf
                                 <button type="submit" class="btn btn-sm btn-success" title="Duyệt">
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
+                            <form action="{{ route('admin.comments.reject', $comment->ma_bl) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-warning" title="Từ chối">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </form>
                             @endif
-                            
-                            <form action="{{ route('staff.binh-luan.destroy', $comment->ma_bl) }}" method="POST" 
+
+                            <form action="{{ route('admin.comments.destroy', $comment->ma_bl) }}" method="POST"
                                   class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')">
                                 @csrf
                                 @method('DELETE')
@@ -193,7 +203,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
+                    <td colspan="7" class="text-center text-muted py-4">
                         <i class="fas fa-comment-slash fa-3x mb-3"></i>
                         <p>Không có bình luận nào</p>
                     </td>
@@ -203,9 +213,9 @@
         </table>
     </div>
 
-    @if($binhLuan->hasPages())
+    @if($comments->hasPages())
     <div class="card-footer">
-        {{ $binhLuan->links() }}
+        {{ $comments->links() }}
     </div>
     @endif
 </div>

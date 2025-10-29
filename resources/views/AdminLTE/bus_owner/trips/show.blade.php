@@ -103,7 +103,7 @@
                             <tr>
                                 <th><i class="fas fa-ticket-alt text-muted mr-2"></i>Đã bán:</th>
                                 <td>
-                                    <span class="badge badge-warning">{{ $trip->so_ve }} vé</span>
+                                    <span class="badge badge-warning">{{ $trip->datVe->where('trang_thai', 'Đã thanh toán')->count() }} vé</span>
                                 </td>
                             </tr>
                         </table>
@@ -134,8 +134,8 @@
                 <table class="table table-hover">
                     <thead>
                         <tr>
-                            <th>Khách hàng</th>
                             <th>Email</th>
+                            <th>Vị trí ghế</th>
                             <th>Số vé</th>
                             <th>Ngày đặt</th>
                             <th>Trạng thái</th>
@@ -144,9 +144,22 @@
                     <tbody>
                         @forelse($recent_bookings as $booking)
                         <tr>
-                            <td>{{ $booking->user->name ?? 'N/A' }}</td>
-                            <td>{{ $booking->user->email ?? 'N/A' }}</td>
-                            <td><span class="badge badge-info">{{ $booking->so_luong_ve ?? 1 }}</span></td>
+                            <td>{{ $booking->email_khach_hang ?? $booking->user->email ?? 'N/A' }}</td>
+                            <td>
+                                @if($booking->so_ghe)
+                                    @php
+                                        $seats = explode(',', $booking->so_ghe);
+                                        $seatLabels = [];
+                                        foreach($seats as $seat) {
+                                            $seatLabels[] = 'Ghế ' . $seat;
+                                        }
+                                    @endphp
+                                    <span class="badge badge-secondary">{{ implode(', ', $seatLabels) }}</span>
+                                @else
+                                    <span class="text-muted">N/A</span>
+                                @endif
+                            </td>
+                            <td><span class="badge badge-info">{{ $booking->so_ghe ? count(explode(',', $booking->so_ghe)) : 1 }}</span></td>
                             <td>{{ $booking->ngay_dat ? \Carbon\Carbon::parse($booking->ngay_dat)->format('d/m/Y H:i') : 'N/A' }}
                             </td>
                             <td>
@@ -170,6 +183,7 @@
                 </table>
             </div>
         </div>
+
     </div>
 
     <div class="col-md-4">
@@ -181,7 +195,7 @@
             <div class="card-body">
                 @php
                 $totalSeats = $trip->so_cho;
-                $bookedSeats = $trip->so_ve;
+                $bookedSeats = $trip->datVe->where('trang_thai', 'Đã thanh toán')->count();
                 $availableSeats = $totalSeats - $bookedSeats;
                 $bookingRate = $totalSeats > 0 ? ($bookedSeats / $totalSeats) * 100 : 0;
                 @endphp
@@ -197,8 +211,8 @@
                     <div class="text-center mt-2">
                         <small class="text-muted">{{ $bookedSeats }} / {{ $totalSeats }} ghế</small>
                     </div>
+            
                 </div>
-
                 <div class="info-box bg-light mb-3">
                     <span class="info-box-icon bg-warning"><i class="fas fa-chair"></i></span>
                     <div class="info-box-content">

@@ -69,7 +69,13 @@ class DatVeController extends Controller
         if ($datve->chuyenXe) {
             $seats = explode(',', $datve->so_ghe);
             $seatCount = count(array_filter(array_map('trim', $seats)));
-            $totalAmount = $datve->chuyenXe->gia_ve * $seatCount;
+
+            // Làm sạch giá vé (loại bỏ dấu chấm và chuyển thành số)
+            $rawPrice = $datve->chuyenXe->gia_ve;
+            $cleanPrice = preg_replace('/[^0-9\.]/', '', (string)$rawPrice);
+            $pricePerSeat = $cleanPrice === '' ? 0.0 : (float)$cleanPrice;
+
+            $totalAmount = $pricePerSeat * $seatCount;
 
             // Áp dụng khuyến mãi
             foreach ($datve->khuyenMais as $km) {
@@ -240,7 +246,11 @@ class DatVeController extends Controller
                 if ($booking->chuyenXe) {
                     $route = ($booking->chuyenXe->tramDi->ten_tram ?? 'N/A') . ' → ' .
                         ($booking->chuyenXe->tramDen->ten_tram ?? 'N/A');
-                    $pricePerSeat = $booking->chuyenXe->gia_ve;
+
+                    // Làm sạch giá vé (loại bỏ dấu chấm và chuyển thành số)
+                    $rawPrice = $booking->chuyenXe->gia_ve;
+                    $cleanPrice = preg_replace('/[^0-9\.]/', '', (string)$rawPrice);
+                    $pricePerSeat = $cleanPrice === '' ? 0.0 : (float)$cleanPrice;
                 }
 
                 $seats = explode(',', $booking->so_ghe);
@@ -328,7 +338,13 @@ class DatVeController extends Controller
             if ($booking->chuyenXe && $booking->trang_thai !== 'Đã hủy') {
                 $seats = explode(',', $booking->so_ghe);
                 $seatCount = count(array_filter(array_map('trim', $seats)));
-                $total += $booking->chuyenXe->gia_ve * $seatCount;
+
+                // Làm sạch giá vé (loại bỏ dấu chấm và chuyển thành số)
+                $rawPrice = $booking->chuyenXe->gia_ve;
+                $cleanPrice = preg_replace('/[^0-9\.]/', '', (string)$rawPrice);
+                $pricePerSeat = $cleanPrice === '' ? 0.0 : (float)$cleanPrice;
+
+                $total += $pricePerSeat * $seatCount;
             }
         }
         return $total;
