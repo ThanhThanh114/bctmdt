@@ -139,7 +139,19 @@
                         <a href="{{ route('staff.comments.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Quay lại
                         </a>
-                        <form action="{{ route('staff.comments.destroy', $comment->ma_bl) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Xóa bình luận?')">
+
+                        <!-- Update Status Form -->
+                        <form action="{{ route('staff.comments.update', $comment->ma_bl) }}" method="POST" style="display:inline-block; margin-left: 10px;">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="trang_thai" value="{{ $comment->trang_thai == 'da_duyet' ? 'cho_duyet' : 'da_duyet' }}">
+                            <button type="submit" class="btn {{ $comment->trang_thai == 'da_duyet' ? 'btn-warning' : 'btn-success' }}">
+                                <i class="fas {{ $comment->trang_thai == 'da_duyet' ? 'fa-lock' : 'fa-unlock' }}"></i>
+                                {{ $comment->trang_thai == 'da_duyet' ? 'Khóa' : 'Mở khóa' }}
+                            </button>
+                        </form>
+
+                        <form action="{{ route('staff.comments.destroy', $comment->ma_bl) }}" method="POST" style="display:inline-block; margin-left: 10px;" onsubmit="return confirm('Xóa bình luận?')">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger">

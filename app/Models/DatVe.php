@@ -18,7 +18,11 @@ class DatVe extends Model
         'chuyen_xe_id',
         'ma_ve',
         'so_ghe',
-        'trang_thai'
+        'trang_thai',
+        'ten_khach_hang',
+        'email_khach_hang',
+        'sdt_khach_hang',
+        'ngay_dat'
     ];
 
     protected $casts = [

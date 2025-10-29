@@ -65,6 +65,42 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
 
                 <div class="filter-section">
+                    <h4><i class="fas fa-building"></i> Nhà xe</h4>
+                    <select id="busCompanySelect" onchange="changeBusCompany(this.value)" class="filter-select">
+                        <option value="all" {{ ($params['bus_company'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả nhà xe</option>
+                        @foreach(\App\Models\NhaXe::all() as $nhaXe)
+                        <option value="{{ $nhaXe->ma_nha_xe }}" {{ ($params['bus_company'] ?? 'all') == $nhaXe->ma_nha_xe ? 'selected' : '' }}>
+                            {{ $nhaXe->ten_nha_xe }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-day"></i> Ngày đi</h4>
+                    <input type="date" id="departureDateSelect" onchange="changeDepartureDate(this.value)" class="filter-select"
+                           value="{{ $params['departure_date'] ?? '' }}" min="{{ date('Y-m-d') }}">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-check"></i> Ngày đến</h4>
+                    <input type="date" id="arrivalDateSelect" onchange="changeArrivalDate(this.value)" class="filter-select"
+                           value="{{ $params['arrival_date'] ?? '' }}">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-user-tie"></i> Tài xế</h4>
+                    <select id="driverSelect" onchange="changeDriver(this.value)" class="filter-select">
+                        <option value="all" {{ ($params['driver'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả tài xế</option>
+                        @foreach(\App\Models\NhanVien::where('chuc_vu', 'Tài xế')->get() as $driver)
+                        <option value="{{ $driver->ma_nv }}" {{ ($params['driver'] ?? 'all') == $driver->ma_nv ? 'selected' : '' }}>
+                            {{ $driver->ten_nv }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="filter-section">
                     <h4><i class="fas fa-money-bill-wave"></i> Khoảng giá</h4>
                     <select id="priceRangeSelect" onchange="changePriceRange(this.value)" class="filter-select">
                         <option value="all" {{ ($params['price_range'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả

@@ -133,8 +133,8 @@
 
                         <!-- Comment Management -->
                         <li class="nav-item">
-                            <a href="{{ route('admin.binhluan.index') }}"
-                                class="nav-link {{ request()->routeIs('admin.binhluan.*') ? 'active' : '' }}">
+                            <a href="{{ route('admin.comments.index') }}"
+                                class="nav-link {{ request()->routeIs('admin.comments.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-comments"></i>
                                 <p>Quản lý bình luận</p>
                             </a>
@@ -257,14 +257,14 @@
                             </a>
                             <ul class="nav nav-treeview">
                                 <li class="nav-item">
-                                    <a href="{{ route('staff.ticket-scanner.index') }}" 
+                                    <a href="{{ route('staff.ticket-scanner.index') }}"
                                        class="nav-link {{ request()->routeIs('staff.ticket-scanner.index') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Quét mã QR</p>
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="{{ route('staff.ticket-scanner.today-trips') }}" 
+                                    <a href="{{ route('staff.ticket-scanner.today-trips') }}"
                                        class="nav-link {{ request()->routeIs('staff.ticket-scanner.today-trips') ? 'active' : '' }}">
                                         <i class="far fa-circle nav-icon"></i>
                                         <p>Chuyến xe hôm nay</p>
@@ -286,15 +286,6 @@
                                 class="nav-link {{ request()->routeIs('staff.contact.*') ? 'active' : '' }}">
                                 <i class="nav-icon fas fa-envelope"></i>
                                 <p>Quản lý liên hệ</p>
-                            </a>
-                        </li>
-
-                        <!-- Bình luận Management -->
-                        <li class="nav-item">
-                            <a href="{{ route('staff.binh-luan.index') }}"
-                                class="nav-link {{ request()->routeIs('staff.binh-luan.*') ? 'active' : '' }}">
-                                <i class="nav-icon fas fa-comments"></i>
-                                <p>Quản lý bình luận</p>
                             </a>
                         </li>
 

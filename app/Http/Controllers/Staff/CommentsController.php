@@ -15,6 +15,12 @@ class CommentsController extends Controller
     {
         $query = BinhLuan::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'parent', 'replies']);
 
+        // Chỉ hiển thị bình luận của chuyến xe thuộc nhà xe của nhân viên
+        $nhaXeId = auth()->user()->ma_nha_xe;
+        $query->whereHas('chuyenXe', function ($q) use ($nhaXeId) {
+            $q->where('ma_nha_xe', $nhaXeId);
+        });
+
         // Tìm kiếm
         if ($request->filled('user')) {
             $search = $request->user;
@@ -38,12 +44,23 @@ class CommentsController extends Controller
 
         $binhLuan = $query->orderBy('ngay_bl', 'desc')->paginate(15);
 
-        // Thống kê
+        // Thống kê - chỉ của nhà xe hiện tại
         $stats = [
-            'total' => BinhLuan::count(),
-            'cho_duyet' => BinhLuan::where('trang_thai', 'cho_duyet')->count(),
-            'da_duyet' => BinhLuan::where('trang_thai', 'da_duyet')->count(),
-            'tu_choi' => BinhLuan::where('trang_thai', 'tu_choi')->count(),
+            'total' => BinhLuan::whereHas('chuyenXe', function ($q) use ($nhaXeId) {
+                $q->where('ma_nha_xe', $nhaXeId);
+            })->whereNull('parent_id')->count(),
+
+            'cho_duyet' => BinhLuan::whereHas('chuyenXe', function ($q) use ($nhaXeId) {
+                $q->where('ma_nha_xe', $nhaXeId);
+            })->where('trang_thai', 'cho_duyet')->whereNull('parent_id')->count(),
+
+            'da_duyet' => BinhLuan::whereHas('chuyenXe', function ($q) use ($nhaXeId) {
+                $q->where('ma_nha_xe', $nhaXeId);
+            })->where('trang_thai', 'da_duyet')->whereNull('parent_id')->count(),
+
+            'tu_choi' => BinhLuan::whereHas('chuyenXe', function ($q) use ($nhaXeId) {
+                $q->where('ma_nha_xe', $nhaXeId);
+            })->where('trang_thai', 'tu_choi')->whereNull('parent_id')->count(),
         ];
 
         return view('AdminLTE.staff.comments.index', compact('binhLuan', 'stats'));
@@ -73,6 +90,7 @@ class CommentsController extends Controller
         $comment = BinhLuan::with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'parent', 'replies.user'])
             ->findOrFail($id);
 
+
         return view('AdminLTE.staff.comments.show', compact('comment'));
     }
 
@@ -92,6 +110,7 @@ class CommentsController extends Controller
     {
         $comment = BinhLuan::findOrFail($id);
 
+
         $validated = $request->validate([
             'trang_thai' => 'required|in:cho_duyet,da_duyet,tu_choi',
             'ly_do_tu_choi' => 'nullable|string'
@@ -108,6 +127,12 @@ class CommentsController extends Controller
     public function destroy($id)
     {
         $comment = BinhLuan::findOrFail($id);
+
+        // Kiểm tra quyền - chỉ xóa bình luận của nhà xe mình
+        if ($comment->chuyenXe->ma_nha_xe !== auth()->user()->ma_nha_xe) {
+            abort(403, 'Bạn không có quyền xóa bình luận này.');
+        }
+
         $comment->delete();
 
         return redirect()->route('staff.comments.index')->with('success', 'Đã xóa bình luận!');
@@ -119,6 +144,7 @@ class CommentsController extends Controller
     public function reply(Request $request, $id)
     {
         $parentComment = BinhLuan::findOrFail($id);
+
 
         $validated = $request->validate([
             'noi_dung_tl' => 'required|string'

@@ -29,7 +29,7 @@
                         <div class="col-md-3">
                             <h5 class="mb-0 text-dark">
                                 <i class="fas fa-bus mr-2"></i>
-                                <strong>{{ $item['trip']->ten_xe ?? $item['trip']->ma_xe }}</strong>
+                                <strong>{{ $item['trip']->ten_xe ?? $item['trip']->ma_xe ?? 'N/A' }}</strong>
                             </h5>
                             <small class="text-dark"><i class="fas fa-building mr-1"></i>{{ $item['trip']->nhaXe->ten_nha_xe ?? 'N/A' }}</small>
                         </div>
@@ -51,9 +51,10 @@
                             <span class="badge badge-secondary ml-2">{{ $item['trip']->so_cho }} ghế</span>
                         </div>
                         <div class="col-md-1 text-right">
-                            <a href="{{ route('staff.ticket-scanner.trip', $item['trip']->id) }}" 
-                               class="btn btn-primary btn-sm">
-                                <i class="fas fa-arrow-right"></i>
+                            <a href="{{ route('staff.ticket-scanner.trip', $item['trip']->id) }}"
+                               class="btn btn-primary btn-sm"
+                               title="Xem danh sách hành khách">
+                                <i class="fas fa-users"></i>
                             </a>
                         </div>
                     </div>

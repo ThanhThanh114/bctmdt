@@ -42,10 +42,10 @@ class BookingController extends Controller
                 ->first();
 
             if ($firstTrip) {
-                // Kiểm tra còn chỗ trống không
+                // Kiểm tra còn chỗ trống không - Chỉ đếm ghế đã thanh toán
                 $bookedSeats = DB::table('dat_ve')
                     ->where('chuyen_xe_id', $firstTrip->id)
-                    ->whereIn('trang_thai', ['Đã đặt', 'Đã thanh toán'])
+                    ->where('trang_thai', 'Đã thanh toán')
                     ->count();
 
                 $availableSeats = $firstTrip->so_cho - $bookedSeats;
@@ -89,12 +89,12 @@ class BookingController extends Controller
             $query->where('loai_xe', $busType);
         }
 
-        // Sử dụng subquery để tính chỗ trống (tránh lỗi GROUP BY)
+        // Sử dụng subquery để tính chỗ trống (tránh lỗi GROUP BY) - Chỉ đếm ghế đã thanh toán
         $query->addSelect([
             'available_seats' => DB::table('dat_ve')
                 ->selectRaw('chuyen_xe.so_cho - COALESCE(COUNT(dat_ve.id), 0)')
                 ->whereColumn('dat_ve.chuyen_xe_id', 'chuyen_xe.id')
-                ->whereIn('dat_ve.trang_thai', ['Đã đặt', 'Đã thanh toán'])
+                ->where('dat_ve.trang_thai', 'Đã thanh toán')
                 ->groupBy('dat_ve.chuyen_xe_id')
                 ->limit(1)
         ]);
@@ -121,7 +121,7 @@ class BookingController extends Controller
     {
         $selectedTrip = ChuyenXe::with(['nhaXe', 'tramDi', 'tramDen'])
             ->select('chuyen_xe.*', DB::raw('chuyen_xe.so_cho - COALESCE(booked_seats, 0) as available_seats'))
-            ->leftJoin(DB::raw('(SELECT chuyen_xe_id, COUNT(*) as booked_seats FROM dat_ve WHERE trang_thai IN ("Đã đặt", "Đã thanh toán") GROUP BY chuyen_xe_id) dv'), 'chuyen_xe.id', '=', 'dv.chuyen_xe_id')
+            ->leftJoin(DB::raw('(SELECT chuyen_xe_id, COUNT(*) as booked_seats FROM dat_ve WHERE trang_thai = "Đã thanh toán" GROUP BY chuyen_xe_id) dv'), 'chuyen_xe.id', '=', 'dv.chuyen_xe_id')
             ->where('chuyen_xe.id', $id)
             ->firstOrFail();
 
