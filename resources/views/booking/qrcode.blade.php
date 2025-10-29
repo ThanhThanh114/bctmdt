@@ -16,7 +16,7 @@
 
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a7a7c5 0%, #e8e0ef 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -53,7 +53,7 @@
         }
 
         .ticket-header {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #667eea;
             color: white;
             padding: 30px;
             text-align: center;
@@ -146,7 +146,7 @@
         }
 
         .route-display {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: #667eea;
             padding: 20px;
             border-radius: 15px;
             display: flex;

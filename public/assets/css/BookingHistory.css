@@ -389,22 +389,22 @@
         gap: 10px;
         align-items: flex-start;
     }
-    
+
     .pagination-link {
         min-width: 38px;
         height: 38px;
         padding: 0 10px;
         font-size: 14px;
     }
-    
+
     .pagination-info {
         padding: 0 15px;
     }
-    
+
     .pagination-text {
         font-size: 13px;
     }
-    
+
     .pagination-list {
         gap: 6px;
     }
