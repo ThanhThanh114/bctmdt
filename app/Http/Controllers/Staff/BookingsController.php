@@ -65,14 +65,6 @@ class BookingsController extends Controller
 
     public function show(DatVe $booking)
     {
-        $user = auth()->user();
-        $maNhaXe = $user->ma_nha_xe;
-        
-        // Kiểm tra booking có thuộc nhà xe của staff không
-        if ($maNhaXe && $booking->chuyenXe && $booking->chuyenXe->ma_nha_xe !== $maNhaXe) {
-            abort(403, 'Bạn không có quyền xem đặt vé này.');
-        }
-        
         $booking->load(['user', 'chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
         return view('AdminLTE.staff.bookings.show', compact('booking'));
     }

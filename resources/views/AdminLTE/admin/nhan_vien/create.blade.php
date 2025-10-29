@@ -118,7 +118,7 @@
                                             💼 Nhân viên văn phòng
                                         </option>
                                         <option value="quản lý" {{ old('chuc_vu') == 'quản lý' ? 'selected' : '' }}>
-                                            👔 Quản lý
+                                            👔 Quản lý (có mật khẩu)
                                         </option>
                                     </select>
                                     @error('chuc_vu')
@@ -151,6 +151,55 @@
                                     @error('ma_nha_xe')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Password fields for Quản lý role -->
+                    <div id="passwordFields" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="password">
+                                        <i class="fas fa-lock text-warning"></i> Mật khẩu
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                        </div>
+                                        <input type="password" name="password" id="password"
+                                            class="form-control @error('password') is-invalid @enderror"
+                                            value="{{ old('password') }}"
+                                            placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                                            minlength="6">
+                                        @error('password')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="password_confirmation">
+                                        <i class="fas fa-lock text-warning"></i> Xác nhận mật khẩu
+                                        <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                        </div>
+                                        <input type="password" name="password_confirmation" id="password_confirmation"
+                                            class="form-control @error('password_confirmation') is-invalid @enderror"
+                                            value="{{ old('password_confirmation') }}"
+                                            placeholder="Nhập lại mật khẩu"
+                                            minlength="6">
+                                        @error('password_confirmation')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -228,7 +277,7 @@
                 </div>
                 <div class="mb-0">
                     <span class="badge badge-warning mr-2">👔</span>
-                    <strong>Quản lý:</strong> Điều hành
+                    <strong>Quản lý:</strong> Điều hành (có tài khoản đăng nhập)
                 </div>
             </div>
         </div>
@@ -253,4 +302,22 @@
         border-radius: 0.5rem;
     }
 </style>
+
+<script>
+$(document).ready(function() {
+    // Show/hide password fields based on role selection
+    $('#chuc_vu').change(function() {
+        if ($(this).val() === 'quản lý') {
+            $('#passwordFields').slideDown();
+            $('#password, #password_confirmation').attr('required', true);
+        } else {
+            $('#passwordFields').slideUp();
+            $('#password, #password_confirmation').removeAttr('required').val('');
+        }
+    });
+
+    // Trigger change on page load if role is already selected
+    $('#chuc_vu').trigger('change');
+});
+</script>
 @endsection

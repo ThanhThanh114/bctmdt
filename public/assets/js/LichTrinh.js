@@ -402,6 +402,42 @@ function changeBusType(busTypeValue) {
     window.location.href = url.toString();
 }
 
+function changeBusCompany(busCompanyValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('bus_company', busCompanyValue);
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi nhà xe
+    window.location.href = url.toString();
+}
+
+function changeDepartureDate(dateValue) {
+    const url = new URL(window.location);
+    if (dateValue) {
+        url.searchParams.set('departure_date', dateValue);
+    } else {
+        url.searchParams.delete('departure_date');
+    }
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi ngày đi
+    window.location.href = url.toString();
+}
+
+function changeArrivalDate(dateValue) {
+    const url = new URL(window.location);
+    if (dateValue) {
+        url.searchParams.set('arrival_date', dateValue);
+    } else {
+        url.searchParams.delete('arrival_date');
+    }
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi ngày đến
+    window.location.href = url.toString();
+}
+
+function changeDriver(driverValue) {
+    const url = new URL(window.location);
+    url.searchParams.set('driver', driverValue);
+    url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi tài xế
+    window.location.href = url.toString();
+}
+
 function changePriceRange(priceRangeValue) {
     const url = new URL(window.location);
     url.searchParams.set('price_range', priceRangeValue);

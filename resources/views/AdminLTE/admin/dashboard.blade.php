@@ -110,7 +110,7 @@
                 </div>
             </div>
             <div class="card-footer bg-transparent border-0 text-right">
-                <a href="{{ route('admin.binhluan.index') }}" class="text-white text-decoration-none">
+                <a href="{{ route('admin.comments.index') }}" class="text-white text-decoration-none">
                     Xem chi tiết <i class="fas fa-arrow-right ml-1"></i>
                 </a>
             </div>
@@ -651,7 +651,7 @@
                         <tr>
                             <td>{{ $booking->ma_ve ?? $booking->id }}</td>
                             <td>
-                                <strong>{{ optional($booking->user)->full_name ?? optional($booking->user)->username ?? 'N/A' }}</strong><br>
+                                <strong>{{ optional($booking->user)->fullname ?? optional($booking->user)->username ?? $booking->ten_khach_hang ?? 'N/A' }}</strong><br>
                                 <small class="text-muted">{{ optional($booking->user)->email ?? '' }}</small>
                             </td>
                             <td>
