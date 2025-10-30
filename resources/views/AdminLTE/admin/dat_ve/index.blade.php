@@ -106,12 +106,12 @@
                 <form method="GET" action="{{ route('admin.datve.index') }}" class="mb-3">
                     <div class="row">
                         <div class="col-md-3">
-                            <input type="text" name="ma_ve" class="form-control" placeholder="Mã vé"
-                                value="{{ request('ma_ve') }}">
+                            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm (mã vé, tên, SĐT)"
+                                value="{{ request('search') }}">
                         </div>
                         <div class="col-md-3">
                             <select name="trang_thai" class="form-control">
-                                <option value="">-- Trạng thái --</option>
+                                <option value="">-- Tất cả trạng thái --</option>
                                 <option value="Đã đặt" {{ request('trang_thai') == 'Đã đặt' ? 'selected' : '' }}>Đã đặt
                                 </option>
                                 <option value="Đã thanh toán"
@@ -122,11 +122,10 @@
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <input type="date" name="ngay_dat" class="form-control" value="{{ request('ngay_dat') }}">
+                            <input type="date" name="from_date" class="form-control" placeholder="Từ ngày" value="{{ request('from_date') }}">
                         </div>
                         <div class="col-md-2">
-                            <input type="text" name="user" class="form-control" placeholder="Tên người đặt"
-                                value="{{ request('user') }}">
+                            <input type="date" name="to_date" class="form-control" placeholder="Đến ngày" value="{{ request('to_date') }}">
                         </div>
                         <div class="col-md-2">
                             <button type="submit" class="btn btn-primary btn-block">

@@ -41,7 +41,7 @@ class BinhLuanController extends Controller
         // Lấy tất cả bình luận đã duyệt (chỉ bình luận cha)
         // Load tất cả replies (từ user và staff/admin)
         $binhLuan = BinhLuan::with([
-                'user', 
+                'user',
                 'replies' => function($query) {
                     // Load tất cả replies đã duyệt, sắp xếp theo thời gian
                     $query->where('trang_thai', 'da_duyet')->orderBy('ngay_bl', 'asc');

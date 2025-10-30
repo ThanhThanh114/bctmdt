@@ -73,9 +73,16 @@ class BookingsController extends Controller
             abort(403, 'Bạn không có quyền xem đặt vé này.');
         }
 
-        $booking->load(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
+        // Get all bookings with the same ma_ve
+        $bookings = DatVe::where('ma_ve', $booking->ma_ve)
+            ->where('user_id', Auth::id())
+            ->with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->get();
 
-        return view('AdminLTE.user.bookings.show', compact('booking'));
+        // Use the first booking for general info
+        $booking = $bookings->first();
+
+        return view('AdminLTE.user.bookings.show', compact('booking', 'bookings'));
     }
 
     public function create(Request $request)
@@ -160,8 +167,15 @@ class BookingsController extends Controller
             return back()->with('error', 'Vé này không thể hiển thị mã QR. Trạng thái: ' . $booking->trang_thai);
         }
 
-        $booking->load(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen']);
+        // Get all bookings with the same ma_ve
+        $bookings = DatVe::where('ma_ve', $booking->ma_ve)
+            ->where('user_id', Auth::id())
+            ->with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen'])
+            ->get();
 
-        return view('AdminLTE.user.bookings.qrcode', compact('booking'));
+        // Use the first booking for general info
+        $booking = $bookings->first();
+
+        return view('AdminLTE.user.bookings.qrcode', compact('booking', 'bookings'));
     }
 }

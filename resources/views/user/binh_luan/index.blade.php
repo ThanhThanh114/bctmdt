@@ -307,38 +307,38 @@
                             <div class="card-body py-2">
                                 <div class="d-flex">
                                     @if($reply->user_id === Auth::id())
-                                        {{-- Reply từ chính user --}}
-                                        <div class="user-avatar mr-3" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                            {{ strtoupper(substr($reply->user->fullname, 0, 1)) }}
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <strong>{{ $reply->user->fullname }}</strong>
-                                                <span class="badge badge-primary badge-sm">Bạn</span>
-                                            </h6>
-                                            <p class="mb-1">{{ $reply->noi_dung }}</p>
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock mr-1"></i>
-                                                {{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->diffForHumans() }}
-                                            </small>
-                                        </div>
-                                    @else
-                                        {{-- Reply từ nhân viên/admin --}}
-                                        <div class="user-avatar mr-3" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                                            {{ strtoupper(substr($reply->user->fullname, 0, 1)) }}
-                                        </div>
-                                        <div class="flex-grow-1">
-                                            <h6 class="mb-1">
-                                                <strong>{{ $reply->user->fullname }}</strong>
-                                                <span class="admin-badge">{{ $reply->user->role === 'admin' ? 'ADMIN' : 'NHÂN VIÊN' }}</span>
-                                            </h6>
-                                            <p class="mb-1">{{ $reply->noi_dung }}</p>
-                                            <small class="text-muted">
-                                                <i class="fas fa-clock mr-1"></i>
-                                                {{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->diffForHumans() }}
-                                            </small>
-                                        </div>
-                                    @endif
+                                {{-- Reply từ chính user --}}
+                                <div class="user-avatar mr-3" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                    {{ strtoupper(substr($reply->user->fullname ?? $reply->user->username ?? 'U', 0, 1)) }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <strong>{{ $reply->user->fullname ?? $reply->user->username ?? 'Người dùng' }}</strong>
+                                        <span class="badge badge-primary badge-sm">Bạn</span>
+                                    </h6>
+                                    <p class="mb-1">{{ $reply->noi_dung }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        {{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->diffForHumans() }}
+                                    </small>
+                                </div>
+                            @else
+                                {{-- Reply từ nhân viên/admin --}}
+                                <div class="user-avatar mr-3" style="width: 40px; height: 40px; font-size: 16px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                    {{ strtoupper(substr($reply->user->fullname ?? $reply->user->username ?? 'S', 0, 1)) }}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1">
+                                        <strong>{{ $reply->user->fullname ?? $reply->user->username ?? 'Nhân viên' }}</strong>
+                                        <span class="admin-badge">{{ $reply->user->role === 'admin' ? 'ADMIN' : ($reply->user->role === 'Staff' ? 'NHÂN VIÊN' : 'NHÀ XE') }}</span>
+                                    </h6>
+                                    <p class="mb-1">{{ $reply->noi_dung }}</p>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        {{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->diffForHumans() }}
+                                    </small>
+                                </div>
+                            @endif
                                 </div>
                             </div>
                         </div>

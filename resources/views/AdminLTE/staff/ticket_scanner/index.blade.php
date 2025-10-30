@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div class="row mb-3">
+<div class="row mb-3" data-trip-route="{{ route('staff.ticket-scanner.trip', ':id') }}">
     <div class="col-md-12">
         <a href="{{ route('staff.ticket-scanner.today-trips') }}" class="btn btn-info">
             <i class="fas fa-list mr-1"></i>Xem Chuyến Xe Hôm Nay
@@ -150,6 +150,7 @@
     let lastScannedData = null;
 
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const tripRouteTemplate = document.querySelector('[data-trip-route]').dataset.tripRoute;
 
     // Handle image upload for QR scanning - Sử dụng jsQR
     function handleImageUpload(event) {
@@ -508,7 +509,7 @@
                 </tr>
                 <tr>
                     <th>SĐT tài xế</th>
-                    <td><a href="tel:${ticket.trip.driver_phone}">${ticket.trip.driver_phone}</a></td>
+                    <td><a href="tel:${ticket.trip.driver_phone}" class="text-primary">${ticket.trip.driver_phone}</a></td>
                 </tr>
                 <tr>
                     <th>Điểm đi</th>
@@ -533,7 +534,7 @@
             </table>
 
             <div class="mt-3 text-center">
-                <a href="{{ url('/staff/ticket-scanner/trip') }}/${ticket.trip.trip_id}" class="btn btn-info btn-sm" target="_blank">
+                <a href="${tripRouteTemplate.replace(':id', ticket.trip.trip_id)}" class="btn btn-info btn-sm" target="_blank">
                     <i class="fas fa-users mr-1"></i>Xem danh sách hành khách
                 </a>
             </div>
@@ -720,6 +721,17 @@
     /* Chỉ hiện loading khi đang scan camera, không phải upload file */
     .scanner-container.scanning #reader__dashboard_section_csr {
         display: block !important;
+    }
+
+    /* Cải thiện hiển thị link điện thoại */
+    .text-primary {
+        color: #007bff !important;
+        text-decoration: none;
+    }
+
+    .text-primary:hover {
+        color: #0056b3 !important;
+        text-decoration: underline;
     }
 </style>
 @endsection

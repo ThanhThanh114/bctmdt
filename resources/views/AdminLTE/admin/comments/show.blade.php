@@ -118,15 +118,15 @@
         <div class="card reply-card ml-4">
             <div class="card-body">
                 <div class="d-flex">
-                    @if($reply->user->role === 'staff' || $reply->user->role === 'nhanvien')
-                        {{-- Staff/NhanVien reply --}}
+                    @if($reply->user->role === 'staff' || $reply->user->role === 'nhanvien' || $reply->user->role === 'Bus_owner')
+                        {{-- Staff/NhanVien/Bus_owner reply --}}
                         <div class="user-avatar mr-3" style="width: 50px; height: 50px; font-size: 18px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                             <i class="fas fa-user-tie"></i>
                         </div>
                         <div class="flex-grow-1">
                             <h6 class="mb-1">
                                 <strong>{{ $comment->chuyenXe->nhaXe->ten_nha_xe }}</strong>
-                                <span class="badge badge-success">NHÀ XE</span>
+                                <span class="badge badge-success">{{ $reply->user->role === 'Bus_owner' ? 'NHÀ XE' : 'NHÂN VIÊN' }}</span>
                             </h6>
                             <p class="mb-1">{{ $reply->noi_dung }}</p>
                             <small class="text-muted">
@@ -244,16 +244,18 @@
                     </button>
                 </form>
 
-                <button type="button" class="btn btn-danger btn-block mb-2" data-toggle="modal" data-target="#rejectModal">
+                <button type="button" class="btn btn-danger btn-block mb-2"
+                        onclick="rejectCommentDetail({{ $comment->ma_bl }}, '{{ $comment->user->fullname }}')">
                     <i class="fas fa-times mr-2"></i>Từ chối
                 </button>
                 @endif
 
-                <form action="{{ route('admin.comments.destroy', $comment->ma_bl) }}" method="POST"
-                      onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')">
+
+                <form action="{{ route('admin.comments.destroy', $comment->ma_bl) }}" method="POST" class="d-inline-block w-100 mb-2">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="btn btn-outline-danger btn-block mb-2">
+                    <button type="submit" class="btn btn-outline-danger btn-block"
+                            onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')">
                         <i class="fas fa-trash mr-2"></i>Xóa bình luận
                     </button>
                 </form>
@@ -266,23 +268,48 @@
     </div>
 </div>
 
-<!-- Modal từ chối -->
-<div class="modal fade" id="rejectModal" tabindex="-1">
+<!-- Modal duyệt bình luận -->
+<div class="modal fade" id="approveModalDetail" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form action="{{ route('admin.comments.reject', $comment->ma_bl) }}" method="POST">
+            <form action="" method="POST" id="approveFormDetail">
+                @csrf
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Duyệt bình luận</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn duyệt bình luận của <strong id="approveUserNameDetail"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check mr-2"></i>Duyệt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal từ chối bình luận -->
+<div class="modal fade" id="rejectModalDetail" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="" method="POST" id="rejectFormDetail">
                 @csrf
                 <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title">Từ chối bình luận</h5>
                     <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
+                    <p>Bạn có chắc muốn từ chối bình luận của <strong id="rejectUserNameDetail"></strong>?</p>
                     <div class="form-group">
-                        <label for="ly_do_tu_choi">Lý do từ chối:</label>
+                        <label for="ly_do_tu_choi_detail">Lý do từ chối:</label>
                         <textarea
                             class="form-control"
                             name="ly_do_tu_choi"
-                            id="ly_do_tu_choi"
+                            id="ly_do_tu_choi_detail"
                             rows="4"
                             required
                             placeholder="Nhập lý do từ chối bình luận này..."
@@ -299,5 +326,58 @@
         </div>
     </div>
 </div>
+
+<script>
+function approveCommentDetail(commentId, userName) {
+    document.getElementById('approveFormDetail').action = `/admin/comments/${commentId}/approve`;
+    document.getElementById('approveUserNameDetail').textContent = userName;
+    $('#approveModalDetail').modal('show');
+}
+
+function rejectCommentDetail(commentId, userName) {
+    document.getElementById('rejectFormDetail').action = `/admin/comments/${commentId}/reject`;
+    document.getElementById('rejectUserNameDetail').textContent = userName;
+    $('#rejectModalDetail').modal('show');
+}
+
+// Handle form submissions with AJAX
+$(document).ready(function() {
+    $('#approveFormDetail, #rejectFormDetail').on('submit', function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        // Add CSRF token
+        formData.append('_token', '{{ csrf_token() }}');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                // Close modal
+                $('#approveModalDetail, #rejectModalDetail').modal('hide');
+                // Show success message
+                if (response.success !== false) {
+                    // Reload page after short delay
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 500);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                alert('Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
+            }
+        });
+    });
+});
+</script>
 
 @endsection

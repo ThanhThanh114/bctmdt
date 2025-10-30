@@ -88,6 +88,7 @@
                             <th>ID</th>
                             <th>Khách hàng</th>
                             <th>Chuyến xe</th>
+                            <th>Vị trí ghế</th>
                             <th>Số lượng vé</th>
                             <th>Tổng tiền</th>
                             <th>Ngày đặt</th>
@@ -113,6 +114,9 @@
                                     {{ $booking->chuyenXe->ngay_di ? \Carbon\Carbon::parse($booking->chuyenXe->ngay_di)->format('d/m/Y') : '' }}
                                     {{ $booking->chuyenXe->gio_di ? \Carbon\Carbon::parse($booking->chuyenXe->gio_di)->format('H:i') : '' }}
                                 </small>
+                            </td>
+                            <td>
+                                <span class="badge badge-secondary">{{ $booking->so_ghe ?? 'N/A' }}</span>
                             </td>
                             <td>
                                 <span class="badge badge-info">{{ $booking->so_luong_ve ?? 1 }}</span>

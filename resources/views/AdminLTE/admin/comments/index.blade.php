@@ -75,6 +75,11 @@
 <div class="card">
     <div class="card-header">
         <h3 class="card-title">Danh sách bình luận</h3>
+        <div class="card-tools">
+            <a href="{{ route('admin.comments.create') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus"></i> Thêm bình luận
+            </a>
+        </div>
     </div>
 
     <!-- Filters -->
@@ -182,19 +187,17 @@
                                     <i class="fas fa-check"></i>
                                 </button>
                             </form>
-                            <form action="{{ route('admin.comments.reject', $comment->ma_bl) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn btn-sm btn-warning" title="Từ chối">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </form>
+                            <button type="button" class="btn btn-sm btn-warning" title="Từ chối"
+                                    onclick="rejectComment({{ $comment->ma_bl }}, '{{ $comment->user->fullname }}')">
+                                <i class="fas fa-times"></i>
+                            </button>
                             @endif
 
-                            <form action="{{ route('admin.comments.destroy', $comment->ma_bl) }}" method="POST"
-                                  class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bình luận này?')">
+                            <form action="{{ route('admin.comments.destroy', $comment->ma_bl) }}" method="POST" class="d-inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa"
+                                        onclick="return confirm('Bạn có chắc muốn xóa bình luận này?')">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>
@@ -219,5 +222,137 @@
     </div>
     @endif
 </div>
+
+<!-- Modal duyệt bình luận -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="" method="POST" id="approveForm">
+                @csrf
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">Duyệt bình luận</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn duyệt bình luận của <strong id="approveUserName"></strong>?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check mr-2"></i>Duyệt
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal từ chối bình luận -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="" method="POST" id="rejectForm">
+                @csrf
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">Từ chối bình luận</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn từ chối bình luận của <strong id="rejectUserName"></strong>?</p>
+                    <div class="form-group">
+                        <label for="ly_do_tu_choi">Lý do từ chối:</label>
+                        <textarea class="form-control" name="ly_do_tu_choi" id="ly_do_tu_choi" rows="3" required
+                                  placeholder="Nhập lý do từ chối bình luận này..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times mr-2"></i>Từ chối
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function approveComment(commentId, userName) {
+    document.getElementById('approveForm').action = `/admin/comments/${commentId}/approve`;
+    document.getElementById('approveUserName').textContent = userName;
+    $('#approveModal').modal('show');
+}
+
+function rejectComment(commentId, userName) {
+    document.getElementById('rejectForm').action = `/admin/comments/${commentId}/reject`;
+    document.getElementById('rejectUserName').textContent = userName;
+    $('#rejectModal').modal('show');
+}
+
+// Handle form submissions with AJAX
+$(document).ready(function() {
+    $('#approveForm, #rejectForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        // Add CSRF token
+        formData.append('_token', '{{ csrf_token() }}');
+
+        $.ajax({
+            url: form.attr('action'),
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                // Close modal
+                $('#approveModal, #rejectModal').modal('hide');
+                // Reload page after short delay
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                alert('Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
+            }
+        });
+    });
+
+    // Handle inline form submissions (approve and delete)
+    $('form.d-inline').on('submit', function(e) {
+        e.preventDefault();
+
+        var form = $(this);
+        var formData = new FormData(form[0]);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method') || 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(response) {
+                // Reload page after short delay
+                setTimeout(function() {
+                    window.location.reload();
+                }, 500);
+            },
+            error: function(xhr, status, error) {
+                console.error('AJAX Error:', xhr.responseText);
+                alert('Có lỗi xảy ra khi xử lý yêu cầu. Vui lòng thử lại.');
+            }
+        });
+    });
+});
+</script>
 
 @endsection

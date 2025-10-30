@@ -190,7 +190,8 @@ class CommentsController extends Controller
             'nv_id' => null, // Set to null for admin actions since they're not from employees
         ]);
 
-        return redirect()->back()->with('success', 'Đã duyệt bình luận thành công!');
+        return redirect()->back()
+            ->with('success', 'Đã duyệt bình luận thành công!');
     }
 
     /**
@@ -209,7 +210,8 @@ class CommentsController extends Controller
             'ly_do_tu_choi' => $validated['ly_do_tu_choi'],
         ]);
 
-        return redirect()->back()->with('success', 'Đã từ chối bình luận!');
+        return redirect()->back()
+            ->with('success', 'Đã từ chối bình luận!');
     }
 
     /**
@@ -224,10 +226,10 @@ class CommentsController extends Controller
             // Xóa bình luận chính
             $binhluan->delete();
 
-            return redirect()->route('admin.comments.index')
+            return redirect()->back()
                 ->with('success', 'Xóa bình luận thành công!');
         } catch (\Exception $e) {
-            return redirect()->route('admin.comments.index')
+            return redirect()->back()
                 ->with('error', 'Không thể xóa bình luận này!');
         }
     }

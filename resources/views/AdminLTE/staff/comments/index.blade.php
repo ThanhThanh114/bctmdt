@@ -73,7 +73,7 @@
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title">
-                    <i class="fas fa-comments"></i> Danh sách bình luận
+                    <i class="fas fa-comments"></i> Danh sách bình luận của nhà xe
                 </h3>
             </div>
             <div class="card-body">

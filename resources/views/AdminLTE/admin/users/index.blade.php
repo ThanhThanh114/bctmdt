@@ -82,12 +82,8 @@
                                 @endif
                             </td>
                             <td>
-                                @if($user->role === 'Bus_owner')
-                                    @if($user->ma_nha_xe && $user->nhaXe)
-                                        {{ $user->nhaXe->ten_nha_xe }}
-                                    @else
-                                        <span class="text-muted">Chưa gán</span>
-                                    @endif
+                                @if($user->ma_nha_xe && $user->nhaXe)
+                                    {{ $user->nhaXe->ten_nha_xe }} ({{ $user->ma_nha_xe }})
                                 @else
                                     <span class="text-muted">-</span>
                                 @endif

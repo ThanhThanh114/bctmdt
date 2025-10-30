@@ -469,7 +469,16 @@ class BookingController extends Controller
                 ->with('error', 'Vé này không thể hiển thị mã QR. Trạng thái: ' . $booking->trang_thai);
         }
 
-        return view('booking.qrcode', compact('booking'));
+        // Get all bookings with the same ma_ve
+        $bookings = DatVe::where('ma_ve', $booking->ma_ve)
+            ->where('user_id', Auth::id())
+            ->with(['chuyenXe.nhaXe', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'user'])
+            ->get();
+
+        // Use the first booking for general info
+        $booking = $bookings->first();
+
+        return view('booking.qrcode', compact('booking', 'bookings'));
     }
 
     /**
