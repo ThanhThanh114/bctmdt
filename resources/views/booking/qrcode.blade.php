@@ -345,7 +345,11 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Số ghế</span>
-                            <span class="info-value">{{ $booking->so_ghe }}</span>
+                            <span class="info-value">
+                                @foreach($bookings as $b)
+                                    {{ $b->so_ghe }}{{ !$loop->last ? ', ' : '' }}
+                                @endforeach
+                            </span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Ngày đặt</span>

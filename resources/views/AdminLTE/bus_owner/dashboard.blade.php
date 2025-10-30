@@ -385,9 +385,9 @@
                             <td>{{ $trip->ngay_di ? \Carbon\Carbon::parse($trip->ngay_di)->format('d/m/Y') : 'N/A' }}
                             </td>
                             <td>{{ $trip->gio_di ? \Carbon\Carbon::parse($trip->gio_di)->format('H:i') : 'N/A' }}</td>
-                            <td>{{ $trip->ten_xe }}</td>
+                            <td>{{ $trip->tramDi->ten_tram ?? 'N/A' }} → {{ $trip->tramDen->ten_tram ?? 'N/A' }}</td>
                             <td>
-                                <span class="badge badge-info">{{ $trip->dat_ve_count }}</span>
+                                <span class="badge badge-info">{{ $trip->dat_ve_count ?? 0 }}</span>
                             </td>
                             <td>
                                 <span
@@ -494,7 +494,7 @@
                         <tr>
                             <td>{{ $booking->ngay_dat ? \Carbon\Carbon::parse($booking->ngay_dat)->format('d/m/Y H:i') : 'N/A' }}
                             </td>
-                            <td>{{ $booking->user->name ?? 'N/A' }}</td>
+                            <td>{{ $booking->user->fullname ?? 'N/A' }}</td>
                             <td>{{ $booking->chuyenXe->ten_xe ?? 'N/A' }}</td>
                             <td>{{ $booking->so_luong_ve ?? 1 }}</td>
                             <td>

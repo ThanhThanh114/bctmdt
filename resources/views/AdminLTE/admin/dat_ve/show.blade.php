@@ -52,12 +52,10 @@
                         <tr>
                             <td class="font-weight-bold">Số ghế:</td>
                             <td>
-                                @php
-                                $seats = explode(',', $datVe->so_ghe);
-                                @endphp
-                                @foreach($seats as $seat)
-                                <span class="badge badge-info mr-1">{{ trim($seat) }}</span>
+                                @foreach($bookings as $booking)
+                                <span class="badge badge-info mr-1">{{ $booking->so_ghe }}</span>
                                 @endforeach
+                                <small class="text-muted">({{ $bookings->count() }} ghế)</small>
                             </td>
                         </tr>
                         <tr>
@@ -66,14 +64,6 @@
                                 <strong class="text-success" style="font-size: 18px;">
                                     {{ $datVe->chuyenXe ? number_format($datVe->chuyenXe->gia_ve, 0, ',', '.') : '0' }}
                                     VNĐ
-                                </strong>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="font-weight-bold">Tổng tiền:</td>
-                            <td>
-                                <strong class="text-danger" style="font-size: 20px;">
-                                    {{ number_format($totalAmount, 0, ',', '.') }} VNĐ
                                 </strong>
                             </td>
                         </tr>

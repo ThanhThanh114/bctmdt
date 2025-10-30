@@ -70,6 +70,10 @@
                                     </td>
                                 </tr>
                                 <tr>
+                                    <th>Vị trí ghế:</th>
+                                    <td><span class="badge badge-secondary">{{ $booking->so_ghe ?? 'N/A' }}</span></td>
+                                </tr>
+                                <tr>
                                     <th>Số lượng vé:</th>
                                     <td><span class="badge badge-info">{{ $booking->so_luong_ve ?? 1 }}</span></td>
                                 </tr>

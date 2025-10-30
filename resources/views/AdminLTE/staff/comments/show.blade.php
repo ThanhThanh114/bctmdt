@@ -107,18 +107,32 @@
                             @endif
                         </dl>
 
-                        @if($comment->replies && $comment->replies->count() > 0)
+                        @if(isset($allReplies) && $allReplies->count() > 1)
                         <hr>
-                        <h5>Phản hồi ({{ $comment->replies->count() }})</h5>
-                        @foreach($comment->replies as $reply)
-                        <div class="card bg-light mb-2">
-                            <div class="card-body">
-                                <p><strong>{{ $reply->user->fullname ?? 'N/A' }}</strong></p>
-                                <p>{{ $reply->noi_dung_tl ?? $reply->noi_dung }}</p>
-                                <small class="text-muted">{{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->format('d/m/Y H:i') }}</small>
+                        <h5>Phản hồi ({{ $allReplies->count() - 1 }})</h5>
+                        @foreach($allReplies as $reply)
+                            @if($reply->ma_bl !== $comment->ma_bl)
+                            <div class="card bg-light mb-2">
+                                <div class="card-body">
+                                    <p><strong>{{ $reply->user->fullname ?? $reply->user->username ?? 'N/A' }}</strong>
+                                        @if($reply->user->role === 'admin')
+                                            <span class="badge badge-danger">ADMIN</span>
+                                        @elseif($reply->user->role === 'staff')
+                                            <span class="badge badge-info">NHÂN VIÊN</span>
+                                        @else
+                                            <span class="badge badge-success">USER</span>
+                                        @endif
+                                    </p>
+                                    <p>{{ $reply->noi_dung ?: $reply->noi_dung_tl }}</p>
+                                    <small class="text-muted">{{ \Carbon\Carbon::parse($reply->ngay_tl ?? $reply->ngay_bl)->format('d/m/Y H:i') }}</small>
+                                </div>
                             </div>
-                        </div>
+                            @endif
                         @endforeach
+                        @else
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Chưa có phản hồi nào.
+                        </div>
                         @endif
 
                         <!-- Reply Form -->

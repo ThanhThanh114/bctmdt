@@ -35,7 +35,7 @@ class UsersController extends Controller
         // Exclude admin users from regular listing
         $query->where('role', '!=', 'Admin');
 
-        $users = $query->paginate(10);
+        $users = $query->with('nhaXe')->paginate(10);
 
         return view('AdminLTE.admin.users.index', compact('users'));
     }
@@ -202,7 +202,7 @@ class UsersController extends Controller
             'admin_note' => $request->admin_note,
         ]);
 
-        return redirect()->route('admin.users.upgrade-requests')
+        return redirect()->back()
             ->with('success', 'Đã phê duyệt yêu cầu nâng cấp. Tài khoản đã được nâng lên Nhà xe.');
     }
 
@@ -245,7 +245,7 @@ class UsersController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.users.upgrade-requests')
+            return redirect()->back()
                 ->with('success', 'Đã từ chối yêu cầu nâng cấp.');
         } catch (\Exception $e) {
             DB::rollBack();

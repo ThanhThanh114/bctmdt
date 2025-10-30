@@ -30,6 +30,18 @@ class DatVeController extends Controller
             });
         }
 
+        // Tìm kiếm theo mã vé từ form
+        if ($request->filled('ma_ve')) {
+            $query->where('ma_ve', 'like', "%{$request->ma_ve}%");
+        }
+
+        // Tìm kiếm theo tên người dùng
+        if ($request->filled('user')) {
+            $query->whereHas('user', function ($q) use ($request) {
+                $q->where('fullname', 'like', "%{$request->user}%");
+            });
+        }
+
         // Lọc theo trạng thái
         if ($request->filled('trang_thai') && $request->trang_thai !== 'all') {
             $query->where('trang_thai', $request->trang_thai);
@@ -62,20 +74,25 @@ class DatVeController extends Controller
      */
     public function show(DatVe $datve)
     {
-        $datve->load(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe', 'khuyenMais']);
+        // Get all bookings with the same ma_ve
+        $bookings = DatVe::where('ma_ve', $datve->ma_ve)
+            ->with(['user', 'chuyenXe.tramDi', 'chuyenXe.tramDen', 'chuyenXe.nhaXe', 'khuyenMais'])
+            ->get();
+
+        // Use the first booking for general info
+        $datve = $bookings->first();
 
         // Tính tổng tiền
         $totalAmount = 0;
         if ($datve->chuyenXe) {
-            $seats = explode(',', $datve->so_ghe);
-            $seatCount = count(array_filter(array_map('trim', $seats)));
+            $totalSeats = $bookings->count();
 
             // Làm sạch giá vé (loại bỏ dấu chấm và chuyển thành số)
             $rawPrice = $datve->chuyenXe->gia_ve;
             $cleanPrice = preg_replace('/[^0-9\.]/', '', (string)$rawPrice);
             $pricePerSeat = $cleanPrice === '' ? 0.0 : (float)$cleanPrice;
 
-            $totalAmount = $pricePerSeat * $seatCount;
+            $totalAmount = $pricePerSeat * $totalSeats;
 
             // Áp dụng khuyến mãi
             foreach ($datve->khuyenMais as $km) {
@@ -87,7 +104,7 @@ class DatVeController extends Controller
         // Sử dụng tên biến $datVe để khớp với view
         $datVe = $datve;
 
-        return view('AdminLTE.admin.dat_ve.show', compact('datVe', 'totalAmount'));
+        return view('AdminLTE.admin.dat_ve.show', compact('datVe', 'totalAmount', 'bookings'));
     }
 
     /**

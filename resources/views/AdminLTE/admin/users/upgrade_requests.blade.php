@@ -79,9 +79,13 @@
                             <i class="fas fa-eye"></i> Xem
                         </a>
                         @if($request->status === 'paid')
-                        <a href="{{ route('admin.users.upgrade-request-detail', $request->id) }}" class="btn btn-sm btn-success">
-                            <i class="fas fa-check"></i> Duyệt
-                        </a>
+                        <form action="{{ route('admin.users.approve-upgrade', $request->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('PATCH')
+                            <button type="submit" class="btn btn-sm btn-success">
+                                <i class="fas fa-check"></i> Duyệt
+                            </button>
+                        </form>
                         @endif
                     </td>
                 </tr>
@@ -114,7 +118,7 @@
             <span class="info-box-icon bg-primary"><i class="fas fa-credit-card"></i></span>
             <div class="info-box-content">
                 <span class="info-box-text">Đã thanh toán</span>
-                <span class="info-box-number">{{ \App\Models\UpgradeRequest::paid()->count() }}</span>
+                <span class="info-box-number">{{ \App\Models\Payment::completed()->count() }}</span>
             </div>
         </div>
     </div>

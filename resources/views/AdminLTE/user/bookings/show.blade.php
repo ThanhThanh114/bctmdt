@@ -87,7 +87,9 @@
                         <tr>
                             <td class="font-weight-bold">Số ghế:</td>
                             <td>
-                                <span class="badge badge-info">{{ $booking->so_ghe }}</span>
+                                @foreach($bookings as $b)
+                                    <span class="badge badge-info mr-1">{{ $b->so_ghe }}</span>
+                                @endforeach
                             </td>
                         </tr>
                         <tr>
@@ -107,32 +109,6 @@
             </div>
         </div>
 
-        <!-- Passenger Information -->
-        <div class="card shadow-sm mt-3">
-            <div class="card-header bg-info text-white">
-                <h3 class="card-title mb-0">
-                    <i class="fas fa-user mr-2"></i>Thông tin hành khách
-                </h3>
-            </div>
-            <div class="card-body">
-                <table class="table table-borderless">
-                    <tbody>
-                        <tr>
-                            <td width="35%" class="font-weight-bold">Họ tên:</td>
-                            <td>{{ $booking->ten_khach_hang }}</td>
-                        </tr>
-                        <tr>
-                            <td class="font-weight-bold">Số điện thoại:</td>
-                            <td>{{ $booking->sdt_khach_hang }}</td>
-                        </tr>
-                        <tr>
-                            <td class="font-weight-bold">Email:</td>
-                            <td>{{ $booking->email }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
     </div>
 
     <!-- Actions Sidebar -->

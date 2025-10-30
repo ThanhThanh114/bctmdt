@@ -37,7 +37,11 @@
                     <div class="row">
                         <div class="col-md-6">
                             <p class="mb-2"><strong>Mã vé:</strong> <span class="text-primary">{{ $booking->ma_ve }}</span></p>
-                            <p class="mb-2"><strong>Số ghế:</strong> <span class="badge badge-success">{{ $booking->so_ghe }}</span></p>
+                            <p class="mb-2"><strong>Số ghế:</strong>
+                                @foreach($bookings as $b)
+                                    <span class="badge badge-success mr-1">{{ $b->so_ghe }}</span>
+                                @endforeach
+                            </p>
                             <p class="mb-2"><strong>Trạng thái:</strong> 
                                 <span class="badge badge-{{ $booking->trang_thai == 'Đã xác nhận' ? 'success' : ($booking->trang_thai == 'Đã đặt' ? 'warning' : 'info') }}">
                                     {{ $booking->trang_thai }}
