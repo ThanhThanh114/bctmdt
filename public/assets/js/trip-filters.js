@@ -18,7 +18,46 @@ function changeBusCompany(busCompanyValue) {
     const url = new URL(window.location);
     url.searchParams.set('bus_company', busCompanyValue);
     url.searchParams.set('page', '1'); // Reset về trang đầu khi thay đổi nhà xe
+
+    // Cập nhật dropdown tài xế dựa trên nhà xe đã chọn
+    updateDriverDropdown(busCompanyValue);
+
     fetchAndReplace(url.toString());
+}
+
+// Hàm cập nhật dropdown tài xế dựa trên nhà xe đã chọn
+async function updateDriverDropdown(busCompanyValue) {
+    try {
+        const response = await fetch(`/api/drivers-by-company?bus_company=${encodeURIComponent(busCompanyValue)}`);
+        const data = await response.json();
+
+        const driverSelect = document.getElementById('driverSelect');
+        if (!driverSelect) return;
+
+        // Lưu lại giá trị hiện tại
+        const currentDriver = driverSelect.value;
+
+        // Xóa tất cả options trừ option đầu tiên
+        driverSelect.innerHTML = '<option value="all">Tất cả tài xế</option>';
+
+        // Thêm các tài xế mới
+        if (data.drivers && data.drivers.length > 0) {
+            data.drivers.forEach(driverName => {
+                const option = document.createElement('option');
+                option.value = driverName;
+                option.textContent = driverName;
+                driverSelect.appendChild(option);
+            });
+        }
+
+        // Reset về "Tất cả tài xế" khi thay đổi nhà xe
+        driverSelect.value = 'all';
+
+    } catch (error) {
+        console.error('Lỗi khi cập nhật danh sách tài xế:', error);
+        // Fallback: nếu có lỗi, reload trang để lấy dữ liệu từ server
+        window.location.reload();
+    }
 }
 
 function changeDepartureDate(dateValue) {

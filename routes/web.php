@@ -41,6 +41,9 @@ Route::get('/admin', function () {
 Route::get('/lichtrinh', [TripController::class, 'index'])->name('trips.trips');
 Route::post('/lichtrinh', [TripController::class, 'handleSearch'])->name('trips.search');
 
+// API route để lấy danh sách tài xế theo nhà xe
+Route::get('/api/drivers-by-company', [TripController::class, 'getDriversByBusCompany'])->name('trips.drivers-by-company');
+
 // Legacy routes for backward compatibility
 Route::get('/LichTrinh.php', [TripController::class, 'index']);
 Route::get('/TraCuu.php', [TrackingController::class, 'index']);
