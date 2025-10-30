@@ -1,91 +1,83 @@
-/* LichTrinh.js
-   - Dữ liệu mẫu (~50 tuyến)
-   - Render bảng
-   - Tìm kiếm theo điểm đi/đến
-   - Hoán đổi input
-   - Lọc theo loại xe
-   - Phân trang
-   - Sắp xếp cột
-   - Highlight row khi bấm "Tìm tuyến xe"
-*/
+/* LichTrinh.js - Trip filter handling */
 
-/* ==================== DỮ LIỆU MẪU (>=50 items) ==================== */
-const lichTrinhData = [
-    { tuyen: "Hà Nội ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "1,700km", thoiGian: "34 giờ", giaVe: "800,000đ" },
-    { tuyen: "Hà Nội ⇌ Đà Nẵng", loaiXe: "Giường", quangDuong: "770km", thoiGian: "15 giờ", giaVe: "350,000đ" },
-    { tuyen: "Hà Nội ⇌ Huế", loaiXe: "Giường", quangDuong: "690km", thoiGian: "13 giờ 30 phút", giaVe: "320,000đ" },
-    { tuyen: "Hà Nội ⇌ Hải Phòng", loaiXe: "Ghế ngồi", quangDuong: "120km", thoiGian: "2 giờ", giaVe: "80,000đ" },
-    { tuyen: "Hà Nội ⇌ Vinh", loaiXe: "Limousine", quangDuong: "310km", thoiGian: "6 giờ", giaVe: "200,000đ" },
-    { tuyen: "Hà Nội ⇌ Thanh Hóa", loaiXe: "Giường", quangDuong: "150km", thoiGian: "3 giờ", giaVe: "120,000đ" },
-    { tuyen: "Hà Nội ⇌ Ninh Bình", loaiXe: "Ghế ngồi", quangDuong: "90km", thoiGian: "2 giờ", giaVe: "70,000đ" },
-    { tuyen: "Hà Nội ⇌ Quảng Ninh", loaiXe: "Limousine", quangDuong: "180km", thoiGian: "3 giờ 30 phút", giaVe: "150,000đ" },
+// No need for initial data as we load from server via AJAX
+const state = {
+    currentPage: 1,
+    selectedRowIndex: null
+};
+//     { tuyen: "Hà Nội ⇌ Huế", loaiXe: "Giường", quangDuong: "690km", thoiGian: "13 giờ 30 phút", giaVe: "320,000đ" },
+//     { tuyen: "Hà Nội ⇌ Hải Phòng", loaiXe: "Ghế ngồi", quangDuong: "120km", thoiGian: "2 giờ", giaVe: "80,000đ" },
+//     { tuyen: "Hà Nội ⇌ Vinh", loaiXe: "Limousine", quangDuong: "310km", thoiGian: "6 giờ", giaVe: "200,000đ" },
+//     { tuyen: "Hà Nội ⇌ Thanh Hóa", loaiXe: "Giường", quangDuong: "150km", thoiGian: "3 giờ", giaVe: "120,000đ" },
+//     { tuyen: "Hà Nội ⇌ Ninh Bình", loaiXe: "Ghế ngồi", quangDuong: "90km", thoiGian: "2 giờ", giaVe: "70,000đ" },
+//     { tuyen: "Hà Nội ⇌ Quảng Ninh", loaiXe: "Limousine", quangDuong: "180km", thoiGian: "3 giờ 30 phút", giaVe: "150,000đ" },
 
-    { tuyen: "Hải Phòng ⇌ Đà Nẵng", loaiXe: "Giường", quangDuong: "900km", thoiGian: "17 giờ", giaVe: "420,000đ" },
-    { tuyen: "Hải Phòng ⇌ Huế", loaiXe: "Giường", quangDuong: "860km", thoiGian: "16 giờ", giaVe: "400,000đ" },
+//     { tuyen: "Hải Phòng ⇌ Đà Nẵng", loaiXe: "Giường", quangDuong: "900km", thoiGian: "17 giờ", giaVe: "420,000đ" },
+//     { tuyen: "Hải Phòng ⇌ Huế", loaiXe: "Giường", quangDuong: "860km", thoiGian: "16 giờ", giaVe: "400,000đ" },
 
-    { tuyen: "Đà Nẵng ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "960km", thoiGian: "18 giờ", giaVe: "550,000đ" },
-    { tuyen: "Đà Nẵng ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "520km", thoiGian: "9 giờ", giaVe: "300,000đ" },
-    { tuyen: "Đà Nẵng ⇌ Quy Nhơn", loaiXe: "Giường", quangDuong: "300km", thoiGian: "6 giờ", giaVe: "180,000đ" },
-    { tuyen: "Đà Nẵng ⇌ Huế", loaiXe: "Limousine", quangDuong: "100km", thoiGian: "2 giờ", giaVe: "120,000đ" },
+//     { tuyen: "Đà Nẵng ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "960km", thoiGian: "18 giờ", giaVe: "550,000đ" },
+//     { tuyen: "Đà Nẵng ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "520km", thoiGian: "9 giờ", giaVe: "300,000đ" },
+//     { tuyen: "Đà Nẵng ⇌ Quy Nhơn", loaiXe: "Giường", quangDuong: "300km", thoiGian: "6 giờ", giaVe: "180,000đ" },
+//     { tuyen: "Đà Nẵng ⇌ Huế", loaiXe: "Limousine", quangDuong: "100km", thoiGian: "2 giờ", giaVe: "120,000đ" },
 
-    { tuyen: "Huế ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "450km", thoiGian: "9 giờ", giaVe: "280,000đ" },
-    { tuyen: "Huế ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "950km", thoiGian: "18 giờ", giaVe: "520,000đ" },
+//     { tuyen: "Huế ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "450km", thoiGian: "9 giờ", giaVe: "280,000đ" },
+//     { tuyen: "Huế ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "950km", thoiGian: "18 giờ", giaVe: "520,000đ" },
 
-    { tuyen: "Quảng Ninh ⇌ Lạng Sơn", loaiXe: "Ghế ngồi", quangDuong: "150km", thoiGian: "3 giờ", giaVe: "90,000đ" },
+//     { tuyen: "Quảng Ninh ⇌ Lạng Sơn", loaiXe: "Ghế ngồi", quangDuong: "150km", thoiGian: "3 giờ", giaVe: "90,000đ" },
 
-    { tuyen: "Vinh ⇌ Thanh Hóa", loaiXe: "Ghế ngồi", quangDuong: "160km", thoiGian: "3 giờ", giaVe: "110,000đ" },
-    { tuyen: "Vinh ⇌ Hà Tĩnh", loaiXe: "Limousine", quangDuong: "120km", thoiGian: "2 giờ 30 phút", giaVe: "140,000đ" },
+//     { tuyen: "Vinh ⇌ Thanh Hóa", loaiXe: "Ghế ngồi", quangDuong: "160km", thoiGian: "3 giờ", giaVe: "110,000đ" },
+//     { tuyen: "Vinh ⇌ Hà Tĩnh", loaiXe: "Limousine", quangDuong: "120km", thoiGian: "2 giờ 30 phút", giaVe: "140,000đ" },
 
-    { tuyen: "Quy Nhơn ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "150,000đ" },
-    { tuyen: "Nha Trang ⇌ Phan Thiết", loaiXe: "Giường", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "160,000đ" },
+//     { tuyen: "Quy Nhơn ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "150,000đ" },
+//     { tuyen: "Nha Trang ⇌ Phan Thiết", loaiXe: "Giường", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "160,000đ" },
 
-    { tuyen: "Phan Thiết ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "4 giờ", giaVe: "120,000đ" },
-    { tuyen: "Bảo Lộc ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "200km", thoiGian: "5 giờ", giaVe: "220,000đ" },
+//     { tuyen: "Phan Thiết ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "4 giờ", giaVe: "120,000đ" },
+//     { tuyen: "Bảo Lộc ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "200km", thoiGian: "5 giờ", giaVe: "220,000đ" },
 
-    { tuyen: "Đà Lạt ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "300km", thoiGian: "7 giờ", giaVe: "250,000đ" },
-    { tuyen: "Buôn Ma Thuột ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "350km", thoiGian: "8 giờ", giaVe: "300,000đ" },
+//     { tuyen: "Đà Lạt ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "300km", thoiGian: "7 giờ", giaVe: "250,000đ" },
+//     { tuyen: "Buôn Ma Thuột ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "350km", thoiGian: "8 giờ", giaVe: "300,000đ" },
 
-    { tuyen: "Pleiku ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "520km", thoiGian: "11 giờ", giaVe: "380,000đ" },
-    { tuyen: "Kon Tum ⇌ Pleiku", loaiXe: "Ghế ngồi", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "140,000đ" },
+//     { tuyen: "Pleiku ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "520km", thoiGian: "11 giờ", giaVe: "380,000đ" },
+//     { tuyen: "Kon Tum ⇌ Pleiku", loaiXe: "Ghế ngồi", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "140,000đ" },
 
-    { tuyen: "Gia Lai ⇌ Đà Nẵng", loaiXe: "Limousine", quangDuong: "360km", thoiGian: "8 giờ", giaVe: "300,000đ" },
+//     { tuyen: "Gia Lai ⇌ Đà Nẵng", loaiXe: "Limousine", quangDuong: "360km", thoiGian: "8 giờ", giaVe: "300,000đ" },
 
-    { tuyen: "Cần Thơ ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "170km", thoiGian: "4 giờ", giaVe: "140,000đ" },
-    { tuyen: "Cần Thơ ⇌ Rạch Giá", loaiXe: "Ghế ngồi", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "120,000đ" },
+//     { tuyen: "Cần Thơ ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "170km", thoiGian: "4 giờ", giaVe: "140,000đ" },
+//     { tuyen: "Cần Thơ ⇌ Rạch Giá", loaiXe: "Ghế ngồi", quangDuong: "220km", thoiGian: "5 giờ", giaVe: "120,000đ" },
 
-    { tuyen: "Rạch Giá ⇌ Hà Tiên", loaiXe: "Giường", quangDuong: "135km", thoiGian: "3 giờ", giaVe: "90,000đ" },
-    { tuyen: "Hà Tiên ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "360km", thoiGian: "8 giờ", giaVe: "320,000đ" },
+//     { tuyen: "Rạch Giá ⇌ Hà Tiên", loaiXe: "Giường", quangDuong: "135km", thoiGian: "3 giờ", giaVe: "90,000đ" },
+//     { tuyen: "Hà Tiên ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "360km", thoiGian: "8 giờ", giaVe: "320,000đ" },
 
-    { tuyen: "Bến Tre ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "85km", thoiGian: "2 giờ 30 phút", giaVe: "90,000đ" },
-    { tuyen: "Trà Vinh ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "5 giờ", giaVe: "130,000đ" },
+//     { tuyen: "Bến Tre ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "85km", thoiGian: "2 giờ 30 phút", giaVe: "90,000đ" },
+//     { tuyen: "Trà Vinh ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "5 giờ", giaVe: "130,000đ" },
 
-    { tuyen: "Vũng Tàu ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "120km", thoiGian: "2 giờ 30 phút", giaVe: "100,000đ" },
-    { tuyen: "Long Khánh ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "110km", thoiGian: "2 giờ", giaVe: "150,000đ" },
+//     { tuyen: "Vũng Tàu ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "120km", thoiGian: "2 giờ 30 phút", giaVe: "100,000đ" },
+//     { tuyen: "Long Khánh ⇌ TP.Hồ Chí Minh", loaiXe: "Limousine", quangDuong: "110km", thoiGian: "2 giờ", giaVe: "150,000đ" },
 
-    { tuyen: "Biên Hòa ⇌ Vũng Tàu", loaiXe: "Ghế ngồi", quangDuong: "70km", thoiGian: "1 giờ 30 phút", giaVe: "70,000đ" },
-    { tuyen: "Bạc Liêu ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "270km", thoiGian: "6 giờ", giaVe: "200,000đ" },
+//     { tuyen: "Biên Hòa ⇌ Vũng Tàu", loaiXe: "Ghế ngồi", quangDuong: "70km", thoiGian: "1 giờ 30 phút", giaVe: "70,000đ" },
+//     { tuyen: "Bạc Liêu ⇌ TP.Hồ Chí Minh", loaiXe: "Giường", quangDuong: "270km", thoiGian: "6 giờ", giaVe: "200,000đ" },
 
-    { tuyen: "Cà Mau ⇌ Bạc Liêu", loaiXe: "Giường", quangDuong: "140km", thoiGian: "3 giờ", giaVe: "90,000đ" },
-    { tuyen: "Sóc Trăng ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "230km", thoiGian: "5 giờ 30 phút", giaVe: "140,000đ" },
+//     { tuyen: "Cà Mau ⇌ Bạc Liêu", loaiXe: "Giường", quangDuong: "140km", thoiGian: "3 giờ", giaVe: "90,000đ" },
+//     { tuyen: "Sóc Trăng ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "230km", thoiGian: "5 giờ 30 phút", giaVe: "140,000đ" },
 
-    { tuyen: "Hưng Yên ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "55km", thoiGian: "1 giờ 10 phút", giaVe: "60,000đ" },
-    { tuyen: "Phú Thọ ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "80km", thoiGian: "1 giờ 40 phút", giaVe: "70,000đ" },
+//     { tuyen: "Hưng Yên ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "55km", thoiGian: "1 giờ 10 phút", giaVe: "60,000đ" },
+//     { tuyen: "Phú Thọ ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "80km", thoiGian: "1 giờ 40 phút", giaVe: "70,000đ" },
 
-    { tuyen: "Tam Kỳ ⇌ Đà Nẵng", loaiXe: "Ghế ngồi", quangDuong: "100km", thoiGian: "2 giờ", giaVe: "90,000đ" },
-    { tuyen: "Quảng Ngãi ⇌ Quy Nhơn", loaiXe: "Giường", quangDuong: "210km", thoiGian: "4 giờ 30 phút", giaVe: "160,000đ" },
+//     { tuyen: "Tam Kỳ ⇌ Đà Nẵng", loaiXe: "Ghế ngồi", quangDuong: "100km", thoiGian: "2 giờ", giaVe: "90,000đ" },
+//     { tuyen: "Quảng Ngãi ⇌ Quy Nhơn", loaiXe: "Giường", quangDuong: "210km", thoiGian: "4 giờ 30 phút", giaVe: "160,000đ" },
 
-    { tuyen: "Mỹ Tho ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "70km", thoiGian: "1 giờ 45 phút", giaVe: "70,000đ" },
-    { tuyen: "Bình Thuận ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "140,000đ" },
+//     { tuyen: "Mỹ Tho ⇌ TP.Hồ Chí Minh", loaiXe: "Ghế ngồi", quangDuong: "70km", thoiGian: "1 giờ 45 phút", giaVe: "70,000đ" },
+//     { tuyen: "Bình Thuận ⇌ Nha Trang", loaiXe: "Giường", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "140,000đ" },
 
-    { tuyen: "Phú Yên ⇌ Nha Trang", loaiXe: "Limousine", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "220,000đ" },
-    { tuyen: "Hòa Bình ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "80km", thoiGian: "1 giờ 50 phút", giaVe: "70,000đ" },
+//     { tuyen: "Phú Yên ⇌ Nha Trang", loaiXe: "Limousine", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "220,000đ" },
+//     { tuyen: "Hòa Bình ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "80km", thoiGian: "1 giờ 50 phút", giaVe: "70,000đ" },
 
-    { tuyen: "Sơn La ⇌ Hà Nội", loaiXe: "Giường", quangDuong: "300km", thoiGian: "7 giờ", giaVe: "210,000đ" },
-    { tuyen: "Yên Bái ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "120,000đ" },
+//     { tuyen: "Sơn La ⇌ Hà Nội", loaiXe: "Giường", quangDuong: "300km", thoiGian: "7 giờ", giaVe: "210,000đ" },
+//     { tuyen: "Yên Bái ⇌ Hà Nội", loaiXe: "Ghế ngồi", quangDuong: "180km", thoiGian: "4 giờ", giaVe: "120,000đ" },
 
-    { tuyen: "Lào Cai ⇌ Hà Nội", loaiXe: "Limousine", quangDuong: "320km", thoiGian: "7 giờ 30 phút", giaVe: "270,000đ" },
-    { tuyen: "Điện Biên ⇌ Sơn La", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "5 giờ 30 phút", giaVe: "190,000đ" }
-];
+//     { tuyen: "Lào Cai ⇌ Hà Nội", loaiXe: "Limousine", quangDuong: "320km", thoiGian: "7 giờ 30 phút", giaVe: "270,000đ" },
+//     { tuyen: "Điện Biên ⇌ Sơn La", loaiXe: "Ghế ngồi", quangDuong: "200km", thoiGian: "5 giờ 30 phút", giaVe: "190,000đ" }
+// ];
 
 /* ==================== STATE ==================== */
 let state = {

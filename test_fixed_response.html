@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lịch Trình - FUTA Bus Lines</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/assets/css/Index.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/assets/css/Header.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/assets/css/footer.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/assets/css/Search-form.css">
+    <link rel="stylesheet" href="http://127.0.0.1:8000/assets/css/Lichtrinh.css">
+    <script src="http://127.0.0.1:8000/assets/js/trip-filters.js"></script>
+</head>
+
+<body>
+    <!-- resources/views/components/header.blade.php -->
+<style>
+    /* Dropdown menu styling for user menu */
+    .user-dropdown {
+        position: relative;
+        display: inline-block;
+        z-index: 10000;
+    }
+
+    .user-menu {
+        position: fixed;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        padding: 8px 0;
+        min-width: 220px;
+        max-height: 400px;
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(10px);
+        transition: all 0.3s ease;
+        z-index: 99999;
+    }
+
+    .user-menu.active {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+
+    .user-menu-item {
+        display: block;
+        padding: 12px 16px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+        white-space: nowrap;
+    }
+
+    .user-menu-item:hover {
+        background-color: #f3f4f6;
+    }
+
+    .user-menu-item.logout:hover {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+
+    .user-menu hr {
+        margin: 8px 0;
+        border: none;
+        border-top: 1px solid #e5e7eb;
+    }
+
+    /* Custom scrollbar for dropdown */
+    .user-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .user-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .user-menu::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .user-menu::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .user-btn {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .user-btn:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+<header class="header-home-page">
+    <!-- Top bar desktop -->
+    <div class="header-top-desktop">
+        <div class="header-top-left">
+            <div class="language-dropdown">
+                <i class="fas fa-flag" style="color: #FFD700; font-size: 20px;"></i>
+                <span class="language-text">VI</span>
+                <i class="fas fa-chevron-down" style="color: white; font-size: 12px;"></i>
+            </div>
+            <div class="app-download">
+                <i class="fas fa-mobile-alt" style="color: white; font-size: 20px;"></i>
+                <span class="app-text">Tải ứng dụng</span>
+                <i class="fas fa-chevron-down" style="color: white; font-size: 12px;"></i>
+            </div>
+        </div>
+
+        <div class="header-logo">
+            <a href="http://127.0.0.1:8000">
+                <div
+                    style="color: white; font-size: 28px; font-weight: bold; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-bus" style="color: #FFD54F;"></i>
+                    FUTA Bus Lines
+                </div>
+            </a>
+        </div>
+
+        <div class="header-top-right">
+                            <a href="http://127.0.0.1:8000/login" class="login-btn">
+                    <i class="fas fa-user" style="color: #FF5722; font-size: 16px;"></i>
+                    Đăng nhập/Đăng ký
+                </a>
+                    </div>
+    </div>
+
+    <!-- Navigation desktop -->
+    <div class="header-nav-desktop">
+        <a href="http://127.0.0.1:8000" class="nav-link ">Trang
+            chủ</a>
+        <a href="http://127.0.0.1:8000/lichtrinh" class="nav-link active">Lịch
+            trình</a>
+        <a href="http://127.0.0.1:8000/tracuu"
+            class="nav-link ">Tra cứu vé</a>
+        <a href="http://127.0.0.1:8000/tintuc" class="nav-link ">Tin
+            tức</a>
+        <a href="http://127.0.0.1:8000/hoadon"
+            class="nav-link ">Hóa đơn</a>
+        <a href="http://127.0.0.1:8000/lienhe"
+            class="nav-link ">Liên hệ</a>
+        <a href="http://127.0.0.1:8000/about" class="nav-link ">Về
+            chúng tôi</a>
+    </div> <!-- Mobile header -->
+    <div class="header-mobile">
+        <div class="mobile-top">
+            <div class="mobile-left">
+                <input type="checkbox" id="mobile-menu" class="mobile-menu-toggle">
+                <label for="mobile-menu" class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </label>
+                <div class="mobile-language">
+                    <i class="fas fa-flag" style="color: #FFD700; font-size: 20px;"></i>
+                </div>
+            </div>
+
+            <a href="http://127.0.0.1:8000" class="mobile-logo">
+                <div
+                    style="color: white; font-size: 20px; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-bus" style="color: #FFD54F;"></i>
+                    FUTA
+                </div>
+            </a>
+
+            <div class="mobile-avatar">
+                                    <i class="fas fa-user" style="color: #FF5722; font-size: 20px;"></i>
+                            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <div class="mobile-menu-overlay">
+            <div class="mobile-menu-content">
+                <div class="mobile-menu-header">
+                    <a href="http://127.0.0.1:8000" class="mobile-menu-logo"></a>
+                </div>
+
+                                    <div class="mobile-login">
+                        <a href="http://127.0.0.1:8000/login"><button>Đăng nhập/Đăng ký</button></a>
+                    </div>
+                
+                <nav class="mobile-nav">
+                    <ul>
+                        <li><a href="http://127.0.0.1:8000" class="">Trang
+                                chủ</a></li>
+                        <li><a href="http://127.0.0.1:8000/lichtrinh"
+                                class="active">Lịch trình</a></li>
+                        <li><a href="http://127.0.0.1:8000/tracuu"
+                                class="">Tra cứu vé</a></li>
+                        <li><a href="http://127.0.0.1:8000/tintuc"
+                                class="">Tin tức</a></li>
+                        <li><a href="http://127.0.0.1:8000/hoadon"
+                                class="">Hóa đơn</a></li>
+                        <li><a href="http://127.0.0.1:8000/lienhe"
+                                class="">Liên hệ</a></li>
+                        <li><a href="http://127.0.0.1:8000/about"
+                                class="">Về chúng tôi</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- User dropdown functionality -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const userMenu = document.getElementById('user-menu');
+        const userBtn = document.querySelector('.user-btn');
+
+        console.log('User menu elements:', {
+            userMenu,
+            userBtn
+        }); // Debug log
+
+        if (userBtn && userMenu) {
+            // Function to position dropdown
+            function positionDropdown() {
+                const btnRect = userBtn.getBoundingClientRect();
+                const menuHeight = userMenu.offsetHeight || 300; // Estimated height
+                const spaceAbove = btnRect.top;
+                const spaceBelow = window.innerHeight - btnRect.bottom;
+
+                // Position dropdown
+                if (spaceBelow < menuHeight && spaceAbove > spaceBelow) {
+                    // Show above if not enough space below
+                    userMenu.style.bottom = (window.innerHeight - btnRect.top + 8) + 'px';
+                    userMenu.style.top = 'auto';
+                } else {
+                    // Show below by default
+                    userMenu.style.top = (btnRect.bottom + 8) + 'px';
+                    userMenu.style.bottom = 'auto';
+                }
+                userMenu.style.right = (window.innerWidth - btnRect.right) + 'px';
+            }
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function (event) {
+                if (!userBtn.contains(event.target) && !userMenu.contains(event.target)) {
+                    userMenu.classList.remove('active');
+                }
+            });
+
+            // Toggle dropdown when clicking button
+            userBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Button clicked, toggling menu'); // Debug log
+
+                if (!userMenu.classList.contains('active')) {
+                    positionDropdown();
+                }
+
+                userMenu.classList.toggle('active');
+            });
+
+            // Reposition on window resize
+            window.addEventListener('resize', function () {
+                if (userMenu.classList.contains('active')) {
+                    positionDropdown();
+                }
+            });
+
+            console.log('Dropdown functionality initialized'); // Debug log
+        } else {
+            console.log('Dropdown elements not found'); // Debug log
+        }
+    });
+</script>
+    <main class="main-content">
+        <div class="search-form-container">
+    <div class="search-form-wrapper">
+        <div class="trip-type-wrapper">
+            <div class="trip-type-radio">
+                <label class="radio-option ">
+                    <input type="radio" name="trip" value="oneway" checked>
+                    <span class="radio-text">Một chiều</span>
+                </label>
+                <label class="radio-option ">
+                    <input type="radio" name="trip" value="round">
+                    <span class="radio-text">Khứ hồi</span>
+                </label>
+            </div>
+            <span class="guide-link">
+                <a href="http://127.0.0.1:8000/huong-dan" target="_blank">Hướng dẫn mua vé</a>
+            </span>
+        </div>
+
+        <form class="search-form" method="GET" action="http://127.0.0.1:8000/lichtrinh">
+            <div class="search-row">
+                <div class="search-locations">
+                    <div class="location-field">
+                        <label>Điểm đi</label>
+                        <div class="location-input">
+                            <select name="start" required>
+                                <option value="">Chọn điểm đi</option>
+                                                                    <option value="Bến xe An Sương" >Bến xe An Sương</option>
+                                                                    <option value="Bến xe Bạc Liêu" >Bến xe Bạc Liêu</option>
+                                                                    <option value="Bến xe Bắc Ninh" >Bến xe Bắc Ninh</option>
+                                                                    <option value="Bến xe Bắc Thanh Hóa" >Bến xe Bắc Thanh Hóa</option>
+                                                                    <option value="Bến xe Bến Tre" >Bến xe Bến Tre</option>
+                                                                    <option value="Bến xe Buôn Ma Thuột" >Bến xe Buôn Ma Thuột</option>
+                                                                    <option value="Bến xe Cà Mau" >Bến xe Cà Mau</option>
+                                                                    <option value="Bến xe Cần Thơ" >Bến xe Cần Thơ</option>
+                                                                    <option value="Bến xe Cao Bằng" >Bến xe Cao Bằng</option>
+                                                                    <option value="Bến xe Châu Đốc" >Bến xe Châu Đốc</option>
+                                                                    <option value="Bến xe Chợ Lớn" >Bến xe Chợ Lớn</option>
+                                                                    <option value="Bến xe Đà Lạt" >Bến xe Đà Lạt</option>
+                                                                    <option value="Bến xe Điện Biên Phủ" >Bến xe Điện Biên Phủ</option>
+                                                                    <option value="Bến xe Gia Lâm" >Bến xe Gia Lâm</option>
+                                                                    <option value="Bến xe Giáp Bát" >Bến xe Giáp Bát</option>
+                                                                    <option value="Bến xe Hạ Long" >Bến xe Hạ Long</option>
+                                                                    <option value="Bến xe Hải Dương" >Bến xe Hải Dương</option>
+                                                                    <option value="Bến xe Lạc Long" >Bến xe Lạc Long</option>
+                                                                    <option value="Bến xe Lạng Sơn" >Bến xe Lạng Sơn</option>
+                                                                    <option value="Bến xe Lào Cai" >Bến xe Lào Cai</option>
+                                                                    <option value="Bến xe Long Xuyên" >Bến xe Long Xuyên</option>
+                                                                    <option value="Bến xe Miền Đông" >Bến xe Miền Đông</option>
+                                                                    <option value="Bến xe Miền Đông Mới" >Bến xe Miền Đông Mới</option>
+                                                                    <option value="Bến xe Miền Tây" >Bến xe Miền Tây</option>
+                                                                    <option value="Bến xe Mỹ Đình" >Bến xe Mỹ Đình</option>
+                                                                    <option value="Bến xe Mỹ Tho" >Bến xe Mỹ Tho</option>
+                                                                    <option value="Bến xe Nam Định" >Bến xe Nam Định</option>
+                                                                    <option value="Bến xe Nam Thanh Hóa" >Bến xe Nam Thanh Hóa</option>
+                                                                    <option value="Bến xe Ngã Bảy" >Bến xe Ngã Bảy</option>
+                                                                    <option value="Bến xe Nha Trang" >Bến xe Nha Trang</option>
+                                                                    <option value="Bến xe Niệm Nghĩa" >Bến xe Niệm Nghĩa</option>
+                                                                    <option value="Bến xe Nước Ngầm" >Bến xe Nước Ngầm</option>
+                                                                    <option value="Bến xe Phan Thiết" >Bến xe Phan Thiết</option>
+                                                                    <option value="Bến xe phía Bắc Đà Nẵng" >Bến xe phía Bắc Đà Nẵng</option>
+                                                                    <option value="Bến xe Phía Bắc Huế" >Bến xe Phía Bắc Huế</option>
+                                                                    <option value="Bến xe Phía Nam Huế" >Bến xe Phía Nam Huế</option>
+                                                                    <option value="Bến xe Phía Nam Nha Trang" >Bến xe Phía Nam Nha Trang</option>
+                                                                    <option value="Bến xe Quy Nhơn" >Bến xe Quy Nhơn</option>
+                                                                    <option value="Bến xe Rạch Giá" >Bến xe Rạch Giá</option>
+                                                                    <option value="Bến xe Sa Pa" >Bến xe Sa Pa</option>
+                                                                    <option value="Bến xe Sóc Trăng" >Bến xe Sóc Trăng</option>
+                                                                    <option value="Bến xe Sơn La" >Bến xe Sơn La</option>
+                                                                    <option value="Bến xe Tam Bạc" >Bến xe Tam Bạc</option>
+                                                                    <option value="Bến xe Thái Bình" >Bến xe Thái Bình</option>
+                                                                    <option value="Bến xe Trà Vinh" >Bến xe Trà Vinh</option>
+                                                                    <option value="Bến xe Trung tâm Đà Nẵng" >Bến xe Trung tâm Đà Nẵng</option>
+                                                                    <option value="Bến xe Vinh" >Bến xe Vinh</option>
+                                                                    <option value="Bến xe Vĩnh Long" >Bến xe Vĩnh Long</option>
+                                                                    <option value="Bến xe Vũng Tàu" >Bến xe Vũng Tàu</option>
+                                                                    <option value="Bến xe Yên Nghĩa" >Bến xe Yên Nghĩa</option>
+                                                            </select>
+                        </div>
+                    </div>
+
+                <div class="switch-location" onclick="swapLocations()" title="Đổi vị trí">
+                    <div class="switch-icon">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+
+                <div class="location-field">
+                    <label>Điểm đến</label>
+                    <div class="location-input">
+                        <select name="end" required>
+                            <option value="">Chọn điểm đến</option>
+                                                            <option value="Bến xe An Sương" >Bến xe An Sương</option>
+                                                            <option value="Bến xe Bạc Liêu" >Bến xe Bạc Liêu</option>
+                                                            <option value="Bến xe Bắc Ninh" >Bến xe Bắc Ninh</option>
+                                                            <option value="Bến xe Bắc Thanh Hóa" >Bến xe Bắc Thanh Hóa</option>
+                                                            <option value="Bến xe Bến Tre" >Bến xe Bến Tre</option>
+                                                            <option value="Bến xe Buôn Ma Thuột" >Bến xe Buôn Ma Thuột</option>
+                                                            <option value="Bến xe Cà Mau" >Bến xe Cà Mau</option>
+                                                            <option value="Bến xe Cần Thơ" >Bến xe Cần Thơ</option>
+                                                            <option value="Bến xe Cao Bằng" >Bến xe Cao Bằng</option>
+                                                            <option value="Bến xe Châu Đốc" >Bến xe Châu Đốc</option>
+                                                            <option value="Bến xe Chợ Lớn" >Bến xe Chợ Lớn</option>
+                                                            <option value="Bến xe Đà Lạt" >Bến xe Đà Lạt</option>
+                                                            <option value="Bến xe Điện Biên Phủ" >Bến xe Điện Biên Phủ</option>
+                                                            <option value="Bến xe Gia Lâm" >Bến xe Gia Lâm</option>
+                                                            <option value="Bến xe Giáp Bát" >Bến xe Giáp Bát</option>
+                                                            <option value="Bến xe Hạ Long" >Bến xe Hạ Long</option>
+                                                            <option value="Bến xe Hải Dương" >Bến xe Hải Dương</option>
+                                                            <option value="Bến xe Lạc Long" >Bến xe Lạc Long</option>
+                                                            <option value="Bến xe Lạng Sơn" >Bến xe Lạng Sơn</option>
+                                                            <option value="Bến xe Lào Cai" >Bến xe Lào Cai</option>
+                                                            <option value="Bến xe Long Xuyên" >Bến xe Long Xuyên</option>
+                                                            <option value="Bến xe Miền Đông" >Bến xe Miền Đông</option>
+                                                            <option value="Bến xe Miền Đông Mới" >Bến xe Miền Đông Mới</option>
+                                                            <option value="Bến xe Miền Tây" >Bến xe Miền Tây</option>
+                                                            <option value="Bến xe Mỹ Đình" >Bến xe Mỹ Đình</option>
+                                                            <option value="Bến xe Mỹ Tho" >Bến xe Mỹ Tho</option>
+                                                            <option value="Bến xe Nam Định" >Bến xe Nam Định</option>
+                                                            <option value="Bến xe Nam Thanh Hóa" >Bến xe Nam Thanh Hóa</option>
+                                                            <option value="Bến xe Ngã Bảy" >Bến xe Ngã Bảy</option>
+                                                            <option value="Bến xe Nha Trang" >Bến xe Nha Trang</option>
+                                                            <option value="Bến xe Niệm Nghĩa" >Bến xe Niệm Nghĩa</option>
+                                                            <option value="Bến xe Nước Ngầm" >Bến xe Nước Ngầm</option>
+                                                            <option value="Bến xe Phan Thiết" >Bến xe Phan Thiết</option>
+                                                            <option value="Bến xe phía Bắc Đà Nẵng" >Bến xe phía Bắc Đà Nẵng</option>
+                                                            <option value="Bến xe Phía Bắc Huế" >Bến xe Phía Bắc Huế</option>
+                                                            <option value="Bến xe Phía Nam Huế" >Bến xe Phía Nam Huế</option>
+                                                            <option value="Bến xe Phía Nam Nha Trang" >Bến xe Phía Nam Nha Trang</option>
+                                                            <option value="Bến xe Quy Nhơn" >Bến xe Quy Nhơn</option>
+                                                            <option value="Bến xe Rạch Giá" >Bến xe Rạch Giá</option>
+                                                            <option value="Bến xe Sa Pa" >Bến xe Sa Pa</option>
+                                                            <option value="Bến xe Sóc Trăng" >Bến xe Sóc Trăng</option>
+                                                            <option value="Bến xe Sơn La" >Bến xe Sơn La</option>
+                                                            <option value="Bến xe Tam Bạc" >Bến xe Tam Bạc</option>
+                                                            <option value="Bến xe Thái Bình" >Bến xe Thái Bình</option>
+                                                            <option value="Bến xe Trà Vinh" >Bến xe Trà Vinh</option>
+                                                            <option value="Bến xe Trung tâm Đà Nẵng" >Bến xe Trung tâm Đà Nẵng</option>
+                                                            <option value="Bến xe Vinh" >Bến xe Vinh</option>
+                                                            <option value="Bến xe Vĩnh Long" >Bến xe Vĩnh Long</option>
+                                                            <option value="Bến xe Vũng Tàu" >Bến xe Vũng Tàu</option>
+                                                            <option value="Bến xe Yên Nghĩa" >Bến xe Yên Nghĩa</option>
+                                                    </select>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+            <div class="search-row-bottom">
+                <div class="date-ticket-wrapper">
+                    <div class="date-field">
+                        <label>Ngày đi</label>
+                        <div class="date-input">
+                            <input type="date" name="date" value="">
+                        </div>
+                    </div>
+                <div class="ticket-field">
+                    <label>Số vé</label>
+                    <div class="ticket-input">
+                        <select name="ticket">
+                                                            <option value="1" selected>1</option>
+                                                            <option value="2" >2</option>
+                                                            <option value="3" >3</option>
+                                                            <option value="4" >4</option>
+                                                            <option value="5" >5</option>
+                                                    </select>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+            <div class="search-button-wrapper">
+                <button type="submit" class="search-button">Tìm chuyến xe</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+        <div class="trips-container">
+            <!-- Sidebar Bộ lọc bên trái -->
+            <aside class="filters-sidebar">
+                <div class="sidebar-header">
+                    <h3><i class="fas fa-filter"></i> Bộ lọc tìm kiếm</h3>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-sort"></i> Sắp xếp theo</h4>
+                    <select id="sortSelect" onchange="changeSort(this.value)" class="filter-select">
+                        <option value="date_asc" selected>
+                            Ngày gần nhất</option>
+                        <option value="date_desc" >
+                            Ngày xa nhất</option>
+                        <option value="time_asc" >Giờ
+                            sớm nhất</option>
+                        <option value="time_desc" >
+                            Giờ muộn nhất</option>
+                        <option value="price_asc" >
+                            Giá thấp đến cao</option>
+                        <option value="price_desc" >Giá cao đến thấp</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-bus"></i> Loại xe</h4>
+                    <select id="busTypeSelect" onchange="changeBusType(this.value)" class="filter-select">
+                        <option value="all" >Tất cả
+                        </option>
+                        <option value="Giường nằm" selected>
+                            Giường nằm</option>
+                        <option value="Limousine" >
+                            Limousine</option>
+                        <option value="Ghế ngồi" >Ghế
+                            ngồi</option>
+                    </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-building"></i> Nhà xe</h4>
+                    <select id="busCompanySelect" onchange="changeBusCompany(this.value)" class="filter-select">
+                        <option value="all" selected>Tất cả nhà xe</option>
+                                                <option value="1" >
+                            FUTA Bus
+                        </option>
+                                                <option value="2" >
+                            Phương Trang
+                        </option>
+                                                <option value="3" >
+                            Mai Linh12
+                        </option>
+                                                <option value="4" >
+                            Thành Bưởi
+                        </option>
+                                                <option value="5" >
+                            Hoàng Long
+                        </option>
+                                                <option value="6" >
+                            Xe Việt
+                        </option>
+                                                <option value="7" >
+                            An Phú Bus
+                        </option>
+                                                <option value="8" >
+                            OpenTour
+                        </option>
+                                                <option value="9" >
+                            Kumho Samco
+                        </option>
+                                                <option value="10" >
+                            Hà Lan
+                        </option>
+                                                <option value="11" >
+                            Tây Đô
+                        </option>
+                                                <option value="12" >
+                            Cúc Tùng
+                        </option>
+                                                <option value="13" >
+                            Thanh Buoi Express
+                        </option>
+                                                <option value="14" >
+                            HTX Vận Tải Sài Gòn
+                        </option>
+                                                <option value="15" >
+                            Hoang Huy
+                        </option>
+                                                <option value="23" >
+                            Nhà Xe 23
+                        </option>
+                                                <option value="25" >
+                            Nhà Xe 25
+                        </option>
+                                            </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-day"></i> Ngày đi</h4>
+                    <input type="date" id="departureDateSelect" onchange="changeDepartureDate(this.value)" class="filter-select"
+                           value="" min="2025-10-30">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-calendar-check"></i> Ngày đến</h4>
+                    <input type="date" id="arrivalDateSelect" onchange="changeArrivalDate(this.value)" class="filter-select"
+                           value="">
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-user-tie"></i> Tài xế</h4>
+                    <select id="driverSelect" onchange="changeDriver(this.value)" class="filter-select">
+                        <option value="all" selected>Tất cả tài xế</option>
+                                                                        <option value="Lê Văn D" >
+                            Lê Văn D
+                        </option>
+                                                <option value="Lê Văn G" >
+                            Lê Văn G
+                        </option>
+                                                <option value="Lê Văn Hòa" >
+                            Lê Văn Hòa
+                        </option>
+                                                <option value="Lê Văn J" >
+                            Lê Văn J
+                        </option>
+                                                <option value="Lê Văn M" >
+                            Lê Văn M
+                        </option>
+                                                <option value="Lê Văn P" >
+                            Lê Văn P
+                        </option>
+                                                <option value="Lê Văn S" >
+                            Lê Văn S
+                        </option>
+                                                <option value="Lê Văn V" >
+                            Lê Văn V
+                        </option>
+                                                <option value="Nguyễn Văn A" >
+                            Nguyễn Văn A
+                        </option>
+                                                <option value="Nguyễn Văn E" >
+                            Nguyễn Văn E
+                        </option>
+                                                <option value="Nguyễn Văn H" >
+                            Nguyễn Văn H
+                        </option>
+                                                <option value="Nguyễn Văn K" >
+                            Nguyễn Văn K
+                        </option>
+                                                <option value="Nguyễn Văn N" >
+                            Nguyễn Văn N
+                        </option>
+                                                <option value="Nguyễn Văn Q" >
+                            Nguyễn Văn Q
+                        </option>
+                                                <option value="Nguyễn Văn T" >
+                            Nguyễn Văn T
+                        </option>
+                                                <option value="Nguyễn Văn Tài" >
+                            Nguyễn Văn Tài
+                        </option>
+                                                <option value="Trần Văn Bình" >
+                            Trần Văn Bình
+                        </option>
+                                                <option value="Trần Văn C" >
+                            Trần Văn C
+                        </option>
+                                                <option value="Trần Văn F" >
+                            Trần Văn F
+                        </option>
+                                                <option value="Trần Văn I" >
+                            Trần Văn I
+                        </option>
+                                                <option value="Trần Văn L" >
+                            Trần Văn L
+                        </option>
+                                                <option value="Trần Văn O" >
+                            Trần Văn O
+                        </option>
+                                                <option value="Trần Văn R" >
+                            Trần Văn R
+                        </option>
+                                                <option value="Trần Văn U" >
+                            Trần Văn U
+                        </option>
+                                            </select>
+                </div>
+
+                <div class="filter-section">
+                    <h4><i class="fas fa-money-bill-wave"></i> Khoảng giá</h4>
+                    <select id="priceRangeSelect" onchange="changePriceRange(this.value)" class="filter-select">
+                        <option value="all" selected>Tất cả
+                        </option>
+                        <option value="0-200000" >
+                            Dưới 200k</option>
+                        <option value="200000-400000" >200k - 400k</option>
+                        <option value="400000-600000" >400k - 600k</option>
+                        <option value="600000-" >Trên 600k</option>
+                    </select>
+                </div>
+
+                <button class="reset-filters-btn" onclick="resetFilters()">
+                    <i class="fas fa-redo"></i> Đặt lại bộ lọc
+                </button>
+            </aside>
+
+            <!-- Nội dung chính bên phải -->
+            <div class="trips-content">
+                <!-- Kết quả tìm kiếm -->
+                <div class="results-info">
+    </div>
+
+    <div class="no-results">
+        <i class="fas fa-bus"></i>
+        <h3>Không tìm thấy chuyến xe phù hợp</h3>
+        <p>Vui lòng thử lại với các tiêu chí tìm kiếm khác hoặc chọn ngày khác.</p>
+    </div>
+
+                <!-- Phân trang -->
+                            </div>
+        </div>
+    </main>
+
+    <!DOCTYPE html>
+<script src="https://cdn.tailwindcss.com?v=1761787452"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'green': '#059669',
+                    'orange': '#ea5a47',
+                    'gray': '#6b7280'
+                }
+            }
+        }
+    }
+</script>
+
+<!-- FOOTER UPDATED: 2025-10-30 01:24:12 -->
+<footer class="mx-auto w-full bg-[#FFF7F5] text-[15px] block"
+    style="background-color: #FFF7F5 !important; font-size: 15px !important;">
+    <div class="p-4 sm:pt-12">
+        <div class="max-w-6xl mx-auto flex flex-wrap gap-4 font-normal text-black lg:gap-14">
+            <div class="flex max-w-[34rem] flex-col">
+                <div class="flex w-full max-w-md justify-between">
+                    <div class="">
+                        <p class="text-green font-medium uppercase">TRUNG TÂM TỔNG ĐÀI & CSKH</p>
+                        <a href="tel:19006067" class="text-3xl font-medium text-orange">1900 6067</a>
+                    </div>
+                    <a target="_blank" href="http://online.gov.vn/Home/WebDetails/14029">
+                        <div class="relative h-[60px] w-40">
+                            <img alt="" loading="lazy" decoding="async"
+                                class="transition-all duration-200 relative h-[60px] w-40"
+                                src="https://cdn.futabus.vn/futa-busline-cms-dev/logo_Sale_Noti_7dab1d54a1/logo_Sale_Noti_7dab1d54a1.png"
+                                style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+                        </div>
+                    </a>
+                </div>
+
+                <span class="text-green mt-5 font-medium uppercase">Công ty cổ phần xe khách Phương Trang - FUTA Bus
+                    Lines</span>
+
+                <span class="text-gray mt-2 sm:mt-1">
+                    <span class="mr-1 min-w-fit">Địa chỉ:</span>
+                    <span class="text-black">486-486A Lê Văn Lương, Phường Tân Hưng,TPHCM, Việt Nam.</span>
+                </span>
+
+                <span class="text-gray mt-2 sm:mt-1">
+                    Email: <a href="mailto:hotro@futa.vn" class="text-orange">hotro@futa.vn</a>
+                </span>
+
+                <div class="mt-[10px] flex w-full max-w-md justify-between sm:mt-1">
+                    <span class="text-gray">Điện thoại: <a href="tel:02838386852"
+                            class="text-black">02838386852</a></span>
+                    <span class="text-gray mr-px">Fax: <a href="tel:02838386853"
+                            class="text-black">02838386853</a></span>
+                </div>
+
+                <div class="mb-4 mt-5 flex w-full max-w-md justify-between">
+                    <div class="text-green font-medium uppercase">
+                        Tải app FUTA
+                        <div class="mt-2 flex gap-4">
+                            <a target="_blank" class="relative" href="http://onelink.to/futa.android">
+                                <div class="relative min-h-[24px] w-[86px] object-cover">
+                                    <img alt="" loading="lazy" decoding="async"
+                                        class="transition-all duration-200 relative min-h-[24px] w-[86px] object-cover"
+                                        src="https://cdn.futabus.vn/futa-busline-cms-dev/CH_Play_712783c88a/CH_Play_712783c88a.svg"
+                                        style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+                                </div>
+                            </a>
+                            <a target="_blank" class="relative" href="http://onelink.to/futa.ios">
+                                <div class="relative min-h-[24px] w-[86px] object-cover">
+                                    <img alt="" loading="lazy" decoding="async"
+                                        class="transition-all duration-200 relative min-h-[24px] w-[86px] object-cover"
+                                        src="https://cdn.futabus.vn/futa-busline-cms-dev/App_Store_60da92cb12/App_Store_60da92cb12.svg"
+                                        style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="text-green font-medium uppercase">
+                        Kết nối chúng tôi
+                        <div class="mt-2 flex gap-4">
+                            <a target="_blank" href="https://www.facebook.com/xephuongtrang" rel="noreferrer">
+                                <div class="">
+                                    <img alt="" loading="lazy" width="27" height="27" decoding="async"
+                                        class="transition-all duration-200"
+                                        src="https://cdn.futabus.vn/futa-busline-cms-dev/facebook_1830e1b97c/facebook_1830e1b97c.svg"
+                                        style="color: transparent;">
+                                </div>
+                            </a>
+                            <a target="_blank"
+                                href="https://www.youtube.com/channel/UCs32uT002InnxFnfXCRN48A?view_as=subscriber"
+                                rel="noreferrer">
+                                <div class="">
+                                    <img alt="" loading="lazy" width="27" height="27" decoding="async"
+                                        class="transition-all duration-200"
+                                        src="https://cdn.futabus.vn/futa-busline-cms-dev/youtube_d5ef476c0e/youtube_d5ef476c0e.svg"
+                                        style="color: transparent;">
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="hidden max-w-lg flex-col gap-4 sm:flex sm:flex-row">
+                <div class="flex flex-col">
+                    <div class="text-green h-4 font-medium">FUTA Bus Lines</div>
+                    <div class="mt-1 flex max-w-md flex-col">
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="/BC_TMDT/legacy/About.php" target="_self" rel="noreferrer">Về chúng tôi</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="/BC_TMDT/legacy/LichTrinh.php" target="_self" rel="noreferrer">Lịch trình</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="https://vieclam.futabus.vn/" target="_blank" rel="noreferrer">Tuyển dụng</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="/BC_TMDT/legacy/TinTuc.php" target="_self" rel="noreferrer">Tin tức & Sự kiện</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="/BC_TMDT/legacy/LienHe.php" target="_self" rel="noreferrer">Mạng lưới văn phòng</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <div class="text-green h-4 font-medium">Hỗ trợ</div>
+                    <div class="mt-1 flex max-w-md flex-col">
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="/BC_TMDT/legacy/TraCuu.php" target="_self" rel="noreferrer">Tra cứu thông tin đặt
+                                vé</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="#" target="_self" rel="noreferrer">Điều khoản sử dụng</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="#" target="_self" rel="noreferrer">Câu hỏi thường gặp</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="http://127.0.0.1:8000/huong-dan" target="_self" rel="noreferrer">Hướng dẫn đặt vé trên Web</a>
+                        </div>
+                        <div class="mt-3 flex min-w-[140px] max-w-[200px] items-center">
+                            <div class="border-rad mr-3 h-2 w-2 rounded-full bg-gray-300"></div>
+                            <a href="http://127.0.0.1:8000/huong-dan" target="_self" rel="noreferrer">Hướng dẫn nạp tiền trên App</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto mb-6 grid grid-cols-2 gap-6 sm:mb-10 sm:flex sm:flex-wrap sm:justify-center px-4">
+        <a target="_blank" class="flex-1" href="https://futabus.vn/">
+            <div class="aspect-[6/1] relative w-full">
+                <img alt="" loading="lazy" decoding="async"
+                    class="transition-all duration-200 aspect-[6/1] relative w-full"
+                    src="https://cdn.futabus.vn/futa-busline-cms-dev/Bus_Lines_817c989817/Bus_Lines_817c989817.svg"
+                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+            </div>
+        </a>
+        <a target="_blank" class="flex-1" href="https://futaexpress.vn">
+            <div class="aspect-[6/1] relative w-full">
+                <img alt="" loading="lazy" decoding="async"
+                    class="transition-all duration-200 aspect-[6/1] relative w-full"
+                    src="https://cdn.futabus.vn/futa-busline-cms-dev/logo_futa_express_0ad93b22d3/logo_futa_express_0ad93b22d3.svg"
+                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+            </div>
+        </a>
+        <a target="_blank" class="flex-1" href="https://futaads.vn/">
+            <div class="aspect-[6/1] relative w-full">
+                <img alt="" loading="lazy" decoding="async"
+                    class="transition-all duration-200 aspect-[6/1] relative w-full"
+                    src="https://cdn.futabus.vn/futa-busline-cms-dev/FUTA_Advertising_d0b60b3a45/FUTA_Advertising_d0b60b3a45.svg"
+                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+            </div>
+        </a>
+        <a target="_blank" class="flex-1" href="https://futabus.vn/tin-tuc/tram-dung-chan-5-sao">
+            <div class="aspect-[6/1] relative w-full">
+                <img alt="" loading="lazy" decoding="async"
+                    class="transition-all duration-200 aspect-[6/1] relative w-full"
+                    src="https://cdn.futabus.vn/futa-busline-web-cms-prod/Tdcpl_1_5d2e395adc/Tdcpl_1_5d2e395adc.png"
+                    style="position: absolute; height: 100%; width: 100%; inset: 0px; color: transparent;">
+            </div>
+        </a>
+    </div>
+
+    <div
+        class="flex min-h-[40px] flex-col items-center justify-center bg-[#00613D] py-2 text-center text-white sm:flex-row">
+        <span>© 2025<span class="mx-2">|</span>Bản quyền thuộc về Công ty Cổ Phần Xe khách Phương Trang - FUTA Bus
+            Lines</span>
+        <span class="mx-2 hidden sm:block">|</span>
+        <span>Chịu trách nhiệm quản lý nội dung: Ông Võ Duy Thành</span>
+    </div>
+</footer>
+
+<!-- FUTA Chat Widget - Clean File Version -->
+<script src="/assets/js/futa-chat.js?v=1761787452"></script>
+<script>
+    // Initialize the chat widget when DOM is ready
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🚀 Initializing FUTA Chat Widget...');
+
+        // Create and initialize the widget
+        if (typeof FUTAChatWidget !== 'undefined') {
+            new FUTAChatWidget();
+            console.log('✅ FUTA Chat Widget loaded successfully!');
+        } else {
+            console.error('❌ FUTAChatWidget class not found!');
+        }
+    });
+</script>
+    <script src="http://127.0.0.1:8000/assets/js/Search-form.js"></script>
+    <script>
+        // Intercept pagination link clicks and use AJAX fragment loading so URL stays /lichtrinh
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest('#paginationWrapper a, .pagination a, a.page-btn');
+            if (a && a.tagName === 'A') {
+                // Only intercept links that point to the trips route
+                try {
+                    var href = a.getAttribute('href');
+                    if (href && href.indexOf('/lichtrinh') !== -1) {
+                        e.preventDefault();
+                        if (typeof fetchAndReplace === 'function') {
+                            fetchAndReplace(href);
+                        } else {
+                            // fallback
+                            window.location.href = href;
+                        }
+                    }
+                } catch (err) {
+                    // ignore and allow default
+                }
+            }
+        });
+
+        // Remove / hide default query parameters (like show_all=1) from the address bar
+        // without reloading the page. This keeps the page content (showing all trips)
+        // but cleans the URL to /lichtrinh for a nicer canonical link.
+        document.addEventListener('DOMContentLoaded', function () {
+            try {
+                var url = new URL(window.location.href);
+                var params = new URLSearchParams(url.search);
+
+                // If show_all present, remove entire query string to hide it
+                if (params.has('show_all')) {
+                    history.replaceState({}, document.title, url.pathname);
+                    return;
+                }
+
+                // Otherwise, if only default params are present (driver=all&page=1 etc.),
+                // hide them as well to keep the URL clean.
+                var defaults = {
+                    driver: 'all',
+                    page: '1',
+                    bus_type: 'all',
+                    sort: 'date_asc',
+                    price_range: 'all',
+                    bus_company: 'all',
+                    departure_date: '',
+                    arrival_date: ''
+                };
+
+                var onlyDefaults = true;
+                params.forEach(function (value, key) {
+                    if (!defaults.hasOwnProperty(key) || String(value) !== String(defaults[key])) {
+                        onlyDefaults = false;
+                    }
+                });
+
+                if (onlyDefaults && params.toString().length > 0) {
+                    history.replaceState({}, document.title, url.pathname);
+                }
+            } catch (e) {
+                // don't block the page if URL API fails
+                console && console.warn && console.warn('Failed to normalize URL', e);
+            }
+        });
+    </script>
+</body>
+
+</html>

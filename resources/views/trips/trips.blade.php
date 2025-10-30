@@ -18,6 +18,7 @@ if (session_status() === PHP_SESSION_NONE) {
     <link rel="stylesheet" href="{{ asset('assets/css/footer.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/Search-form.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/Lichtrinh.css') }}">
+    <script src="{{ asset('assets/js/trip-filters.js') }}"></script>
 </head>
 
 <body>
@@ -92,10 +93,18 @@ if (session_status() === PHP_SESSION_NONE) {
                     <h4><i class="fas fa-user-tie"></i> Tài xế</h4>
                     <select id="driverSelect" onchange="changeDriver(this.value)" class="filter-select">
                         <option value="all" {{ ($params['driver'] ?? 'all') == 'all' ? 'selected' : '' }}>Tất cả tài xế</option>
-                        @foreach(\App\Models\NhanVien::where('chuc_vu', 'Tài xế')->get() as $driver)
-                        {{-- Pass driver's name here because the controller filters by ten_tai_xe (name) --}}
-                        <option value="{{ $driver->ten_nv }}" {{ ($params['driver'] ?? 'all') == $driver->ten_nv ? 'selected' : '' }}>
-                            {{ $driver->ten_nv }}
+                        @php
+                        // Get unique driver names from actual trips
+                        $drivers = \App\Models\ChuyenXe::select('ten_tai_xe')
+                            ->whereNotNull('ten_tai_xe')
+                            ->where('ten_tai_xe', '!=', '')
+                            ->distinct()
+                            ->orderBy('ten_tai_xe')
+                            ->get();
+                        @endphp
+                        @foreach($drivers as $driverItem)
+                        <option value="{{ $driverItem->ten_tai_xe }}" {{ ($params['driver'] ?? 'all') == $driverItem->ten_tai_xe ? 'selected' : '' }}>
+                            {{ $driverItem->ten_tai_xe }}
                         </option>
                         @endforeach
                     </select>
@@ -110,7 +119,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             Dưới 200k</option>
                         <option value="200000-400000" {{ ($params['price_range'] ?? 'all') == '200000-400000' ? 'selected' : '' }}>200k - 400k</option>
                         <option value="400000-600000" {{ ($params['price_range'] ?? 'all') == '400000-600000' ? 'selected' : '' }}>400k - 600k</option>
-                        <option value="600000-1000000" {{ ($params['price_range'] ?? 'all') == '600000-1000000' ? 'selected' : '' }}>Trên 600k</option>
+                        <option value="600000-" {{ ($params['price_range'] ?? 'all') == '600000-' ? 'selected' : '' }}>Trên 600k</option>
                     </select>
                 </div>
 
@@ -135,7 +144,6 @@ if (session_status() === PHP_SESSION_NONE) {
     @include('layouts.footer')
 
     <script src="{{ asset('assets/js/Search-form.js') }}"></script>
-    <script src="{{ asset('assets/js/Lichtrinh.js') }}"></script>
     <script>
         // Intercept pagination link clicks and use AJAX fragment loading so URL stays /lichtrinh
         document.addEventListener('click', function (e) {

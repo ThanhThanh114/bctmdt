@@ -123,6 +123,8 @@ if (app()->environment('local') || config('app.debug')) {
 
         return response()->json($booking);
     });
+    // Debug: return the built trips SQL, bindings and a small sample of rows for current filters
+    Route::get('/debug/trips', [\App\Http\Controllers\TripController::class, 'debug'])->name('debug.trips');
 }
 
 //Page controllers

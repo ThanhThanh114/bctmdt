@@ -11,25 +11,10 @@
     <!-- Leaflet CSS for map functionality -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="{{ asset('assets/css/btrack.css') }}">
-    <style>
-        /* Ensure driver and company names wrap to at most 3 lines and then ellipsize */
-        .two-line {
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: normal;
-        }
-    </style>
 </head>
 
 <body>
     <div class="container">
-        <a href="{{ route('booking.history') }}" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Quay lại lịch sử đặt vé
-        </a>
 
         <div class="header">
             <h1><i class="fas fa-map-marked-alt"></i> Theo dõi chuyến đi</h1>
@@ -114,7 +99,7 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">Giá vé</div>
-                            <div class="info-value">{{ number_format($booking->chuyenXe->gia_ve ?? 0) }}đ</div>
+                            <div class="info-value">{{ number_format($booking->chuyenXe->gia_ve) }}đ</div>
                         </div>
                     </div>
                 </div>
@@ -128,14 +113,14 @@
                     <div class="info-grid">
                         <div class="info-item">
                             <div class="info-label">Tài xế</div>
-                                <div class="info-value two-line">{{ $booking->chuyenXe->ten_tai_xe }}</div>
+                            <div class="info-value">{{ $booking->chuyenXe->ten_tai_xe }}</div>
                             <a href="tel:{{ $booking->chuyenXe->sdt_tai_xe }}" class="btn btn-primary btn-sm mt-2">
                                 <i class="fas fa-phone"></i> Gọi
                             </a>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Nhà xe</div>
-                            <div class="info-value two-line">{{ $booking->chuyenXe->nhaXe->ten_nha_xe }}</div>
+                            <div class="info-value">{{ $booking->chuyenXe->nhaXe->ten_nha_xe }}</div>
                             @if($booking->chuyenXe->nhaXe->so_dien_thoai)
                             <a href="tel:{{ $booking->chuyenXe->nhaXe->so_dien_thoai }}" class="btn btn-primary btn-sm mt-2">
                                 <i class="fas fa-phone"></i> Gọi

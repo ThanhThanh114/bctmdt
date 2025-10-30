@@ -41,9 +41,9 @@
             <ul class="navbar-nav ml-auto">
                 <!-- User Account Menu -->
                 <li class="nav-item dropdown">
-                    <a class="nav-link" data-toggle="dropdown" href="#">
+                    {{-- <a class="nav-link" data-toggle="dropdown" href="#">
                         <i class="fas fa-user"></i> {{ Auth::user()->fullname ?? Auth::user()->username }}
-                    </a>
+                    </a> --}}
                     <div class="dropdown-menu dropdown-menu-right">
                         <a href="{{ route('profile.show') }}" class="dropdown-item">
                             <i class="fas fa-user mr-2"></i> Hồ sơ cá nhân
@@ -85,7 +85,17 @@
                     </div>
                     <div class="info">
                         <a href="#" class="d-block">{{ Auth::user()->fullname ?? Auth::user()->username }}</a>
-                        <small class="text-muted">{{ Auth::user()->role }}</small>
+                        @php
+                            $roleKey = strtolower(trim(Auth::user()->role ?? ''));
+                            $roleLabel = match ($roleKey) {
+                                'admin' => 'Quản trị viên',
+                                'staff' => 'Nhân viên',
+                                'bus_owner' => 'Nhà xe',
+                                'user' => 'Người dùng',
+                                default => ucfirst($roleKey ?: 'Người dùng'),
+                            };
+                        @endphp
+                        <small class="text-muted">{{ $roleLabel }}</small>
                     </div>
                 </div>
 

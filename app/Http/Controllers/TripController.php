@@ -54,17 +54,39 @@ class TripController extends Controller
         }
     }
 
+    // Log query parameters cho debug
+    Log::info('Filter Parameters:', [
+        'bus_type' => $params['bus_type'],
+        'bus_company' => $params['bus_company'],
+        'driver' => $params['driver'],
+        'price_range' => $params['price_range']
+    ]);
+
     // Lấy danh sách tỉnh thành
     $cities = DB::table('tram_xe')->orderBy('ten_tram')->get();
-
-    // Xây dựng điều kiện tìm kiếm - Chỉ hiển thị chuyến xe chưa khởi hành
     $query = DB::table('chuyen_xe as cx')
         ->join('tram_xe as tx1', 'cx.ma_tram_di', '=', 'tx1.ma_tram_xe')
         ->join('tram_xe as tx2', 'cx.ma_tram_den', '=', 'tx2.ma_tram_xe')
         ->join('nha_xe as nx', 'cx.ma_nha_xe', '=', 'nx.ma_nha_xe')
-        ->select('cx.*', 'tx1.ten_tram as diem_di', 'tx2.ten_tram as diem_den', 'nx.ten_nha_xe',
-            DB::raw('(cx.so_cho - COALESCE(dv.booked_seats, 0)) as available_seats'))
-    ->leftJoin(DB::raw("(SELECT chuyen_xe_id, COUNT(*) as booked_seats FROM dat_ve WHERE trang_thai IN ('Đã thanh toán') GROUP BY chuyen_xe_id) dv"), 'cx.id', '=', 'dv.chuyen_xe_id')
+        ->select(
+            'cx.*',
+            'tx1.ten_tram as diem_di',
+            'tx2.ten_tram as diem_den',
+            'nx.ten_nha_xe',
+            'nx.ma_nha_xe',
+            DB::raw('(cx.so_cho - COALESCE(dv.booked_seats, 0)) as available_seats')
+        )
+        ->leftJoin(
+            DB::raw("(
+                SELECT chuyen_xe_id, COUNT(*) as booked_seats
+                FROM dat_ve
+                WHERE trang_thai = 'Đã thanh toán'
+                GROUP BY chuyen_xe_id
+            ) dv"),
+            'cx.id',
+            '=',
+            'dv.chuyen_xe_id'
+        )
     // Date/time cutoff: by default show trips whose `ngay_di` is today or later.
     // If the request provides an explicit `date` filter we won't apply this cutoff (the date filter below will handle it).
     // Developers can bypass the cutoff by adding `show_all=1` to the query string for testing.
@@ -90,31 +112,49 @@ class TripController extends Controller
     foreach ($filterKeys as $k) {
         if ($request->has($k)) {
             $v = $request->query($k);
-            if ($v !== null && $v !== '' ) {
-                // treat default values as not active
-                if (($k === 'bus_type' || $k === 'price_range' || $k === 'bus_company' || $k === 'driver') && in_array($v, ['all','date_asc'])) {
-                    continue;
-                }
+            // normalize empty strings to null
+            $val = $v === '' ? null : (string)$v;
+            $def = array_key_exists($k, $defaults) ? (string)$defaults[$k] : null;
+            if ($val !== $def && $val !== null) {
                 $hasActiveFilters = true;
                 break;
             }
         }
     }
 
-    // Apply default cutoff only when the user applied active filters (so pagination alone won't trigger it)
+    // Log incoming params and whether filters are considered active for debugging
+    Log::debug('TripController::index incoming params', ['params' => $params, 'hasActiveFilters' => $hasActiveFilters, 'query' => $request->query()]);
+
+    // Apply default date cutoff only when the user applied active filters
+    // This preserves the previous UX: when no filters are chosen show all trips (including past),
+    // but when the user starts filtering we show recent trips by default (unless `date` or `show_all`).
+    // Use a very lenient cutoff (7 days ago) to handle databases with past dates
     if ($hasActiveFilters && empty($params['date']) && !$request->boolean('show_all')) {
-        // use date-only comparison so trips scheduled today are shown regardless of time-of-day
-        $query->whereDate('cx.ngay_di', '>=', date('Y-m-d'));
+        $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+        $query->whereDate('cx.ngay_di', '>=', $sevenDaysAgo);
     }
 
-    // Kiểm tra bus_type
-    if ($params['bus_type'] !== 'all') {
-        $query->where('cx.loai_xe', '=', $params['bus_type']);
+    // Normalize and apply bus_type filter (case-insensitive, UTF-8 safe)
+    $busType = isset($params['bus_type']) ? trim($params['bus_type']) : 'all';
+    if ($busType !== 'all' && $busType !== '') {
+        // Use a case-insensitive comparison with proper UTF-8 handling
+        $busTypeLower = mb_strtolower($busType, 'UTF-8');
+        $query->where(function($q) use ($busType, $busTypeLower) {
+            $q->whereRaw('LOWER(cx.loai_xe) = ?', [$busTypeLower])
+              ->orWhereRaw('cx.loai_xe = ?', [$busType]);
+        });
     }
 
-    // Lọc theo nhà xe
-    if ($params['bus_company'] !== 'all') {
-        $query->where('nx.ma_nha_xe', '=', $params['bus_company']);
+    // Normalize and apply bus_company filter (cast to int for safety)
+    $busCompany = isset($params['bus_company']) ? trim($params['bus_company']) : 'all';
+    if ($busCompany !== 'all' && $busCompany !== '') {
+        // If the client passed a numeric id, match by ma_nha_xe. Otherwise try matching by name.
+        if (ctype_digit((string)$busCompany)) {
+            $query->where('nx.ma_nha_xe', '=', intval($busCompany));
+        } else {
+            $name = trim($busCompany);
+            $query->where('nx.ten_nha_xe', 'like', '%' . $name . '%');
+        }
     }
 
     // Lọc theo ngày đi
@@ -127,38 +167,79 @@ class TripController extends Controller
         $query->whereDate('cx.ngay_den', '=', $params['arrival_date']);
     }
 
-    // Lọc theo tài xế
-    if ($params['driver'] !== 'all') {
-        $query->where('cx.ten_tai_xe', 'like', '%' . $params['driver'] . '%');
+    // Normalize and apply driver filter (trim)
+    $driver = isset($params['driver']) ? trim($params['driver']) : 'all';
+    if ($driver !== 'all' && $driver !== '') {
+        // match driver name - support both exact name and partial match
+        $d = trim($driver);
+        $query->where('cx.ten_tai_xe', 'like', '%' . $d . '%');
     }
 
-    // Lọc theo khoảng giá
-    if ($params['price_range'] !== 'all') {
-        $priceRanges = explode('-', $params['price_range']);
-        if (count($priceRanges) === 2) {
-            $minPrice = intval($priceRanges[0]);
-            $maxPrice = intval($priceRanges[1]);
-            $query->whereBetween('cx.gia_ve', [$minPrice, $maxPrice]);
-        } elseif (count($priceRanges) === 1) {
-            $minPrice = intval($priceRanges[0]);
-            $query->where('cx.gia_ve', '>=', $minPrice);
+    // Lọc theo khoảng giá (defensive parsing)
+    if (isset($params['price_range']) && $params['price_range'] !== 'all' && $params['price_range'] !== '') {
+        $raw = (string)$params['price_range'];
+        // support formats: 'min-max', 'min-' (open-ended), '-max'
+        $parts = explode('-', $raw, 2);
+        $min = preg_replace('/[^0-9]/', '', $parts[0] ?? '');
+        $max = isset($parts[1]) ? preg_replace('/[^0-9]/', '', $parts[1]) : '';
+        if ($min !== '' && $max !== '') {
+            $query->whereBetween('cx.gia_ve', [intval($min), intval($max)]);
+        } elseif ($min !== '') {
+            $query->where('cx.gia_ve', '>=', intval($min));
+        } elseif ($max !== '') {
+            $query->where('cx.gia_ve', '<=', intval($max));
         }
     }
 
-    // Đếm tổng số kết quả (chỉ đếm những chuyến có chỗ trống)
-    $allTrips = $query->get();
-    $filteredTrips = $allTrips->filter(function ($trip) {
-        return $trip->available_seats > 0;
-    });
-    // Helpful debug log when no trips pass the available seats filter
-    if ($filteredTrips->isEmpty()) {
-        Log::info('TripController: no available trips after filtering', [
-            'all_trips_count' => $allTrips->count(),
-            'available_seats_snapshot' => $allTrips->pluck('available_seats')->toArray(),
+    // Debug: log the built SQL and bindings before execution when filters are present
+    if ($hasActiveFilters) {
+        try {
+            Log::debug('TripController SQL (pre-exec)', [
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings(),
+            ]);
+        } catch (\Exception $e) {
+            // toSql/getBindings can sometimes fail when raw subqueries exist; swallow error
+            Log::debug('TripController SQL debug failed', ['error' => $e->getMessage()]);
+        }
+    }
+
+    // Apply available seats filter at SQL level so counts and pagination are correct
+    $query->whereRaw('(cx.so_cho - COALESCE(dv.booked_seats, 0)) > 0');
+
+    // Đếm tổng số kết quả (sử dụng bản sao của query để đếm chính xác)
+    try {
+        $countQuery = clone $query;
+        $totalCount = $countQuery->count();
+    } catch (\Exception $e) {
+        // Fallback: fetch and count in PHP (should be rare)
+        $allTrips = $query->get();
+        $totalCount = $allTrips->filter(function ($trip) {
+            return ($trip->available_seats ?? 0) > 0;
+        })->count();
+        Log::warning('TripController count fallback used', ['error' => $e->getMessage()]);
+    }
+
+    if ($totalCount === 0) {
+        // Log helpful snapshot for debugging when no trips match
+        try {
+            $sample = $query->limit(20)->get()->map(function ($t) { return [
+                'id' => $t->id ?? null,
+                'ma_xe' => $t->ma_xe ?? null,
+                'gia_ve' => $t->gia_ve ?? null,
+                'available_seats' => $t->available_seats ?? null,
+            ];
+            })->toArray();
+        } catch (\Exception $e) {
+            $sample = [];
+        }
+        Log::info('TripController: no trips after filters', [
+            'total_count' => $totalCount,
             'request_query' => $request->query(),
+            'sample_rows' => $sample,
         ]);
     }
-    $totalCount = $filteredTrips->count();
+
     $totalPages = ceil($totalCount / $perPage);
 
     // Xử lý sắp xếp
@@ -196,13 +277,11 @@ class TripController extends Controller
             break;
     }
 
-    // Lấy dữ liệu chuyến xe với phân trang (đã lọc chỗ trống)
+    // Lấy dữ liệu chuyến xe với phân trang (đã lọc chỗ trống) at SQL level
     $trips = $query->orderBy($orderBy, $orderDirection)
-        ->get()
-        ->filter(function ($trip) {
-            return $trip->available_seats > 0;
-        })
-        ->slice($offset, $perPage);
+        ->offset($offset)
+        ->limit($perPage)
+        ->get();
 
     // Lấy tên các trạm trung gian cho mỗi chuyến xe
     foreach ($trips as $trip) {
@@ -220,4 +299,131 @@ class TripController extends Controller
 
     return view('trips.trips', compact('trips', 'totalCount', 'totalPages', 'params', 'cities'));
 }
+
+    /**
+     * Dev-only endpoint: return the built SQL, bindings and a small sample of rows
+     * for the current trips filters. Enabled only in local or debug mode.
+     */
+    public function debug(Request $request)
+    {
+        if (! (app()->environment('local') || config('app.debug'))) {
+            abort(404);
+        }
+
+        $params = $request->only(['start', 'end', 'date', 'ticket', 'trip', 'bus_type', 'sort', 'page', 'price_range', 'bus_company', 'departure_date', 'arrival_date', 'driver']);
+        $params['bus_type'] = $params['bus_type'] ?? 'all';
+        $params['sort'] = $params['sort'] ?? 'date_asc';
+        $params['price_range'] = $params['price_range'] ?? 'all';
+        $params['bus_company'] = $params['bus_company'] ?? 'all';
+        $params['departure_date'] = $params['departure_date'] ?? null;
+        $params['arrival_date'] = $params['arrival_date'] ?? null;
+        $params['driver'] = $params['driver'] ?? 'all';
+
+        // Build the base query similar to index()
+        $query = DB::table('chuyen_xe as cx')
+            ->join('tram_xe as tx1', 'cx.ma_tram_di', '=', 'tx1.ma_tram_xe')
+            ->join('tram_xe as tx2', 'cx.ma_tram_den', '=', 'tx2.ma_tram_xe')
+            ->join('nha_xe as nx', 'cx.ma_nha_xe', '=', 'nx.ma_nha_xe')
+            ->select('cx.*', 'tx1.ten_tram as diem_di', 'tx2.ten_tram as diem_den', 'nx.ten_nha_xe',
+                DB::raw('(cx.so_cho - COALESCE(dv.booked_seats, 0)) as available_seats'))
+            ->leftJoin(DB::raw("(SELECT chuyen_xe_id, COUNT(*) as booked_seats FROM dat_ve WHERE trang_thai IN ('Đã thanh toán') GROUP BY chuyen_xe_id) dv"), 'cx.id', '=', 'dv.chuyen_xe_id');
+
+        // apply filters (reuse same normalization as index)
+        if (!empty($params['start'])) {
+            $query->where('tx1.ten_tram', 'like', '%' . $params['start'] . '%');
+        }
+        if (!empty($params['end'])) {
+            $query->where('tx2.ten_tram', 'like', '%' . $params['end'] . '%');
+        }
+        if (!empty($params['date'])) {
+            $query->whereDate('cx.ngay_di', '=', $params['date']);
+        }
+
+        // bus_type
+        $busType = isset($params['bus_type']) ? trim($params['bus_type']) : 'all';
+        if ($busType !== 'all' && $busType !== '') {
+            // Use a case-insensitive comparison with proper UTF-8 handling
+            $busTypeLower = mb_strtolower($busType, 'UTF-8');
+            $query->where(function($q) use ($busType, $busTypeLower) {
+                $q->whereRaw('LOWER(cx.loai_xe) = ?', [$busTypeLower])
+                  ->orWhereRaw('cx.loai_xe = ?', [$busType]);
+            });
+        }
+
+        // bus_company
+        $busCompany = isset($params['bus_company']) ? trim($params['bus_company']) : 'all';
+        if ($busCompany !== 'all' && $busCompany !== '') {
+            if (ctype_digit((string)$busCompany)) {
+                $query->where('nx.ma_nha_xe', '=', intval($busCompany));
+            } else {
+                $query->where('nx.ten_nha_xe', 'like', '%' . $busCompany . '%');
+            }
+        }
+
+        if (!empty($params['departure_date'])) {
+            $query->whereDate('cx.ngay_di', '=', $params['departure_date']);
+        }
+        if (!empty($params['arrival_date'])) {
+            $query->whereDate('cx.ngay_den', '=', $params['arrival_date']);
+        }
+
+        // driver
+        $driver = isset($params['driver']) ? trim($params['driver']) : 'all';
+        if ($driver !== 'all' && $driver !== '') {
+            // match driver name - support both exact name and partial match
+            $d = trim($driver);
+            $query->where('cx.ten_tai_xe', 'like', '%' . $d . '%');
+        }
+
+        // price_range
+        if (isset($params['price_range']) && $params['price_range'] !== 'all' && $params['price_range'] !== '') {
+            $raw = (string)$params['price_range'];
+            $parts = explode('-', $raw, 2);
+            $min = preg_replace('/[^0-9]/', '', $parts[0] ?? '');
+            $max = isset($parts[1]) ? preg_replace('/[^0-9]/', '', $parts[1]) : '';
+            if ($min !== '' && $max !== '') {
+                $query->whereBetween('cx.gia_ve', [intval($min), intval($max)]);
+            } elseif ($min !== '') {
+                $query->where('cx.gia_ve', '>=', intval($min));
+            } elseif ($max !== '') {
+                $query->where('cx.gia_ve', '<=', intval($max));
+            }
+        }
+
+        // apply available seats condition
+        $query->whereRaw('(cx.so_cho - COALESCE(dv.booked_seats, 0)) > 0');
+
+        // Apply same date cutoff logic as in index method
+        $sevenDaysAgo = date('Y-m-d', strtotime('-7 days'));
+        $query->whereDate('cx.ngay_di', '>=', $sevenDaysAgo);
+
+        // prepare response
+        try {
+            $sql = $query->toSql();
+            $bindings = $query->getBindings();
+        } catch (\Exception $e) {
+            $sql = 'failed to generate sql: ' . $e->getMessage();
+            $bindings = [];
+        }
+
+        try {
+            $count = $query->count();
+        } catch (\Exception $e) {
+            $count = null;
+        }
+
+        try {
+            $sample = $query->limit(20)->get();
+        } catch (\Exception $e) {
+            $sample = [];
+        }
+
+        return response()->json([
+            'params' => $params,
+            'sql' => $sql,
+            'bindings' => $bindings,
+            'count' => $count,
+            'sample' => $sample,
+        ]);
+    }
 }
