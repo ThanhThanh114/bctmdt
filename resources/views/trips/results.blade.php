@@ -47,7 +47,7 @@
                 <div class="price">
                     {{ number_format($trip->gia_ve, 0, ',', '.') }}đ
                 </div>
-                <a href="{{ route('booking.show', $trip->id) }}" class="book-btn">Đặt vé</a>
+                <a href="{{ route('trips.trips') }}" class="book-btn">Đặt vé</a>
             </div>
         </div>
         @endforeach
